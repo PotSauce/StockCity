@@ -20,6 +20,18 @@ Each building splits its money **80% day trading / 20% AI picks** (adjustable pe
 
 Each building can switch to **Swing** style on its settings tab instead: it holds the top 3 momentum stocks (6-month, 3-month and 1-week returns, above their 50-day average) for days or weeks.
 
+**Risk slider**: each building's settings tab has a slider from less risky to more risky. It sets the numbers below for you:
+
+| Level | Buy when up | Take profit | Stop | Day trades at once | AI pick stop / trailing stop |
+|---|---|---|---|---|---|
+| 1 Careful | 0.3% | +0.6% | −0.35% | 3 | 6% / 4% |
+| 2 Steady | 0.25% | +0.7% | −0.45% | 2 | 8% / 5% |
+| 3 Balanced (default) | 0.2% | +0.8% | −0.5% | 2 | 10% / 7% |
+| 4 Bold | 0.15% | +1.2% | −0.8% | 1 | 12% / 9% |
+| 5 Aggressive | 0.1% | +2% | −1.2% | 1 | 15% / 12% |
+
+The exact numbers can still be changed under **Fine-tune**, which switches the slider to Custom. The levels live in `RISK_LEVELS` in `engine/config.py`.
+
 **Guardrails** (all adjustable per building):
 
 - **At most 30 buys a day** per building. Selling is never capped, so stops and the close-out always go through.

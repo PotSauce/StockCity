@@ -92,11 +92,63 @@ def _merge(base, override):
     return out
 
 
+# The risk slider on each building's settings tab. Each level sets the numbers below; level 0
+# means "custom" (the user typed their own numbers under Fine-tune). Higher risk = bigger, more
+# concentrated bets with wider stops and quicker entries.
+RISK_LEVELS = {
+    1: {
+        "name": "Careful",
+        "intraday": {"entry_pct": 0.003, "take_profit_pct": 0.006, "stop_pct": 0.0035, "max_positions": 3, "cooldown_minutes": 30},
+        "momentum": {"stop_loss_pct": 0.06, "trailing_stop_pct": 0.04, "top_n": 5},
+    },
+    2: {
+        "name": "Steady",
+        "intraday": {"entry_pct": 0.0025, "take_profit_pct": 0.007, "stop_pct": 0.0045, "max_positions": 2, "cooldown_minutes": 25},
+        "momentum": {"stop_loss_pct": 0.08, "trailing_stop_pct": 0.05, "top_n": 4},
+    },
+    3: {
+        "name": "Balanced",
+        "intraday": {"entry_pct": 0.002, "take_profit_pct": 0.008, "stop_pct": 0.005, "max_positions": 2, "cooldown_minutes": 20},
+        "momentum": {"stop_loss_pct": 0.1, "trailing_stop_pct": 0.07, "top_n": 3},
+    },
+    4: {
+        "name": "Bold",
+        "intraday": {"entry_pct": 0.0015, "take_profit_pct": 0.012, "stop_pct": 0.008, "max_positions": 1, "cooldown_minutes": 15},
+        "momentum": {"stop_loss_pct": 0.12, "trailing_stop_pct": 0.09, "top_n": 2},
+    },
+    5: {
+        "name": "Aggressive",
+        "intraday": {"entry_pct": 0.001, "take_profit_pct": 0.02, "stop_pct": 0.012, "max_positions": 1, "cooldown_minutes": 10},
+        "momentum": {"stop_loss_pct": 0.15, "trailing_stop_pct": 0.12, "top_n": 1},
+    },
+}
+
+
+def detect_risk(bot):
+    """The level whose numbers a building already uses, or 0 (custom)."""
+    for level, preset in RISK_LEVELS.items():
+        if all(abs(bot[sec][k] - v) < 1e-9 for sec in ("intraday", "momentum") for k, v in preset[sec].items()):
+            return level
+    return 0
+
+
+def apply_risk(bot, level):
+    for sec in ("intraday", "momentum"):
+        bot[sec].update(RISK_LEVELS[level][sec])
+
+
 RETIRED_KEYS = {"momentum": ["rebalance_days"], "ai": ["rebalance_days"], "": ["max_trades_per_day"]}
 
 
 def normalize_bot(raw):
     bot = _merge(DEFAULT_BOT, raw)
+    # risk level: the slider's numbers win; a building saved before the slider existed gets the
+    # level matching its numbers, or "custom"
+    risk = raw.get("risk")
+    risk = detect_risk(bot) if risk is None else int(min(max(int(risk), 0), 5))
+    if risk:
+        apply_risk(bot, risk)
+    bot["risk"] = risk
     for section, keys in RETIRED_KEYS.items():
         for k in keys:
             (bot[section] if section else bot).pop(k, None)

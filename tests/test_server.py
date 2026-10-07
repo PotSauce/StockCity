@@ -44,6 +44,16 @@ def test_settings_need_password(client):
     assert '"enabled": false' in (client.city.config_path.read_text())
 
 
+def test_risk_slider_saves_through_the_api(client):
+    bot = client.get("/api/state").json()["bots"][0]["settings"]
+    r = client.put(f"/api/bots/{bot['id']}", json={**bot, "risk": 5}, headers={"X-City-Password": "secret"})
+    saved = r.json()
+    assert r.status_code == 200 and saved["risk"] == 5 and saved["intraday"]["max_positions"] == 1
+    st = client.get("/api/state").json()
+    assert st["risk_levels"]["5"]["name"] == "Aggressive"
+    assert st["bots"][0]["settings"]["intraday"]["take_profit_pct"] == 0.02
+
+
 def test_cannot_add_blocked_ticker_via_api(client):
     bot = client.get("/api/state").json()["bots"][0]["settings"]
     bot["universe"] = bot["universe"] + ["GEO"]
