@@ -906,8 +906,8 @@ function settingsHTML(b) {
       <div class="split-legend">${legendHTML(d, aiPct)}</div>
       <input id="s-ai" type="range" min="0" max="100" step="5" value="${aiPct}" aria-label="AI share"></div>
     <div class="field"><span class="flabel">Risk</span>
-      <div class="risk-head"><b id="risk-name">${riskName(d.risk)}</b><span id="risk-level">${d.risk ? `${d.risk} of 5` : ""}</span></div>
-      <input id="s-risk" class="risk-range" type="range" min="1" max="5" step="1" value="${d.risk || 3}" aria-label="Risk, from less risky to more risky">
+      <div class="risk-head"><b id="risk-name">${riskName(d.risk)}</b><span id="risk-level">${d.risk ? `${d.risk} of ${maxRisk()}` : ""}</span></div>
+      <input id="s-risk" class="risk-range" type="range" min="1" max="${maxRisk()}" step="1" value="${d.risk || 3}" aria-label="Risk, from less risky to more risky">
       <div class="risk-ends"><span>Less risky</span><span>More risky</span></div>
       <span class="help" id="risk-sum">${riskSummary(d)}</span></div>
     <div class="field"><span class="flabel">Stocks this building can trade (${d.universe.length})</span>
@@ -941,6 +941,7 @@ function settingsHTML(b) {
 
 let fineOpen = false;
 const riskLevels = () => STATE.risk_levels || {};
+const maxRisk = () => Math.max(5, ...Object.keys(riskLevels()).map(Number));
 const riskName = (level) => (level ? riskLevels()[level]?.name || `Level ${level}` : "Custom");
 
 function applyRisk(d, level) {
@@ -1015,7 +1016,7 @@ function wireSettings(root, b) {
   });
   const showRisk = () => {
     root.querySelector("#risk-name").textContent = riskName(draft.risk);
-    root.querySelector("#risk-level").textContent = draft.risk ? `${draft.risk} of 5` : "";
+    root.querySelector("#risk-level").textContent = draft.risk ? `${draft.risk} of ${maxRisk()}` : "";
     root.querySelector("#risk-sum").textContent = riskSummary(draft);
   };
   root.querySelector("#s-risk").addEventListener("input", (e) => {

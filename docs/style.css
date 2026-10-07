@@ -276,7 +276,7 @@ pre.json { background: rgba(11, 8, 32, 0.8); border: 1px solid var(--line); bord
 .risk-head { display: flex; justify-content: space-between; align-items: baseline; }
 .risk-head b { font: 600 15px var(--font-display); letter-spacing: 0.04em; }
 .risk-head span { font: 12.5px var(--font-data); color: var(--ink-dim); }
-.risk-range { appearance: none; -webkit-appearance: none; height: 8px; border-radius: 4px; background: linear-gradient(90deg, #4ade80, #facc15 50%, #fb7185); }
+.risk-range { appearance: none; -webkit-appearance: none; height: 8px; border-radius: 4px; background: linear-gradient(90deg, #4ade80, #facc15 45%, #fb7185 80%, #ef4444); }
 .risk-range::-webkit-slider-thumb { -webkit-appearance: none; width: 18px; height: 18px; border-radius: 50%; background: var(--ink); border: 2px solid var(--night); box-shadow: 0 0 10px rgba(167, 139, 250, 0.8); cursor: pointer; }
 .risk-range::-moz-range-thumb { width: 18px; height: 18px; border-radius: 50%; background: var(--ink); border: 2px solid var(--night); box-shadow: 0 0 10px rgba(167, 139, 250, 0.8); cursor: pointer; }
 .risk-ends { display: flex; justify-content: space-between; font: 12px var(--font-data); color: var(--ink-dim); }

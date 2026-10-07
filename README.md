@@ -29,6 +29,7 @@ Each building can switch to **Swing** style on its settings tab instead: it hold
 | 3 Balanced (default) | 0.2% | +0.8% | −0.5% | 2 | 10% / 7% |
 | 4 Bold | 0.15% | +1.2% | −0.8% | 1 | 12% / 9% |
 | 5 Aggressive | 0.1% | +2% | −1.2% | 1 | 15% / 12% |
+| 6 Insane | 0.07% | +3% | −1.8% | 1 | 22.5% / 18% |
 
 The exact numbers can still be changed under **Fine-tune**, which switches the slider to Custom. The levels live in `RISK_LEVELS` in `engine/config.py`.
 

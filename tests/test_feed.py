@@ -3,6 +3,7 @@ import json
 from datetime import datetime, timezone
 
 import pandas as pd
+import pytest
 
 from engine.brokers import PaperBroker
 from engine.city import BotDay, new_ledger
@@ -190,6 +191,10 @@ def test_risk_slider_sets_the_numbers():
     bold = normalize_bot({**base, "risk": 5})
     assert bold["intraday"]["take_profit_pct"] == RISK_LEVELS[5]["intraday"]["take_profit_pct"]
     assert bold["intraday"]["max_positions"] == 1 and bold["momentum"]["top_n"] == 1
+    insane = normalize_bot({**base, "risk": 6})  # 50% more room than Aggressive
+    assert insane["risk"] == 6 and insane["intraday"]["stop_pct"] == pytest.approx(1.5 * bold["intraday"]["stop_pct"])
+    assert insane["intraday"]["take_profit_pct"] == pytest.approx(1.5 * bold["intraday"]["take_profit_pct"])
+    assert normalize_bot({**base, "risk": 9})["risk"] == 6
     careful = normalize_bot({**base, "risk": 1})
     assert careful["intraday"]["stop_pct"] < bold["intraday"]["stop_pct"]
     # the slider's level wins over stale numbers sent with it
