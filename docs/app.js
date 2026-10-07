@@ -901,6 +901,17 @@ function settingsHTML(b) {
       <div class="split"><span class="m" style="width:${100 - aiPct}%"></span><span class="a" style="width:${aiPct}%"></span></div>
       <div class="split-legend">${legendHTML(d, aiPct)}</div>
       <input id="s-ai" type="range" min="0" max="100" step="5" value="${aiPct}" aria-label="AI share"></div>
+    <div class="field"><span class="flabel">Risk</span>
+      <div class="risk-head"><b id="risk-name">${riskName(d.risk)}</b><span id="risk-level">${d.risk ? `${d.risk} of 5` : ""}</span></div>
+      <input id="s-risk" class="risk-range" type="range" min="1" max="5" step="1" value="${d.risk || 3}" aria-label="Risk, from less risky to more risky">
+      <div class="risk-ends"><span>Less risky</span><span>More risky</span></div>
+      <span class="help" id="risk-sum">${riskSummary(d)}</span></div>
+    <div class="field"><span class="flabel">Stocks this building can trade (${d.universe.length})</span>
+      <div class="chips" id="s-chips">${d.universe.map((t) => `<span class="chip">${esc(t)}<button type="button" data-rm="${esc(t)}" aria-label="Remove ${esc(t)}">✕</button></span>`).join("")}</div>
+      <div class="add-row"><input id="s-add" type="text" placeholder="Add ticker, e.g. IBM" maxlength="8" autocomplete="off"><button type="button" id="s-add-btn">Add</button></div>
+      <span class="err" id="s-err"></span></div>
+    <details class="fine" id="s-fine" ${fineOpen ? "open" : ""}><summary>Fine-tune (optional)</summary>
+    <span class="help">The risk slider sets these for you. Changing one here switches the slider to Custom.</span>
     ${isDay ? dayFields : swingFields}
     <div class="two">
       <div class="field"><label for="s-check">Check for trades every</label><select id="s-check">${opt(CHECKS, d.check_every_minutes)}</select></div>
@@ -918,13 +929,40 @@ function settingsHTML(b) {
     </div>
     <div class="field"><label for="s-hold">Hold at least (minutes)</label><input id="s-hold" type="number" min="0" max="10080" step="15" value="${d.min_hold_minutes}">
       <span class="help">${isDay ? "These three apply to the AI picks." : "These apply to every holding."} Stop loss sells when a stock falls this far below what the bot paid; trailing stop sells a winner that falls this far from its high. Each AI review is one Claude request, roughly 3–5¢.</span></div>
-    <div class="field"><span class="flabel">Stocks this building can trade (${d.universe.length})</span>
-      <div class="chips" id="s-chips">${d.universe.map((t) => `<span class="chip">${esc(t)}<button type="button" data-rm="${esc(t)}" aria-label="Remove ${esc(t)}">✕</button></span>`).join("")}</div>
-      <div class="add-row"><input id="s-add" type="text" placeholder="Add ticker, e.g. IBM" maxlength="8" autocomplete="off"><button type="button" id="s-add-btn">Add</button></div>
-      <span class="err" id="s-err"></span></div>
+    </details>
     <div class="actions"><button type="submit" class="primary" id="s-save">${MODE === "server" ? (api.unlocked() ? "Save changes" : "Unlock to save") : gh.connected() ? "Save to GitHub" : "Save changes"}</button><button type="button" id="s-reset">Undo changes</button></div>
     <div id="s-out"></div>
   </form>`;
+}
+
+let fineOpen = false;
+const riskLevels = () => STATE.risk_levels || {};
+const riskName = (level) => (level ? riskLevels()[level]?.name || `Level ${level}` : "Custom");
+
+function applyRisk(d, level) {
+  const p = riskLevels()[level];
+  if (!p) return;
+  Object.assign(d.intraday, p.intraday);
+  Object.assign(d.momentum, p.momentum);
+  d.risk = level;
+}
+
+function detectRisk(d) {
+  for (const [level, p] of Object.entries(riskLevels())) {
+    const same = ["intraday", "momentum"].every((sec) => Object.entries(p[sec]).every(([k, v]) => Math.abs(d[sec][k] - v) < 1e-9));
+    if (same) return Number(level);
+  }
+  return 0;
+}
+
+function riskSummary(d) {
+  if (!d.risk) return "You've set your own numbers under Fine-tune. Move the slider to go back to a preset.";
+  const pc = (x) => `${num1(x * 100)}%`;
+  const day = d.intraday, m = d.momentum;
+  const ai = `AI picks: ${pc(m.stop_loss_pct)} stop loss, ${pc(m.trailing_stop_pct)} trailing stop.`;
+  if (d.style !== "intraday") return `Holds the top ${m.top_n} momentum ${m.top_n === 1 ? "stock" : "stocks"}, sold at a ${pc(m.stop_loss_pct)} loss or after falling ${pc(m.trailing_stop_pct)} from a high.`;
+  const n = day.max_positions === 1 ? "one stock at a time" : `${day.max_positions} stocks at a time`;
+  return `Buys a stock up ${pc(day.entry_pct)} in ${day.lookback_minutes} min, takes profit at +${pc(day.take_profit_pct)}, sells at −${pc(day.stop_pct)}, ${n}. ${ai}`;
 }
 
 function legendHTML(d, aiPct) {
@@ -970,6 +1008,24 @@ function wireSettings(root, b) {
   root.querySelector("#s-style").addEventListener("change", () => {
     sync();
     renderPanel();
+  });
+  const showRisk = () => {
+    root.querySelector("#risk-name").textContent = riskName(draft.risk);
+    root.querySelector("#risk-level").textContent = draft.risk ? `${draft.risk} of 5` : "";
+    root.querySelector("#risk-sum").textContent = riskSummary(draft);
+  };
+  root.querySelector("#s-risk").addEventListener("input", (e) => {
+    sync();
+    applyRisk(draft, Number(e.target.value));
+    showRisk();
+  });
+  root.querySelector("#s-risk").addEventListener("change", () => renderPanel());
+  const fine = root.querySelector("#s-fine");
+  fine.addEventListener("toggle", () => (fineOpen = fine.open));
+  fine.addEventListener("input", () => {
+    sync();
+    draft.risk = detectRisk(draft);
+    showRisk();
   });
   root.querySelector("#s-ai").addEventListener("input", (e) => {
     const v = Number(e.target.value);

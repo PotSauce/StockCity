@@ -15,7 +15,7 @@ import pandas as pd
 
 from .brokers import PaperBroker, make_broker
 from .city import BotDay, equity, new_ledger
-from .config import ROOT, load_config, load_exclusions
+from .config import RISK_LEVELS, ROOT, load_config, load_exclusions
 from .data import SyntheticPrices, YahooPrices
 from .exclusions import Exclusions
 from .strategy import ai_picks
@@ -114,6 +114,7 @@ def build_state(cfg, ledger, closes, excl_raw, source, broker_name, run_note):
         "bots": bots_out,
         "config": {"broker": cfg["broker"], "live_trading_confirmed": cfg["live_trading_confirmed"], "bots": cfg["bots"]},
         "exclusions": excl_raw,
+        "risk_levels": RISK_LEVELS,
     }
 
 

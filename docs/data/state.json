@@ -1,5 +1,5 @@
 {
- "generated_at": "2026-10-07T21:54:54+00:00",
+ "generated_at": "2026-10-07T22:06:49+00:00",
  "price_source": "simulated",
  "broker": "paper",
  "run_note": "Simulated 5 trading days with fake prices, checking every 3 minutes",
@@ -181,7 +181,8 @@
     "id": "tech",
     "name": "Tech Tower",
     "sector": "Technology",
-    "color": "#38bdf8"
+    "color": "#38bdf8",
+    "risk": 3
    },
    "cash": 441.56,
    "settling": 432.15,
@@ -1104,7 +1105,8 @@
     "id": "energy",
     "name": "Energy Works",
     "sector": "Energy",
-    "color": "#f59e0b"
+    "color": "#f59e0b",
+    "risk": 3
    },
    "cash": 411.68,
    "settling": 397.04,
@@ -1916,7 +1918,8 @@
     "id": "finance",
     "name": "Finance Bank",
     "sector": "Financials",
-    "color": "#34d399"
+    "color": "#34d399",
+    "risk": 3
    },
    "cash": 499.95,
    "settling": 491.94,
@@ -2812,7 +2815,8 @@
     "id": "consumer",
     "name": "Consumer Mall",
     "sector": "Consumer",
-    "color": "#f472b6"
+    "color": "#f472b6",
+    "risk": 3
    },
    "cash": 501.18,
    "settling": 499.54,
@@ -3729,7 +3733,8 @@
     "id": "tech",
     "name": "Tech Tower",
     "sector": "Technology",
-    "color": "#38bdf8"
+    "color": "#38bdf8",
+    "risk": 3
    },
    {
     "market": "us_stocks",
@@ -3895,7 +3900,8 @@
     "id": "energy",
     "name": "Energy Works",
     "sector": "Energy",
-    "color": "#f59e0b"
+    "color": "#f59e0b",
+    "risk": 3
    },
    {
     "market": "us_stocks",
@@ -4061,7 +4067,8 @@
     "id": "finance",
     "name": "Finance Bank",
     "sector": "Financials",
-    "color": "#34d399"
+    "color": "#34d399",
+    "risk": 3
    },
    {
     "market": "us_stocks",
@@ -4227,7 +4234,8 @@
     "id": "consumer",
     "name": "Consumer Mall",
     "sector": "Consumer",
-    "color": "#f472b6"
+    "color": "#f472b6",
+    "risk": 3
    }
   ]
  },
@@ -4282,5 +4290,82 @@
    "medical",
    "health"
   ]
+ },
+ "risk_levels": {
+  "1": {
+   "name": "Careful",
+   "intraday": {
+    "entry_pct": 0.003,
+    "take_profit_pct": 0.006,
+    "stop_pct": 0.0035,
+    "max_positions": 3,
+    "cooldown_minutes": 30
+   },
+   "momentum": {
+    "stop_loss_pct": 0.06,
+    "trailing_stop_pct": 0.04,
+    "top_n": 5
+   }
+  },
+  "2": {
+   "name": "Steady",
+   "intraday": {
+    "entry_pct": 0.0025,
+    "take_profit_pct": 0.007,
+    "stop_pct": 0.0045,
+    "max_positions": 2,
+    "cooldown_minutes": 25
+   },
+   "momentum": {
+    "stop_loss_pct": 0.08,
+    "trailing_stop_pct": 0.05,
+    "top_n": 4
+   }
+  },
+  "3": {
+   "name": "Balanced",
+   "intraday": {
+    "entry_pct": 0.002,
+    "take_profit_pct": 0.008,
+    "stop_pct": 0.005,
+    "max_positions": 2,
+    "cooldown_minutes": 20
+   },
+   "momentum": {
+    "stop_loss_pct": 0.1,
+    "trailing_stop_pct": 0.07,
+    "top_n": 3
+   }
+  },
+  "4": {
+   "name": "Bold",
+   "intraday": {
+    "entry_pct": 0.0015,
+    "take_profit_pct": 0.012,
+    "stop_pct": 0.008,
+    "max_positions": 1,
+    "cooldown_minutes": 15
+   },
+   "momentum": {
+    "stop_loss_pct": 0.12,
+    "trailing_stop_pct": 0.09,
+    "top_n": 2
+   }
+  },
+  "5": {
+   "name": "Aggressive",
+   "intraday": {
+    "entry_pct": 0.001,
+    "take_profit_pct": 0.02,
+    "stop_pct": 0.012,
+    "max_positions": 1,
+    "cooldown_minutes": 10
+   },
+   "momentum": {
+    "stop_loss_pct": 0.15,
+    "trailing_stop_pct": 0.12,
+    "top_n": 1
+   }
+  }
  }
 }

@@ -163,3 +163,23 @@ def test_run_now_never_trades_while_the_market_is_closed(tmp_path, monkeypatch):
     assert "market closed" in note
     for b in city.ledger["bots"].values():
         assert not b["trades"] and b["ranking"]  # rankings refreshed, nothing traded
+
+
+def test_risk_slider_sets_the_numbers():
+    from engine.config import RISK_LEVELS, normalize_bot
+
+    base = {"id": "x", "name": "X", "sector": "Tech"}
+    assert normalize_bot(base)["risk"] == 3  # the defaults are the Balanced level
+    bold = normalize_bot({**base, "risk": 5})
+    assert bold["intraday"]["take_profit_pct"] == RISK_LEVELS[5]["intraday"]["take_profit_pct"]
+    assert bold["intraday"]["max_positions"] == 1 and bold["momentum"]["top_n"] == 1
+    careful = normalize_bot({**base, "risk": 1})
+    assert careful["intraday"]["stop_pct"] < bold["intraday"]["stop_pct"]
+    # the slider's level wins over stale numbers sent with it
+    assert normalize_bot({**base, "risk": 4, "intraday": {"take_profit_pct": 0.05}})["intraday"]["take_profit_pct"] == 0.012
+    # numbers typed under Fine-tune make it custom and are kept
+    custom = normalize_bot({**base, "risk": 0, "intraday": {"take_profit_pct": 0.05}})
+    assert custom["risk"] == 0 and custom["intraday"]["take_profit_pct"] == 0.05
+    # a building saved before the slider existed gets the level its numbers match, or custom
+    assert normalize_bot({**base, "intraday": RISK_LEVELS[4]["intraday"], "momentum": RISK_LEVELS[4]["momentum"]})["risk"] == 4
+    assert normalize_bot({**base, "intraday": {"take_profit_pct": 0.05}})["risk"] == 0
