@@ -652,8 +652,12 @@ function renderHUD() {
 
   const banner = $("banner");
   const ageH = (Date.now() - Date.parse(STATE.generated_at)) / 36e5;
+  const slowFeed = (STATE.server?.markets || []).find((m) => m.feed && !m.feed.ok);
   if (STATE.server?.last_error) {
     banner.textContent = `Price feed problem: ${STATE.server.last_error}. Retrying automatically.`;
+    banner.hidden = false;
+  } else if (slowFeed) {
+    banner.textContent = `The quick price feed isn't working (${slowFeed.feed.error}). During market hours the bots fall back to slower per-stock prices for up to 80 stocks, holdings first, and keep retrying.`;
     banner.hidden = false;
   } else if (STATE.price_source === "simulated" && MODE === "server") {
     banner.textContent = "Test mode: the server is using simulated prices (MARKET_DATA=simulated).";

@@ -293,7 +293,8 @@ class City:
             st["server"] = {
                 "mode": "live",
                 "markets": [
-                    {"id": m, "name": self.market(m).name, "open": self.market(m).is_open(now)} for m in self.market_ids()
+                    {"id": m, "name": self.market(m).name, "open": self.market(m).is_open(now), "feed": self.market(m).feed_status()}
+                    for m in self.market_ids()
                 ],
                 "last_quote_at": self.last_quote_at.isoformat(timespec="seconds") if self.last_quote_at else None,
                 "last_trade_at": self.ledger["meta"].get("last_trade_at"),

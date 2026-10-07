@@ -60,6 +60,16 @@ async def lifespan(app):
 app = FastAPI(title="Stock City", lifespan=lifespan)
 
 
+@app.middleware("http")
+async def always_check_for_new_pages(request, call_next):
+    """Browsers otherwise keep showing the old page for a while after a deploy. "no-cache" makes them
+    ask each time; an unchanged file comes back as a tiny "not modified" reply."""
+    response = await call_next(request)
+    if not request.url.path.startswith("/api/"):
+        response.headers["Cache-Control"] = "no-cache"
+    return response
+
+
 def require_password(given):
     expected = os.environ.get("APP_PASSWORD")
     if not expected:
@@ -70,7 +80,8 @@ def require_password(given):
 
 @app.get("/api/health")
 def health():
-    return {"ok": True, "last_quote_at": city.last_quote_at, "last_error": city.last_error}
+    feeds = {m: city.market(m).feed_status() for m in city.market_ids()}
+    return {"ok": True, "last_quote_at": city.last_quote_at, "last_error": city.last_error, "feeds": feeds}
 
 
 @app.get("/api/state")

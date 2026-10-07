@@ -75,6 +75,23 @@ def test_yahoo_intraday_uses_one_snapshot_per_minute(tmp_path, monkeypatch):
     assert len(calls) == 3 and close.shape == (3, 500)
 
 
+def test_feed_status_says_whether_the_batch_request_worked(tmp_path, monkeypatch):
+    from engine.markets.us_stocks import UsStocks
+
+    prices = YahooPrices(tape_path=tmp_path / "tape.pkl")
+    market = UsStocks(prices)
+    assert market.feed_status() is None  # nothing asked yet
+    monkeypatch.setattr(prices, "_snapshot", lambda t: {"AAA": {"price": 1.0, "volume": 5.0}})
+    prices.quotes(["AAA", "BBB"])
+    assert market.feed_status()["ok"] and market.feed_status()["got"] == 1 and market.feed_status()["asked"] == 2
+    monkeypatch.setattr(prices, "_snapshot", lambda t: (_ for _ in ()).throw(RuntimeError("Invalid Crumb")))
+    try:
+        prices.quotes(["AAA"])
+    except RuntimeError:
+        pass
+    assert market.feed_status()["ok"] is False and "Invalid Crumb" in market.feed_status()["error"]
+
+
 def test_failed_snapshot_falls_back_to_charts_for_holdings_first(tmp_path, monkeypatch):
     prices = YahooPrices(tape_path=tmp_path / "tape.pkl")
     monkeypatch.setattr(prices, "snapshot", lambda t: (_ for _ in ()).throw(RuntimeError("429")))

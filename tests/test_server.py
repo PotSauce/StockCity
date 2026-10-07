@@ -32,8 +32,12 @@ def test_state_and_site(client):
     st = r.json()
     assert {b["id"] for b in st["bots"]} == {"tech", "energy", "finance", "consumer"}
     assert st["server"]["mode"] == "live"
-    assert client.get("/").status_code == 200
-    assert client.get("/app.js").status_code == 200
+    for page in ("/", "/app.js", "/style.css"):
+        r = client.get(page)
+        # browsers must check for a newer copy, or they keep the old page after a deploy
+        assert r.status_code == 200 and r.headers["cache-control"] == "no-cache"
+    assert "cache-control" not in client.get("/api/state").headers
+    assert client.get("/api/health").json()["feeds"] == {"us_stocks": None}  # simulated prices have no batch feed
 
 
 def test_settings_need_password(client):
