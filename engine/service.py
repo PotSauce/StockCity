@@ -46,6 +46,7 @@ class City:
         self.excl_raw = load_exclusions()
         self.excl = Exclusions(self.excl_raw)
         self.price_source = price_source
+        self._add_new_repo_tickers()
         self.cfg = parse_config(json.loads(self.config_path.read_text()), source=self.config_path)
         self.ledger = self._load_ledger()
         self.markets = {}
@@ -53,12 +54,30 @@ class City:
         self.quotes = {}  # market id -> {symbol: price}
         self.bars = {}  # market id -> today's 1-minute (closes, volumes)
         self.closes_day = None
+        self.history_asked = {}  # market id -> symbols already asked for daily history today
         self.last_quote_at = None
         self.last_stop_check = None
         self.last_error = None
         self.run_note = "Starting up"
 
     # ---- persistence -----------------------------------------------------------
+    def _add_new_repo_tickers(self):
+        """Settings live in DATA_DIR, so ticker lists added to the repo later wouldn't reach a
+        running city. When config/bots.json has a higher universe_version than the saved
+        settings, add its new tickers to each building's saved list (keeping the user's own)."""
+        repo = json.loads(CONFIG_PATH.read_text())
+        saved = json.loads(self.config_path.read_text())
+        if saved.get("universe_version", 1) >= repo.get("universe_version", 1):
+            return
+        repo_lists = {b["id"]: b.get("universe", []) for b in repo["bots"]}
+        for b in saved["bots"]:
+            have = b.get("universe", [])
+            b["universe"] = have + [t for t in repo_lists.get(b["id"], []) if t not in have and not self.excl.is_blocked(t)]
+        saved["universe_version"] = repo.get("universe_version", 1)
+        tmp = self.config_path.with_suffix(".tmp")
+        tmp.write_text(json.dumps(saved, indent=2) + "\n")
+        tmp.replace(self.config_path)
+
     def _load_ledger(self):
         data = json.loads(self.ledger_path.read_text()) if self.ledger_path.exists() else {"bots": {}, "meta": {}}
         data.setdefault("meta", {})
@@ -74,7 +93,11 @@ class City:
     # ---- markets & prices --------------------------------------------------------
     def market(self, market_id):
         if market_id not in self.markets:
-            prices = SyntheticPrices() if self.price_source == "simulated" else YahooPrices(self.data_dir / "ticker_info.json")
+            prices = (
+                SyntheticPrices()
+                if self.price_source == "simulated"
+                else YahooPrices(self.data_dir / "ticker_info.json", self.data_dir / "tape.pkl")
+            )
             self.markets[market_id] = make_market(market_id, prices=prices)
         return self.markets[market_id]
 
@@ -94,17 +117,33 @@ class City:
         with self.lock:
             self._refresh_prices(force_history)
 
+    def holdings(self, market_id):
+        return sorted(
+            {p["ticker"] for b in self.cfg["bots"] if b["market"] == market_id for p in self.ledger["bots"][b["id"]]["positions"].values()}
+        )
+
     def _refresh_prices(self, force_history):
         today = now_utc().astimezone(NY).date()
         for mid in self.market_ids():
             m = self.market(mid)
             syms = self.symbols(mid)
-            have = self.closes.get(mid)
-            if force_history or have is None or self.closes_day != today or not set(syms) <= set(have.columns):
+            m.prefetch_info(syms)
+            # daily history: everything once a day, then only stocks that were added since
+            asked = self.history_asked.setdefault(mid, set())
+            if force_history or mid not in self.closes or self.closes_day != today:
                 self.closes[mid] = m.history(syms, HISTORY_DAYS)
+                asked.clear()
+                asked.update(syms)
+            elif set(syms) - asked:
+                new = sorted(set(syms) - asked)
+                extra = m.history(new, HISTORY_DAYS)
+                asked.update(new)
+                if not extra.empty:
+                    have = self.closes[mid]
+                    self.closes[mid] = have.join(extra[[c for c in extra.columns if c not in have.columns]], how="outer").ffill()
             try:
                 if m.is_trading_day(today):
-                    bars = m.intraday(syms, now=now_utc())
+                    bars = m.intraday(syms, now=now_utc(), priority=self.holdings(mid))
                     self.bars[mid] = bars
                     if not bars[0].empty:
                         last = bars[0].ffill().iloc[-1]
@@ -153,9 +192,15 @@ class City:
             broker = None
             for mid in self.market_ids():
                 m = self.market(mid)
-                open_now = m.is_open(now)
-                trade = open_now or (force and self.cfg["broker"] == "paper")
-                if not trade:
+                if not m.is_open(now):
+                    # Run now while the market is closed refreshes the rankings but never trades:
+                    # fills at stale prices would be fiction on paper and impossible with real money.
+                    if force:
+                        frame = self.frame(mid)
+                        for bot in self.cfg["bots"]:
+                            if bot["market"] == mid:
+                                led = self.ledger["bots"][bot["id"]]
+                                BotDay(bot, led, frame, today, PaperBroker(), self.excl, no_ai_picker, info_fn=m.info_cached).run(trade=False)
                     notes.append(f"{m.name}: market closed, no trades")
                     continue
                 broker = broker or make_broker(self.cfg)
@@ -168,7 +213,7 @@ class City:
                     led = self.ledger["bots"][bot["id"]]
                     before = len(led["trades"])
                     BotDay(
-                        bot, led, frame, today, broker, self.excl, self._picker(), info_fn=m.info, force=force,
+                        bot, led, frame, today, broker, self.excl, self._picker(), info_fn=m.info_cached, force=force,
                         now=now_ny.replace(tzinfo=None), minute_bars=self.bars.get(mid), settle=self.settle(),
                     ).run(live_cash=live_cash)
                     led["last_check"] = now.isoformat(timespec="seconds")
@@ -201,7 +246,7 @@ class City:
                     led = self.ledger["bots"][bot["id"]]
                     if bot["enabled"] and m.is_open(now) and led["positions"]:
                         broker = broker or make_broker(self.cfg)
-                        day = BotDay(bot, led, frame, today, broker, self.excl, no_ai_picker, info_fn=m.info, **kw)
+                        day = BotDay(bot, led, frame, today, broker, self.excl, no_ai_picker, info_fn=m.info_cached, **kw)
                         day.sell_blocked()
                         day.stop_losses()
                         day.finish()

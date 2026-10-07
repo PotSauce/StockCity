@@ -2,6 +2,8 @@
   "broker": "paper",
   "live_trading_confirmed": false,
   "cash_account_rules": "always",
+  "_universe_note": "universe_version goes up whenever these ticker lists grow; the server then adds the new tickers to each building's saved list (keeping your own additions).",
+  "universe_version": 2,
   "bots": [
     {
       "id": "tech",
@@ -40,7 +42,7 @@
         "no_entries_after": "15:40",
         "close_out_at": "15:50"
       },
-      "universe": ["AAPL", "MSFT", "NVDA", "GOOGL", "META", "AVGO", "AMD", "ORCL", "CRM", "ADBE", "CSCO", "QCOM", "TXN", "NOW", "PLTR", "MU", "AMAT", "INTC"]
+      "universe": ["AAPL", "MSFT", "NVDA", "GOOGL", "META", "AVGO", "AMD", "ORCL", "CRM", "ADBE", "CSCO", "QCOM", "TXN", "NOW", "PLTR", "MU", "AMAT", "INTC", "LRCX", "KLAC", "ADI", "MRVL", "NXPI", "MCHP", "ON", "MPWR", "TER", "ENTG", "SWKS", "QRVO", "GFS", "ARM", "TSM", "ASML", "SMCI", "ALAB", "CRDO", "COHR", "LITE", "AMKR", "MTSI", "WDC", "STX", "SNDK", "NTAP", "PSTG", "IBM", "INTU", "PANW", "CRWD", "FTNT", "SNPS", "CDNS", "ADSK", "WDAY", "TEAM", "SNOW", "DDOG", "NET", "ZS", "OKTA", "MDB", "HUBS", "DOCU", "TWLO", "ZM", "U", "PATH", "AI", "S", "GTLB", "ESTC", "MSTR", "APP", "SHOP", "UBER", "LYFT", "RBLX", "TTD", "ANET", "DELL", "HPQ", "HPE", "JBL", "FLEX", "CLS", "APH", "GLW", "TEL", "KEYS", "ZBRA", "TRMB", "GEN", "NOK", "ERIC", "ACN", "IT", "CTSH", "EPAM", "INFY", "NFLX", "SNAP", "PINS", "SPOT", "T", "VZ", "TMUS", "CMCSA", "DIS", "BIDU", "SOUN", "IONQ", "RGTI", "QBTS", "BBAI", "ASTS", "DT", "CHKP", "NTNX", "BILL", "VRSN", "CRWV", "NBIS", "CIEN", "RDDT"]
     },
     {
       "id": "energy",
@@ -79,7 +81,7 @@
         "no_entries_after": "15:40",
         "close_out_at": "15:50"
       },
-      "universe": ["XOM", "CVX", "COP", "EOG", "SLB", "OXY", "PSX", "MPC", "VLO", "KMI", "WMB", "OKE", "HAL", "DVN", "FANG", "NEE", "FSLR"]
+      "universe": ["XOM", "CVX", "COP", "EOG", "SLB", "OXY", "PSX", "MPC", "VLO", "KMI", "WMB", "OKE", "HAL", "DVN", "FANG", "NEE", "FSLR", "APA", "CTRA", "EQT", "AR", "RRC", "EXE", "CNX", "OVV", "MTDR", "PR", "CHRD", "SM", "MUR", "GPOR", "NFG", "KOS", "TALO", "CRK", "MGY", "NOG", "CRGY", "BKR", "NOV", "FTI", "WFRD", "LBRT", "PTEN", "HP", "NE", "RIG", "VAL", "TDW", "OII", "PUMP", "AROC", "TRGP", "LNG", "DTM", "AM", "ENB", "TRP", "KNTK", "SU", "CNQ", "CVE", "IMO", "BP", "SHEL", "EQNR", "TTE", "PBR", "YPF", "EC", "E", "DINO", "PBF", "DK", "CVI", "PARR", "BTU", "HCC", "AMR", "CCJ", "UEC", "UUUU", "DNN", "NXE", "LEU", "OKLO", "SMR", "ENPH", "SEDG", "RUN", "PLUG", "FCEL", "BE", "ARRY", "SHLS", "NXT", "CSIQ", "JKS", "CWEN", "CEG", "VST", "NRG", "TLN", "DUK", "SO", "D", "AEP", "EXC", "XEL", "PCG", "ED", "PEG", "EIX", "ETR", "FE", "PPL", "AES", "CNP", "NI", "SRE", "AEE", "CMS", "WEC", "DTE", "ES"]
     },
     {
       "id": "finance",
@@ -118,7 +120,7 @@
         "no_entries_after": "15:40",
         "close_out_at": "15:50"
       },
-      "universe": ["JPM", "BAC", "WFC", "GS", "MS", "C", "SCHW", "BLK", "AXP", "V", "MA", "SPGI", "PGR", "CB", "USB", "PNC"]
+      "universe": ["JPM", "BAC", "WFC", "GS", "MS", "C", "SCHW", "BLK", "AXP", "V", "MA", "SPGI", "PGR", "CB", "USB", "PNC", "TFC", "COF", "ALLY", "SYF", "KEY", "RF", "HBAN", "CFG", "FITB", "MTB", "ZION", "FHN", "WAL", "EWBC", "VLY", "FLG", "BK", "STT", "NTRS", "PYPL", "XYZ", "COIN", "HOOD", "SOFI", "AFRM", "UPST", "LC", "NU", "TOST", "IBKR", "LPLA", "RJF", "SF", "EVR", "HLI", "JEF", "MKTX", "FIS", "FI", "GPN", "MQ", "PAYO", "DLO", "STNE", "PAGS", "XP", "TROW", "BEN", "IVZ", "KKR", "BX", "APO", "ARES", "CG", "OWL", "ICE", "CME", "NDAQ", "CBOE", "MCO", "MSCI", "MMC", "AON", "AJG", "BRO", "WTW", "ALL", "TRV", "AIG", "MET", "PRU", "HIG", "L", "CINF", "LNC", "PFG", "EQH", "CRBG", "JXN", "WRB", "AIZ", "RGA", "RKT", "UWMC", "FNF", "ITUB", "BBD", "SAN", "BCS", "HSBC", "UBS", "ING", "DB", "MUFG", "SMFG", "NMR", "TD", "BMO", "BNS", "CM", "RY", "MFC", "BAM", "BN", "ACGL", "ARCC", "OBDC", "FSK", "BXSL"]
     },
     {
       "id": "consumer",
@@ -157,7 +159,7 @@
         "no_entries_after": "15:40",
         "close_out_at": "15:50"
       },
-      "universe": ["AMZN", "TSLA", "HD", "MCD", "NKE", "SBUX", "COST", "WMT", "PG", "KO", "PEP", "LOW", "TJX", "BKNG", "CMG", "LULU", "TGT"]
+      "universe": ["AMZN", "TSLA", "HD", "MCD", "NKE", "SBUX", "COST", "WMT", "PG", "KO", "PEP", "LOW", "TJX", "BKNG", "CMG", "LULU", "TGT", "YUM", "DRI", "DPZ", "QSR", "WING", "CAVA", "TXRH", "ROST", "BURL", "DG", "DLTR", "BBY", "ULTA", "ORLY", "AZO", "GPC", "TSCO", "WSM", "RH", "EBAY", "ETSY", "W", "CHWY", "GME", "DKS", "KSS", "M", "GAP", "ANF", "AEO", "URBN", "BJ", "F", "GM", "STLA", "RIVN", "LCID", "NIO", "XPEV", "LI", "TM", "HMC", "CVNA", "KMX", "APTV", "BWA", "MGA", "GT", "ABNB", "MAR", "HLT", "RCL", "CCL", "NCLH", "EXPE", "DKNG", "PENN", "CZR", "MGM", "WYNN", "LVS", "BABA", "JD", "PDD", "SE", "MELI", "CPNG", "DASH", "DECK", "CROX", "ONON", "VFC", "PVH", "RL", "TPR", "UAA", "DHI", "LEN", "PHM", "TOL", "PTON", "HAS", "POOL", "MDLZ", "PM", "MO", "CL", "KMB", "KHC", "GIS", "HSY", "KDP", "MNST", "STZ", "TAP", "CELH", "KR", "ACI", "SYY", "ADM", "BG", "TSN", "CAG", "CHD", "CLX", "EL", "COTY", "ELF"]
     }
   ]
 }

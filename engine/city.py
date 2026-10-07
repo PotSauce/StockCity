@@ -14,6 +14,7 @@ from .strategy import ai_picks, intraday, momentum
 
 MAX_TRADES_KEPT = 500
 REBALANCE_TOLERANCE = 0.10  # leave a holding alone if it's within 10% of its target size
+AI_CANDIDATES = 40  # stocks Claude reviews per building
 SIM_TIME = time(15, 35)  # simulated runs pretend each day's check happens at this time
 
 
@@ -73,7 +74,11 @@ class BotDay:
 
     # ---- helpers -------------------------------------------------------------
     def _blocked(self, ticker):
-        return self.excl.reason(ticker, **self.info_fn(ticker))
+        return self.excl.reason(ticker, **(self.info_fn(ticker) or {}))
+
+    def _known(self, ticker):
+        """False while the stock's sector is still being looked up; it isn't bought until then."""
+        return self.info_fn(ticker) is not None
 
     def spendable(self):
         return self.led["cash"] - sum(u["amount"] for u in self.led["unsettled"])
@@ -181,10 +186,17 @@ class BotDay:
 
     # ---- planning --------------------------------------------------------------------
     def candidates(self):
-        ok, blocked = [], []
+        ok, blocked, pending = [], [], 0
         for t in self.bot["universe"]:
             why = self._blocked(t)
-            (blocked if why else ok).append(t if not why else {"ticker": t, "reason": why})
+            if why:
+                blocked.append({"ticker": t, "reason": why})
+            elif not self._known(t):
+                pending += 1
+            else:
+                ok.append(t)
+        if pending:
+            self._note_once("Still checking some stocks against the do-not-buy list; they can't be bought until that's done")
         return [t for t in ok if t in self.closes.columns], blocked
 
     def plan_sleeve(self, sleeve, targets, slot_value):
@@ -339,6 +351,9 @@ class BotDay:
         if not affordable:
             self._note_once(f"AI picks: no stock here costs under its ${slot_value:,.0f} slot")
             return []
+        # Claude sees the strongest 40 by momentum, which keeps each request small
+        ranked = [r["ticker"] for r in ranking if r["ticker"] in affordable]
+        affordable = (ranked + [t for t in affordable if t not in ranked])[:AI_CANDIDATES]
         cand_metrics = ai_picks.metrics(self.closes[affordable])
         try:
             result = self.picker(self.bot["sector"], cand_metrics, self.bot["ai"]["max_picks"], avoid)

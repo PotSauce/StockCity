@@ -2,8 +2,6 @@
 from datetime import date, datetime, time
 from zoneinfo import ZoneInfo
 
-import pandas as pd
-
 from ..data import SyntheticPrices, YahooPrices
 from .base import Market
 
@@ -54,21 +52,20 @@ class UsStocks(Market):
     def quotes(self, symbols):
         if isinstance(self.prices, SyntheticPrices):
             return self.prices.live_quotes(symbols)
-        import yfinance as yf
+        return self.prices.quotes(symbols)
 
-        df = yf.download(sorted(set(symbols)), period="1d", interval="1m", progress=False, threads=True, auto_adjust=True)
-        if df.empty:
-            return {}
-        close = df["Close"] if isinstance(df.columns, pd.MultiIndex) else df[["Close"]].set_axis(sorted(set(symbols)), axis=1)
-        last = close.ffill().iloc[-1]
-        return {t: float(v) for t, v in last.items() if pd.notna(v) and v > 0}
-
-    def intraday(self, symbols, now=None):
+    def intraday(self, symbols, now=None, priority=()):
         """Today's 1-minute (close, volume) frames."""
+        ny = (now or datetime.now(NY)).astimezone(NY)
         if isinstance(self.prices, SyntheticPrices):
-            ny = (now or datetime.now(NY)).astimezone(NY)
             return self.prices.intraday(symbols, day=ny.date(), until=ny.time())
-        return self.prices.intraday(symbols)
+        return self.prices.intraday(symbols, now_ny=ny.replace(tzinfo=None), is_open=self.is_open(ny), priority=priority)
 
     def info(self, symbol):
         return self.prices.info(symbol)
+
+    def info_cached(self, symbol):
+        return self.prices.info_cached(symbol)
+
+    def prefetch_info(self, symbols):
+        self.prices.prefetch_info(symbols)

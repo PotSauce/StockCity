@@ -28,13 +28,20 @@ class Market:
         """Latest prices right now (may be a few minutes delayed)."""
         raise NotImplementedError
 
-    def intraday(self, symbols: list[str], now: datetime | None = None):
+    def intraday(self, symbols: list[str], now: datetime | None = None, priority=()):
         """Today's 1-minute bars as (closes, volumes) DataFrames. Empty when not supported."""
         return pd.DataFrame(), pd.DataFrame()
 
     def info(self, symbol: str) -> dict:
         """{"name", "sector", "industry"} when known; used by the do-not-buy check."""
         return {}
+
+    def info_cached(self, symbol: str) -> dict | None:
+        """Same as info() but never waits: None means "still looking it up"."""
+        return self.info(symbol)
+
+    def prefetch_info(self, symbols: list[str]):
+        """Start looking up stocks in the background."""
 
     def poll_seconds(self, now: datetime) -> int:
         """How often the server should refresh quotes."""
