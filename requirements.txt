@@ -1,0 +1,7 @@
+yfinance>=0.2.50
+pandas>=2.2
+numpy>=1.26
+anthropic>=1.12
+pydantic>=2.7
+schwab-py>=1.4
+pytest>=8

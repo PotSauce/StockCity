@@ -1,0 +1,94 @@
+{
+  "broker": "paper",
+  "live_trading_confirmed": false,
+  "bots": [
+    {
+      "id": "tech",
+      "name": "Tech Tower",
+      "sector": "Technology",
+      "color": "#38bdf8",
+      "enabled": true,
+      "starting_cash": 10000,
+      "ai_share": 0.2,
+      "momentum": {
+        "top_n": 3,
+        "lookback_days": 126,
+        "short_lookback_days": 63,
+        "trend_sma_days": 50,
+        "rebalance_days": 7,
+        "stop_loss_pct": 0.1
+      },
+      "ai": {
+        "max_picks": 2,
+        "rebalance_days": 7
+      },
+      "universe": ["AAPL", "MSFT", "NVDA", "GOOGL", "META", "AVGO", "AMD", "ORCL", "CRM", "ADBE", "CSCO", "QCOM", "TXN", "NOW", "PLTR", "MU", "AMAT", "INTC"]
+    },
+    {
+      "id": "energy",
+      "name": "Energy Works",
+      "sector": "Energy",
+      "color": "#f59e0b",
+      "enabled": true,
+      "starting_cash": 10000,
+      "ai_share": 0.2,
+      "momentum": {
+        "top_n": 3,
+        "lookback_days": 126,
+        "short_lookback_days": 63,
+        "trend_sma_days": 50,
+        "rebalance_days": 7,
+        "stop_loss_pct": 0.1
+      },
+      "ai": {
+        "max_picks": 2,
+        "rebalance_days": 7
+      },
+      "universe": ["XOM", "CVX", "COP", "EOG", "SLB", "OXY", "PSX", "MPC", "VLO", "KMI", "WMB", "OKE", "HAL", "DVN", "FANG", "NEE", "FSLR"]
+    },
+    {
+      "id": "finance",
+      "name": "Finance Bank",
+      "sector": "Financials",
+      "color": "#34d399",
+      "enabled": true,
+      "starting_cash": 10000,
+      "ai_share": 0.2,
+      "momentum": {
+        "top_n": 3,
+        "lookback_days": 126,
+        "short_lookback_days": 63,
+        "trend_sma_days": 50,
+        "rebalance_days": 7,
+        "stop_loss_pct": 0.1
+      },
+      "ai": {
+        "max_picks": 2,
+        "rebalance_days": 7
+      },
+      "universe": ["JPM", "BAC", "WFC", "GS", "MS", "C", "SCHW", "BLK", "AXP", "V", "MA", "SPGI", "PGR", "CB", "USB", "PNC"]
+    },
+    {
+      "id": "consumer",
+      "name": "Consumer Mall",
+      "sector": "Consumer",
+      "color": "#f472b6",
+      "enabled": true,
+      "starting_cash": 10000,
+      "ai_share": 0.2,
+      "momentum": {
+        "top_n": 3,
+        "lookback_days": 126,
+        "short_lookback_days": 63,
+        "trend_sma_days": 50,
+        "rebalance_days": 7,
+        "stop_loss_pct": 0.1
+      },
+      "ai": {
+        "max_picks": 2,
+        "rebalance_days": 7
+      },
+      "universe": ["AMZN", "TSLA", "HD", "MCD", "NKE", "SBUX", "COST", "WMT", "PG", "KO", "PEP", "LOW", "TJX", "BKNG", "CMG", "LULU", "TGT"]
+    }
+  ]
+}

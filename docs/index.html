@@ -1,0 +1,92 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Stock City</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Chakra+Petch:wght@500;600;700&family=Barlow:wght@400;500;600&family=JetBrains+Mono:wght@400;600&display=swap">
+<link rel="stylesheet" href="style.css">
+<script type="importmap">
+{ "imports": {
+  "three": "https://cdn.jsdelivr.net/npm/three@0.160.0/build/three.module.js",
+  "three/addons/": "https://cdn.jsdelivr.net/npm/three@0.160.0/examples/jsm/"
+} }
+</script>
+</head>
+<body>
+<!--BODY-->
+<div id="app">
+  <canvas id="city" aria-label="3D city of trading bots. Click a building to open it."></canvas>
+  <div id="labels" aria-hidden="true"></div>
+
+  <header class="hud">
+    <div class="brand">
+      <span class="brand-mark">STOCK CITY</span>
+      <span class="pill" id="mode-pill">PAPER</span>
+    </div>
+    <div class="hud-stats">
+      <div class="stat"><span class="stat-label">City value</span><span class="stat-value" id="t-equity">–</span></div>
+      <div class="stat"><span class="stat-label">All-time</span><span class="stat-value" id="t-pnl">–</span></div>
+      <div class="stat"><span class="stat-label">Today</span><span class="stat-value" id="t-day">–</span></div>
+    </div>
+    <div class="hud-actions">
+      <button class="icon-btn" id="btn-run" type="button" title="Run the bots now">Run now</button>
+      <button class="icon-btn" id="btn-connect" type="button" title="Connect to your GitHub repo">Connect</button>
+    </div>
+  </header>
+
+  <div class="banner" id="banner" hidden></div>
+
+  <nav class="building-list" id="building-list" aria-label="Buildings"></nav>
+
+  <div class="tape" aria-label="Latest trades"><div class="tape-track" id="tape"></div></div>
+
+  <aside class="panel" id="panel" hidden aria-labelledby="p-name">
+    <div class="panel-head">
+      <div>
+        <div class="eyebrow" id="p-sector"></div>
+        <h2 id="p-name"></h2>
+      </div>
+      <span class="pill" id="p-status"></span>
+      <button class="close" id="p-close" type="button" aria-label="Close">✕</button>
+    </div>
+    <div class="p-figures">
+      <div><span class="stat-label">Value</span><span class="big" id="p-equity"></span></div>
+      <div><span class="stat-label">All-time</span><span class="mid" id="p-pnl"></span></div>
+      <div><span class="stat-label">Today</span><span class="mid" id="p-day"></span></div>
+      <div><span class="stat-label">Cash</span><span class="mid" id="p-cash"></span></div>
+    </div>
+    <svg class="spark" id="p-spark" viewBox="0 0 320 80" preserveAspectRatio="none" role="img" aria-label="Value over time"></svg>
+    <div class="tabs" role="tablist">
+      <button role="tab" data-tab="holdings" aria-selected="true">Holdings</button>
+      <button role="tab" data-tab="trades">Trades</button>
+      <button role="tab" data-tab="picks">Picks</button>
+      <button role="tab" data-tab="settings">Settings</button>
+    </div>
+    <div class="tab-body" id="tab-body"></div>
+  </aside>
+
+  <div class="modal" id="connect-modal" hidden role="dialog" aria-modal="true" aria-labelledby="c-title">
+    <form class="modal-card" id="connect-form">
+      <h2 id="c-title">Connect your repo</h2>
+      <p>Saving settings and the Run now button write to your GitHub repo. Paste a fine-grained token with <b>Contents</b> and <b>Actions</b> read/write access to just this repo. It stays in this browser only.</p>
+      <label for="c-repo">Repo (owner/name)</label>
+      <input id="c-repo" placeholder="nash/stock-city" autocomplete="off" required>
+      <label for="c-token">GitHub token</label>
+      <input id="c-token" type="password" placeholder="github_pat_…" autocomplete="off" required>
+      <div class="row">
+        <button type="submit" class="primary">Save connection</button>
+        <button type="button" id="c-forget">Forget</button>
+        <button type="button" id="c-cancel">Close</button>
+      </div>
+      <p class="hint" id="c-msg"></p>
+    </form>
+  </div>
+  <div class="toast" id="toast" role="status" hidden></div>
+</div>
+<!--/BODY-->
+<script type="module" src="app.js"></script>
+</body>
+</html>
