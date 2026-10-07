@@ -178,7 +178,7 @@ th:first-child, td:first-child { text-align: left; }
 td { padding: 7px 4px; text-align: right; border-bottom: 1px solid rgba(167, 139, 250, 0.08); font-family: var(--font-data); font-variant-numeric: tabular-nums; }
 td.tk { font-weight: 600; }
 .sleeve { font: 600 9.5px/1 var(--font-display); letter-spacing: 0.1em; padding: 3px 5px; border-radius: 4px; margin-left: 6px; vertical-align: 1px; }
-.sleeve.momentum { background: rgba(34, 211, 238, 0.14); color: var(--neon-2); }
+.sleeve.momentum, .sleeve.intraday { background: rgba(34, 211, 238, 0.14); color: var(--neon-2); }
 .sleeve.ai { background: rgba(244, 114, 182, 0.16); color: #f9a8d4; }
 .empty { color: var(--ink-dim); font-size: 14px; padding: 14px 0; }
 .section-title { font: 600 11px/1 var(--font-display); letter-spacing: 0.14em; text-transform: uppercase; color: var(--ink-dim); margin: 16px 0 8px; }

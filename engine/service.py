@@ -51,6 +51,7 @@ class City:
         self.markets = {}
         self.closes = {}  # market id -> daily closes
         self.quotes = {}  # market id -> {symbol: price}
+        self.bars = {}  # market id -> today's 1-minute (closes, volumes)
         self.closes_day = None
         self.last_quote_at = None
         self.last_stop_check = None
@@ -102,6 +103,13 @@ class City:
             if force_history or have is None or self.closes_day != today or not set(syms) <= set(have.columns):
                 self.closes[mid] = m.history(syms, HISTORY_DAYS)
             try:
+                if m.is_trading_day(today):
+                    bars = m.intraday(syms, now=now_utc())
+                    self.bars[mid] = bars
+                    if not bars[0].empty:
+                        last = bars[0].ffill().iloc[-1]
+                        self.quotes[mid] = {t: float(v) for t, v in last.items() if pd.notna(v) and v > 0}
+                        continue
                 self.quotes[mid] = m.quotes(syms)
             except Exception as e:  # keep the last quotes; history still works
                 self.last_error = f"Quotes failed: {e}"
@@ -126,6 +134,10 @@ class City:
     # ---- trading -------------------------------------------------------------------
     def _picker(self):
         return ai_picks.claude_picks if ai_picks.ai_available() else no_ai_picker
+
+    def settle(self):
+        rule = self.cfg["cash_account_rules"]
+        return rule == "always" or (rule == "live" and self.cfg["broker"] == "schwab")
 
     def bot_due(self, bot, now):
         return minutes_since(self.ledger["bots"][bot["id"]].get("last_check"), now) >= bot["check_every_minutes"]
@@ -156,7 +168,8 @@ class City:
                     led = self.ledger["bots"][bot["id"]]
                     before = len(led["trades"])
                     BotDay(
-                        bot, led, frame, today, broker, self.excl, self._picker(), info_fn=m.info, force=force, now=now_ny.replace(tzinfo=None)
+                        bot, led, frame, today, broker, self.excl, self._picker(), info_fn=m.info, force=force,
+                        now=now_ny.replace(tzinfo=None), minute_bars=self.bars.get(mid), settle=self.settle(),
                     ).run(live_cash=live_cash)
                     led["last_check"] = now.isoformat(timespec="seconds")
                     checked += 1
@@ -175,23 +188,25 @@ class City:
         """Between trading cycles: stop losses and the do-not-buy list, on live prices."""
         with self.lock:
             now = now_utc()
-            today = now.astimezone(NY).date()
+            now_ny = now.astimezone(NY).replace(tzinfo=None)
+            today = now_ny.date()
             broker = None
             for mid in self.market_ids():
                 m = self.market(mid)
                 frame = self.frame(mid)
+                kw = dict(now=now_ny, minute_bars=self.bars.get(mid), settle=self.settle())
                 for bot in self.cfg["bots"]:
                     if bot["market"] != mid:
                         continue
                     led = self.ledger["bots"][bot["id"]]
                     if bot["enabled"] and m.is_open(now) and led["positions"]:
                         broker = broker or make_broker(self.cfg)
-                        day = BotDay(bot, led, frame, today, broker, self.excl, no_ai_picker, info_fn=m.info)
+                        day = BotDay(bot, led, frame, today, broker, self.excl, no_ai_picker, info_fn=m.info, **kw)
                         day.sell_blocked()
                         day.stop_losses()
                         day.finish()
                     elif m.is_trading_day(today):
-                        BotDay(bot, led, frame, today, PaperBroker(), self.excl, no_ai_picker).finish()
+                        BotDay(bot, led, frame, today, PaperBroker(), self.excl, no_ai_picker, **kw).finish()
             self.last_stop_check = now
             self.save()
 
@@ -238,6 +253,7 @@ class City:
                 "last_quote_at": self.last_quote_at.isoformat(timespec="seconds") if self.last_quote_at else None,
                 "last_trade_at": self.ledger["meta"].get("last_trade_at"),
                 "trade_window_ny": f"{TRADE_START.strftime('%-I:%M')}–{TRADE_END.strftime('%-I:%M %p')}",
+                "cash_account_rules": self.settle(),
                 "ai_enabled": ai_picks.ai_available(),
                 "password_set": bool(os.environ.get("APP_PASSWORD")),
                 "last_error": self.last_error,

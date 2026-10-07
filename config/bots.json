@@ -1,6 +1,7 @@
 {
   "broker": "paper",
   "live_trading_confirmed": false,
+  "cash_account_rules": "live",
   "bots": [
     {
       "id": "tech",
@@ -8,11 +9,12 @@
       "sector": "Technology",
       "color": "#38bdf8",
       "enabled": true,
-      "starting_cash": 10000,
+      "style": "intraday",
+      "starting_cash": 500,
       "ai_share": 0.2,
       "check_every_minutes": 3,
       "min_hold_minutes": 30,
-      "max_trades_per_day": 20,
+      "max_buys_per_day": 30,
       "momentum": {
         "top_n": 3,
         "lookback_days": 126,
@@ -24,8 +26,19 @@
         "rank_buffer": 2
       },
       "ai": {
-        "max_picks": 2,
+        "max_picks": 1,
         "review_every_minutes": 120
+      },
+      "intraday": {
+        "lookback_minutes": 15,
+        "entry_pct": 0.002,
+        "take_profit_pct": 0.008,
+        "stop_pct": 0.005,
+        "max_positions": 2,
+        "min_hold_minutes": 3,
+        "cooldown_minutes": 20,
+        "no_entries_after": "15:40",
+        "close_out_at": "15:50"
       },
       "universe": ["AAPL", "MSFT", "NVDA", "GOOGL", "META", "AVGO", "AMD", "ORCL", "CRM", "ADBE", "CSCO", "QCOM", "TXN", "NOW", "PLTR", "MU", "AMAT", "INTC"]
     },
@@ -35,11 +48,12 @@
       "sector": "Energy",
       "color": "#f59e0b",
       "enabled": true,
-      "starting_cash": 10000,
+      "style": "intraday",
+      "starting_cash": 500,
       "ai_share": 0.2,
       "check_every_minutes": 3,
       "min_hold_minutes": 30,
-      "max_trades_per_day": 20,
+      "max_buys_per_day": 30,
       "momentum": {
         "top_n": 3,
         "lookback_days": 126,
@@ -51,8 +65,19 @@
         "rank_buffer": 2
       },
       "ai": {
-        "max_picks": 2,
+        "max_picks": 1,
         "review_every_minutes": 120
+      },
+      "intraday": {
+        "lookback_minutes": 15,
+        "entry_pct": 0.002,
+        "take_profit_pct": 0.008,
+        "stop_pct": 0.005,
+        "max_positions": 2,
+        "min_hold_minutes": 3,
+        "cooldown_minutes": 20,
+        "no_entries_after": "15:40",
+        "close_out_at": "15:50"
       },
       "universe": ["XOM", "CVX", "COP", "EOG", "SLB", "OXY", "PSX", "MPC", "VLO", "KMI", "WMB", "OKE", "HAL", "DVN", "FANG", "NEE", "FSLR"]
     },
@@ -62,11 +87,12 @@
       "sector": "Financials",
       "color": "#34d399",
       "enabled": true,
-      "starting_cash": 10000,
+      "style": "intraday",
+      "starting_cash": 500,
       "ai_share": 0.2,
       "check_every_minutes": 3,
       "min_hold_minutes": 30,
-      "max_trades_per_day": 20,
+      "max_buys_per_day": 30,
       "momentum": {
         "top_n": 3,
         "lookback_days": 126,
@@ -78,8 +104,19 @@
         "rank_buffer": 2
       },
       "ai": {
-        "max_picks": 2,
+        "max_picks": 1,
         "review_every_minutes": 120
+      },
+      "intraday": {
+        "lookback_minutes": 15,
+        "entry_pct": 0.002,
+        "take_profit_pct": 0.008,
+        "stop_pct": 0.005,
+        "max_positions": 2,
+        "min_hold_minutes": 3,
+        "cooldown_minutes": 20,
+        "no_entries_after": "15:40",
+        "close_out_at": "15:50"
       },
       "universe": ["JPM", "BAC", "WFC", "GS", "MS", "C", "SCHW", "BLK", "AXP", "V", "MA", "SPGI", "PGR", "CB", "USB", "PNC"]
     },
@@ -89,11 +126,12 @@
       "sector": "Consumer",
       "color": "#f472b6",
       "enabled": true,
-      "starting_cash": 10000,
+      "style": "intraday",
+      "starting_cash": 500,
       "ai_share": 0.2,
       "check_every_minutes": 3,
       "min_hold_minutes": 30,
-      "max_trades_per_day": 20,
+      "max_buys_per_day": 30,
       "momentum": {
         "top_n": 3,
         "lookback_days": 126,
@@ -105,8 +143,19 @@
         "rank_buffer": 2
       },
       "ai": {
-        "max_picks": 2,
+        "max_picks": 1,
         "review_every_minutes": 120
+      },
+      "intraday": {
+        "lookback_minutes": 15,
+        "entry_pct": 0.002,
+        "take_profit_pct": 0.008,
+        "stop_pct": 0.005,
+        "max_positions": 2,
+        "min_hold_minutes": 3,
+        "cooldown_minutes": 20,
+        "no_entries_after": "15:40",
+        "close_out_at": "15:50"
       },
       "universe": ["AMZN", "TSLA", "HD", "MCD", "NKE", "SBUX", "COST", "WMT", "PG", "KO", "PEP", "LOW", "TJX", "BKNG", "CMG", "LULU", "TGT"]
     }

@@ -28,6 +28,10 @@ class Market:
         """Latest prices right now (may be a few minutes delayed)."""
         raise NotImplementedError
 
+    def intraday(self, symbols: list[str], now: datetime | None = None):
+        """Today's 1-minute bars as (closes, volumes) DataFrames. Empty when not supported."""
+        return pd.DataFrame(), pd.DataFrame()
+
     def info(self, symbol: str) -> dict:
         """{"name", "sector", "industry"} when known; used by the do-not-buy check."""
         return {}

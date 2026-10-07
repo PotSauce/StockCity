@@ -21,6 +21,7 @@ const pct = (x, dp = 1) => {
   return (Number(v) === 0 ? "" : x >= 0 ? "+" : "−") + v + "%";
 };
 const cls = (x) => (x >= 0 ? "up" : "down");
+const num1 = (x) => String(Math.round(x * 100) / 100);
 const esc = (s) => String(s ?? "").replace(/[&<>"']/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" })[c]);
 
 // "server": the always-on server (live prices, password-protected settings)
@@ -658,7 +659,7 @@ function renderHUD() {
     banner.textContent = "Test mode: the server is using simulated prices (MARKET_DATA=simulated).";
     banner.hidden = false;
   } else if (STATE.price_source === "simulated") {
-    banner.textContent = "Preview with simulated prices. Real prices take over after the first run on GitHub.";
+    banner.textContent = "Preview with simulated prices. Real prices show once the server is running.";
     banner.hidden = false;
   } else if (MODE !== "server" && ageH > 80) {
     banner.textContent = `Last update was ${Math.round(ageH / 24)} days ago. Check the Actions tab on GitHub.`;
@@ -734,10 +735,13 @@ document.querySelectorAll(".tabs button").forEach((btn) =>
   }),
 );
 
+const SLEEVE_TAG = { ai: "AI", momentum: "MOM", intraday: "DAY" };
+const mainName = (s) => (s.style === "intraday" ? "Day trading" : "Momentum");
+
 function renderPanel() {
   const b = bot();
   if (!b) return;
-  $("p-sector").textContent = `${b.sector} · ${Math.round((1 - b.settings.ai_share) * 100)}/${Math.round(b.settings.ai_share * 100)} momentum/AI`;
+  $("p-sector").textContent = `${b.sector} · ${Math.round((1 - b.settings.ai_share) * 100)}/${Math.round(b.settings.ai_share * 100)} ${mainName(b.settings).toLowerCase()}/AI`;
   $("p-name").textContent = b.name;
   const st = $("p-status");
   st.textContent = b.enabled ? "Active" : "Paused";
@@ -780,7 +784,7 @@ function holdingsHTML(b) {
   if (!b.positions.length) return `<p class="empty">No holdings yet. Cash: ${money(b.cash, 2)}.</p>`;
   const rows = b.positions
     .map(
-      (p) => `<tr><td class="tk">${esc(p.ticker)}<span class="sleeve ${p.sleeve}">${p.sleeve === "ai" ? "AI" : "MOM"}</span></td>
+      (p) => `<tr><td class="tk">${esc(p.ticker)}<span class="sleeve ${p.sleeve}">${SLEEVE_TAG[p.sleeve] || "MOM"}</span></td>
       <td>${p.shares}</td><td>${money(p.price, 2)}</td><td>${money(p.value)}</td><td class="${cls(p.pnl_pct)}">${pct(p.pnl_pct)}</td></tr>`,
     )
     .join("");
@@ -795,7 +799,7 @@ function tradesHTML(b) {
     .slice(0, 60)
     .map(
       (t) => `<div class="trade"><span class="side ${t.side}">${t.side.toUpperCase()}</span>
-      <span class="what">${t.shares} ${esc(t.ticker)} @ ${money(t.price, 2)}<span class="sleeve ${t.sleeve}">${t.sleeve === "ai" ? "AI" : "MOM"}</span></span>
+      <span class="what">${t.shares} ${esc(t.ticker)} @ ${money(t.price, 2)}<span class="sleeve ${t.sleeve}">${SLEEVE_TAG[t.sleeve] || "MOM"}</span></span>
       <span class="when">${esc(t.date)}${t.time ? " " + esc(t.time) : ""}</span><span class="why">${esc(t.reason)}</span></div>`,
     )
     .join("");
@@ -806,7 +810,7 @@ function picksHTML(b) {
   let aiPart;
   if (ai.status === "ok") {
     aiPart = `${ai.market_view ? `<p class="view">“${esc(ai.market_view)}”</p>` : ""}
-      ${ai.picks.length ? ai.picks.map((p) => `<div class="pick"><div class="pick-head"><b>${esc(p.ticker)}</b><span class="conf">confidence ${Math.round(p.confidence * 100)}%</span></div><p>${esc(p.reason)}</p></div>`).join("") : `<p class="empty">No picks this week. The AI sleeve is holding cash.</p>`}
+      ${ai.picks.length ? ai.picks.map((p) => `<div class="pick"><div class="pick-head"><b>${esc(p.ticker)}</b><span class="conf">confidence ${Math.round(p.confidence * 100)}%</span></div><p>${esc(p.reason)}</p></div>`).join("") : `<p class="empty">No AI picks right now. That part of the building is holding cash.</p>`}
       ${ai.rejected?.length ? `<p class="blocked">Blocked: ${ai.rejected.map((r) => `${esc(r.ticker)} (${esc(r.reason)})`).join(", ")}</p>` : ""}
       <p class="blocked">Picked ${esc(ai.date)} by ${esc(ai.model)}.</p>`;
   } else if (ai.status === "error") {
@@ -828,8 +832,25 @@ function picksHTML(b) {
     ? `<p class="blocked">Never bought here: ${b.blocked_in_universe.map((x) => `${esc(x.ticker)} (${esc(x.reason)})`).join(", ")}</p>`
     : "";
 
-  return `<div class="section-title">AI picks · ${Math.round(b.settings.ai_share * 100)}% of this building</div>${aiPart}
-    <div class="section-title">Momentum leaderboard · top ${b.settings.momentum.top_n} with ✓ get bought · re-checked every ${b.settings.check_every_minutes} min</div>${rank}${blocked}`;
+  const main =
+    b.settings.style === "intraday"
+      ? `<div class="section-title">Moving right now · ✓ = up ${num1(b.settings.intraday.entry_pct * 100)}%+ in ${b.settings.intraday.lookback_minutes} min and above VWAP · re-checked every ${b.settings.check_every_minutes} min</div>${moversHTML(b)}`
+      : `<div class="section-title">Momentum leaderboard · top ${b.settings.momentum.top_n} with ✓ get bought · re-checked every ${b.settings.check_every_minutes} min</div>${rank}`;
+  return `${main}${blocked}<div class="section-title">AI picks · ${Math.round(b.settings.ai_share * 100)}% of this building</div>${aiPart}`;
+}
+
+function moversHTML(b) {
+  const sig = b.intraday_signals || [];
+  if (!sig.length) return `<p class="empty">Movers appear once the market has been open about ${b.settings.intraday.lookback_minutes} minutes.</p>`;
+  const top = Math.max(0.0001, ...sig.map((r) => Math.abs(r.move)));
+  return sig
+    .map(
+      (r) => `<div class="rank-row ${r.qualifies ? "" : "no"}"><span>${esc(r.ticker)}</span>
+        <span class="rank-bar"><i style="width:${Math.max(2, (Math.max(0, r.move) / top) * 100)}%"></i></span>
+        <span class="${cls(r.move)}" style="text-align:right">${pct(r.move, 2)}</span><span class="ok" title="${r.qualifies ? "Running up and above VWAP" : r.above_vwap ? "Not moving enough yet" : "Below VWAP"}">${r.qualifies ? "✓" : ""}</span></div>`,
+    )
+    .join("")
+    + `<p class="blocked">VWAP is today's volume-weighted average price. A stock above it has been trading stronger than average today.</p>`;
 }
 
 /* ---------- settings ---------- */
@@ -837,37 +858,60 @@ const CHECKS = [[2, "2 minutes"], [3, "3 minutes"], [5, "5 minutes"], [15, "15 m
 const AI_EVERY = [[60, "hour"], [120, "2 hours"], [240, "4 hours"], [390, "day"], [1950, "week"]];
 const LOOKBACKS = [[63, "3 months"], [126, "6 months"], [189, "9 months"], [252, "12 months"]];
 
+const STYLES = [["intraday", "Day trading (in and out within the day)"], ["swing", "Swing (hold days to weeks)"]];
+
 function settingsHTML(b) {
   const d = draft;
   const aiPct = Math.round(d.ai_share * 100);
+  const day = d.intraday;
+  const isDay = d.style === "intraday";
+  const opt = (list, cur) => list.map(([v, l]) => `<option value="${v}" ${v === cur ? "selected" : ""}>${l}</option>`).join("");
+  const dayFields = `
+    <div class="two">
+      <div class="field"><label for="s-entry">Buy when up at least (%)</label><input id="s-entry" type="number" min="0.05" max="5" step="0.05" value="${num1(day.entry_pct * 100)}"></div>
+      <div class="field"><label for="s-lookmin">…over the last (minutes)</label><input id="s-lookmin" type="number" min="2" max="120" step="1" value="${day.lookback_minutes}"></div>
+    </div>
+    <div class="two">
+      <div class="field"><label for="s-tp">Take profit at (%)</label><input id="s-tp" type="number" min="0.1" max="20" step="0.1" value="${num1(day.take_profit_pct * 100)}"></div>
+      <div class="field"><label for="s-dstop">Stop at (%)</label><input id="s-dstop" type="number" min="0.1" max="20" step="0.1" value="${num1(day.stop_pct * 100)}"></div>
+    </div>
+    <div class="two">
+      <div class="field"><label for="s-maxpos">Day trades open at once</label><input id="s-maxpos" type="number" min="1" max="10" value="${day.max_positions}"></div>
+      <div class="field"><label for="s-cool">Wait before re-buying (minutes)</label><input id="s-cool" type="number" min="0" max="390" step="5" value="${day.cooldown_minutes}"></div>
+    </div>
+    <span class="help">Buys a stock that is up this much over the last few minutes and above VWAP. Sells at the take profit, at the stop, when the run fades, and always by ${esc(day.close_out_at)} so nothing is held overnight. No new buys after ${esc(day.no_entries_after)}.</span>`;
+  const swingFields = `
+    <div class="two">
+      <div class="field"><label for="s-topn">Momentum stocks held</label><input id="s-topn" type="number" min="1" max="10" value="${d.momentum.top_n}"></div>
+      <div class="field"><label for="s-look">Momentum looks back</label><select id="s-look">${opt(LOOKBACKS, d.momentum.lookback_days)}</select></div>
+    </div>`;
   return `<form class="settings" id="settings-form">
     <div class="toggle"><input type="checkbox" id="s-enabled" ${d.enabled ? "checked" : ""}><label for="s-enabled">Trading on (untick to pause this building)</label></div>
     <div class="field"><label for="s-cash">Money in this building ($)</label>
       <input id="s-cash" type="number" min="0" step="100" value="${d.starting_cash}">
-      <span class="help">Raising it adds cash on the next run; lowering it takes cash out (only uninvested cash).</span></div>
+      <span class="help">Raising it adds cash on the next check; lowering it takes cash out (only uninvested cash).</span></div>
+    <div class="field"><label for="s-style">Trading style</label><select id="s-style">${opt(STYLES, d.style)}</select></div>
     <div class="field"><span class="flabel">Strategy split</span>
       <div class="split"><span class="m" style="width:${100 - aiPct}%"></span><span class="a" style="width:${aiPct}%"></span></div>
-      <div class="split-legend"><span style="color:var(--neon-2)">Momentum ${100 - aiPct}%</span><span style="color:#f9a8d4">AI picks ${aiPct}%</span></div>
+      <div class="split-legend">${legendHTML(d, aiPct)}</div>
       <input id="s-ai" type="range" min="0" max="100" step="5" value="${aiPct}" aria-label="AI share"></div>
+    ${isDay ? dayFields : swingFields}
     <div class="two">
-      <div class="field"><label for="s-topn">Momentum stocks held</label><input id="s-topn" type="number" min="1" max="10" value="${d.momentum.top_n}"></div>
-      <div class="field"><label for="s-aipicks">AI stocks held</label><input id="s-aipicks" type="number" min="1" max="5" value="${d.ai.max_picks}"></div>
+      <div class="field"><label for="s-check">Check for trades every</label><select id="s-check">${opt(CHECKS, d.check_every_minutes)}</select></div>
+      <div class="field"><label for="s-cap">Max buys per day</label><input id="s-cap" type="number" min="1" max="500" value="${d.max_buys_per_day}"></div>
     </div>
+    <span class="help">Selling is never capped, so a stop or close-out always goes through.</span>
+    <div class="section-title">${isDay ? "AI picks (held for days)" : "Risk and AI picks"}</div>
     <div class="two">
-      <div class="field"><label for="s-check">Check for trades every</label><select id="s-check">${CHECKS.map(([v, l]) => `<option value="${v}" ${v === d.check_every_minutes ? "selected" : ""}>${l}</option>`).join("")}</select></div>
-      <div class="field"><label for="s-look">Momentum looks back</label><select id="s-look">${LOOKBACKS.map(([v, l]) => `<option value="${v}" ${v === d.momentum.lookback_days ? "selected" : ""}>${l}</option>`).join("")}</select></div>
+      <div class="field"><label for="s-aipicks">AI stocks held</label><input id="s-aipicks" type="number" min="1" max="5" value="${d.ai.max_picks}"></div>
+      <div class="field"><label for="s-aievery">AI re-picks every</label><select id="s-aievery">${opt(AI_EVERY, d.ai.review_every_minutes)}</select></div>
     </div>
     <div class="two">
       <div class="field"><label for="s-stop">Stop loss (%)</label><input id="s-stop" type="number" min="1" max="90" step="1" value="${Math.round(d.momentum.stop_loss_pct * 100)}"></div>
       <div class="field"><label for="s-trail">Trailing stop (%)</label><input id="s-trail" type="number" min="1" max="90" step="1" value="${Math.round(d.momentum.trailing_stop_pct * 100)}"></div>
     </div>
-    <span class="help">Stop loss sells a holding that falls this far below what the bot paid. Trailing stop sells a winner that falls this far from its high. Both are checked on every trade check.</span>
-    <div class="two">
-      <div class="field"><label for="s-hold">Hold at least (minutes)</label><input id="s-hold" type="number" min="0" max="10080" step="15" value="${d.min_hold_minutes}"></div>
-      <div class="field"><label for="s-cap">Max trades per day</label><input id="s-cap" type="number" min="1" max="200" value="${d.max_trades_per_day}"></div>
-    </div>
-    <div class="field"><label for="s-aievery">AI re-picks every</label><select id="s-aievery">${AI_EVERY.map(([v, l]) => `<option value="${v}" ${v === d.ai.review_every_minutes ? "selected" : ""}>${l}</option>`).join("")}</select>
-      <span class="help">Each AI review is one Claude request, roughly 3–5¢.</span></div>
+    <div class="field"><label for="s-hold">Hold at least (minutes)</label><input id="s-hold" type="number" min="0" max="10080" step="15" value="${d.min_hold_minutes}">
+      <span class="help">${isDay ? "These three apply to the AI picks." : "These apply to every holding."} Stop loss sells when a stock falls this far below what the bot paid; trailing stop sells a winner that falls this far from its high. Each AI review is one Claude request, roughly 3–5¢.</span></div>
     <div class="field"><span class="flabel">Stocks this building can trade</span>
       <div class="chips" id="s-chips">${d.universe.map((t) => `<span class="chip">${esc(t)}<button type="button" data-rm="${esc(t)}" aria-label="Remove ${esc(t)}">✕</button></span>`).join("")}</div>
       <div class="add-row"><input id="s-add" type="text" placeholder="Add ticker, e.g. IBM" maxlength="8" autocomplete="off"><button type="button" id="s-add-btn">Add</button></div>
@@ -877,6 +921,10 @@ function settingsHTML(b) {
   </form>`;
 }
 
+function legendHTML(d, aiPct) {
+  return `<span style="color:var(--neon-2)">${mainName(d)} ${100 - aiPct}%</span><span style="color:#f9a8d4">AI picks ${aiPct}%</span>`;
+}
+
 function blockedReason(t) {
   const ex = STATE.exclusions || {};
   return (ex.blocked_tickers || {})[t] || null;
@@ -884,26 +932,44 @@ function blockedReason(t) {
 
 function wireSettings(root, b) {
   const num = (id) => Number(root.querySelector(id).value);
+  const has = (id) => !!root.querySelector(id);
+  const clamp = (v, lo, hi) => Math.min(hi, Math.max(lo, v));
   const sync = () => {
     draft.enabled = root.querySelector("#s-enabled").checked;
     draft.starting_cash = Math.max(0, num("#s-cash"));
+    draft.style = root.querySelector("#s-style").value;
     draft.ai_share = num("#s-ai") / 100;
-    draft.momentum.top_n = Math.min(10, Math.max(1, Math.round(num("#s-topn"))));
-    draft.ai.max_picks = Math.min(5, Math.max(1, Math.round(num("#s-aipicks"))));
-    draft.momentum.lookback_days = num("#s-look");
-    draft.momentum.short_lookback_days = Math.round(num("#s-look") / 2);
+    draft.ai.max_picks = clamp(Math.round(num("#s-aipicks")), 1, 5);
     draft.check_every_minutes = num("#s-check");
     draft.ai.review_every_minutes = num("#s-aievery");
-    draft.min_hold_minutes = Math.min(10080, Math.max(0, Math.round(num("#s-hold"))));
-    draft.max_trades_per_day = Math.min(200, Math.max(1, Math.round(num("#s-cap"))));
-    draft.momentum.stop_loss_pct = Math.min(90, Math.max(1, num("#s-stop"))) / 100;
-    draft.momentum.trailing_stop_pct = Math.min(90, Math.max(1, num("#s-trail"))) / 100;
+    draft.min_hold_minutes = clamp(Math.round(num("#s-hold")), 0, 10080);
+    draft.max_buys_per_day = clamp(Math.round(num("#s-cap")), 1, 500);
+    draft.momentum.stop_loss_pct = clamp(num("#s-stop"), 1, 90) / 100;
+    draft.momentum.trailing_stop_pct = clamp(num("#s-trail"), 1, 90) / 100;
+    if (has("#s-topn")) {
+      draft.momentum.top_n = clamp(Math.round(num("#s-topn")), 1, 10);
+      draft.momentum.lookback_days = num("#s-look");
+      draft.momentum.short_lookback_days = Math.round(num("#s-look") / 2);
+    }
+    if (has("#s-entry")) {
+      const day = draft.intraday;
+      day.entry_pct = clamp(num("#s-entry"), 0.05, 5) / 100;
+      day.lookback_minutes = clamp(Math.round(num("#s-lookmin")), 2, 120);
+      day.take_profit_pct = clamp(num("#s-tp"), 0.1, 20) / 100;
+      day.stop_pct = clamp(num("#s-dstop"), 0.1, 20) / 100;
+      day.max_positions = clamp(Math.round(num("#s-maxpos")), 1, 10);
+      day.cooldown_minutes = clamp(Math.round(num("#s-cool")), 0, 390);
+    }
   };
+  root.querySelector("#s-style").addEventListener("change", () => {
+    sync();
+    renderPanel();
+  });
   root.querySelector("#s-ai").addEventListener("input", (e) => {
     const v = Number(e.target.value);
     root.querySelector(".split .m").style.width = `${100 - v}%`;
     root.querySelector(".split .a").style.width = `${v}%`;
-    root.querySelector(".split-legend").innerHTML = `<span style="color:var(--neon-2)">Momentum ${100 - v}%</span><span style="color:#f9a8d4">AI picks ${v}%</span>`;
+    root.querySelector(".split-legend").innerHTML = legendHTML(draft, v);
   });
   root.querySelectorAll("[data-rm]").forEach((btn) =>
     btn.addEventListener("click", () => {

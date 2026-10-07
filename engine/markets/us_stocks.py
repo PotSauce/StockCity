@@ -19,6 +19,20 @@ HOLIDAYS = {
 }
 
 
+def is_trading_day(day):
+    return day.weekday() < 5 and day not in HOLIDAYS
+
+
+def next_trading_day(day):
+    """When a sale made on `day` settles (T+1)."""
+    from datetime import timedelta
+
+    d = day + timedelta(days=1)
+    while not is_trading_day(d):
+        d += timedelta(days=1)
+    return d
+
+
 class UsStocks(Market):
     id = "us_stocks"
     name = "US stocks"
@@ -28,7 +42,7 @@ class UsStocks(Market):
         self.source = self.prices.name
 
     def is_trading_day(self, day):
-        return day.weekday() < 5 and day not in HOLIDAYS
+        return is_trading_day(day)
 
     def is_open(self, now):
         ny = now.astimezone(NY)
@@ -48,6 +62,13 @@ class UsStocks(Market):
         close = df["Close"] if isinstance(df.columns, pd.MultiIndex) else df[["Close"]].set_axis(sorted(set(symbols)), axis=1)
         last = close.ffill().iloc[-1]
         return {t: float(v) for t, v in last.items() if pd.notna(v) and v > 0}
+
+    def intraday(self, symbols, now=None):
+        """Today's 1-minute (close, volume) frames."""
+        if isinstance(self.prices, SyntheticPrices):
+            ny = (now or datetime.now(NY)).astimezone(NY)
+            return self.prices.intraday(symbols, day=ny.date(), until=ny.time())
+        return self.prices.intraday(symbols)
 
     def info(self, symbol):
         return self.prices.info(symbol)

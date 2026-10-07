@@ -1,5 +1,6 @@
 """Loads and sanity-checks the city's settings (config/bots.json)."""
 import copy
+import re
 import json
 from pathlib import Path
 
@@ -23,7 +24,14 @@ LIMITS = {
     "ai.review_every_minutes": (30, 10080),
     "check_every_minutes": (2, 390),
     "min_hold_minutes": (0, 10080),
-    "max_trades_per_day": (1, 200),
+    "max_buys_per_day": (1, 500),
+    "intraday.lookback_minutes": (2, 120),
+    "intraday.entry_pct": (0.0005, 0.05),
+    "intraday.take_profit_pct": (0.001, 0.2),
+    "intraday.stop_pct": (0.001, 0.2),
+    "intraday.max_positions": (1, 10),
+    "intraday.min_hold_minutes": (0, 390),
+    "intraday.cooldown_minutes": (0, 390),
 }
 
 DEFAULT_BOT = {
@@ -33,7 +41,19 @@ DEFAULT_BOT = {
     "ai_share": 0.2,
     "check_every_minutes": 3,
     "min_hold_minutes": 30,
-    "max_trades_per_day": 20,
+    "max_buys_per_day": 30,
+    "style": "intraday",
+    "intraday": {
+        "lookback_minutes": 15,
+        "entry_pct": 0.002,
+        "take_profit_pct": 0.008,
+        "stop_pct": 0.005,
+        "max_positions": 2,
+        "min_hold_minutes": 3,
+        "cooldown_minutes": 20,
+        "no_entries_after": "15:40",
+        "close_out_at": "15:50",
+    },
     "momentum": {
         "top_n": 3,
         "lookback_days": 126,
@@ -72,14 +92,19 @@ def _merge(base, override):
     return out
 
 
-RETIRED_KEYS = {"momentum": ["rebalance_days"], "ai": ["rebalance_days"]}
+RETIRED_KEYS = {"momentum": ["rebalance_days"], "ai": ["rebalance_days"], "": ["max_trades_per_day"]}
 
 
 def normalize_bot(raw):
     bot = _merge(DEFAULT_BOT, raw)
     for section, keys in RETIRED_KEYS.items():
         for k in keys:
-            bot[section].pop(k, None)
+            (bot[section] if section else bot).pop(k, None)
+    if bot["style"] not in ("intraday", "swing"):
+        raise ValueError(f"style must be 'intraday' or 'swing', not {bot['style']!r}")
+    for k in ("no_entries_after", "close_out_at"):
+        if not re.fullmatch(r"\d\d:\d\d", str(bot["intraday"][k])):
+            raise ValueError(f"intraday.{k} must look like 15:40")
     for key, (lo, hi) in LIMITS.items():
         val = _get(bot, key)
         cast = int if isinstance(lo, int) and key != "starting_cash" else float
@@ -101,6 +126,8 @@ def parse_config(raw, source="config"):
     cfg = {
         "broker": raw.get("broker", "paper"),
         "live_trading_confirmed": bool(raw.get("live_trading_confirmed", False)),
+        # Cash-account settlement rule: "live" (only with real money), "always" (paper too), or "off"
+        "cash_account_rules": raw.get("cash_account_rules", "live"),
         "bots": [normalize_bot(b) for b in raw["bots"]],
     }
     ids = [b["id"] for b in cfg["bots"]]

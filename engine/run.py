@@ -86,6 +86,7 @@ def build_state(cfg, ledger, closes, excl_raw, source, broker_name, run_note):
                 "trades": list(reversed(led["trades"][-80:])),
                 "history": hist,
                 "ranking": led.get("ranking", []),
+                "intraday_signals": led.get("intraday_signals", []),
                 "ai": led.get("ai", {}),
                 "blocked_in_universe": led.get("blocked_in_universe", []),
                 "notes": list(reversed(led.get("notes", [])[-12:])),
@@ -159,14 +160,24 @@ def run_simulation(args):
     tickers = all_tickers(cfg, ledger)
     broker = PaperBroker()
     days = source.trading_days(args.simulate)
+    step = args.check_minutes
     for d in days:
-        closes = source.closes(tickers, HISTORY_DAYS, as_of=d)
-        for bot in cfg["bots"]:
-            BotDay(bot, ledger["bots"][bot["id"]], closes, d, broker, excl, ai_picks.simulated_picks).run()
+        daily = source.closes(tickers, HISTORY_DAYS, as_of=d - pd.Timedelta(days=1))
+        bars_c, bars_v = source.intraday(tickers, day=d)
+        t = d + pd.Timedelta(hours=9, minutes=45)
+        while t < d + pd.Timedelta(hours=15, minutes=56):
+            c, v = bars_c[bars_c.index <= t], bars_v[bars_v.index <= t]
+            frame = pd.concat([daily, c.iloc[[-1]].set_axis([d])])
+            for bot in cfg["bots"]:
+                BotDay(
+                    bot, ledger["bots"][bot["id"]], frame, d, broker, excl, ai_picks.simulated_picks,
+                    now=t, minute_bars=(c, v), settle=cfg["cash_account_rules"] == "always",
+                ).run()
+            t += pd.Timedelta(minutes=step)
     SIM_LEDGER.parent.mkdir(exist_ok=True)
     SIM_LEDGER.write_text(json.dumps(ledger, indent=1))
     closes = source.closes(tickers, HISTORY_DAYS)
-    state = build_state(cfg, ledger, closes, excl_raw, source.name, "paper", f"Simulated {args.simulate} trading days with fake prices")
+    state = build_state(cfg, ledger, closes, excl_raw, source.name, "paper", f"Simulated {args.simulate} trading days with fake prices, checking every {args.check_minutes} minutes")
     out = Path(args.out) if args.out else STATE_OUT
     out.write_text(json.dumps(state, indent=1))
     print(f"Simulated {len(days)} days -> {out}")
@@ -180,6 +191,7 @@ def main():
     ap.add_argument("--no-ai", action="store_true", help="skip the AI sleeve this run")
     ap.add_argument("--simulate", type=int, metavar="DAYS", help="run on fake prices for DAYS trading days")
     ap.add_argument("--out", help="where to write the website data (simulation only)")
+    ap.add_argument("--check-minutes", type=int, default=5, help="minutes between checks in a simulation")
     args = ap.parse_args()
     if args.simulate:
         run_simulation(args)

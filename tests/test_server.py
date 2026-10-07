@@ -14,8 +14,11 @@ def client(tmp_path, monkeypatch):
     monkeypatch.delenv("ANTHROPIC_API_KEY", raising=False)
     import importlib
 
+    import engine.service
     import server.app as app_module
 
+    # 11am New York on a Wednesday, so the market is open and the intraday strategy can trade
+    monkeypatch.setattr(engine.service, "now_utc", lambda: datetime(2026, 10, 7, 15, 0, tzinfo=timezone.utc))
     importlib.reload(app_module)
     app_module.city.refresh_prices()
     with TestClient(app_module.app) as c:
@@ -53,6 +56,8 @@ def test_run_now_trades_on_paper(client):
     assert r.status_code == 200
     st = client.get("/api/state").json()
     assert any(b["trades"] for b in st["bots"])
+    # the Picks tab lists today's movers for day-trading buildings
+    assert all(b["intraday_signals"] for b in st["bots"] if b["settings"]["style"] == "intraday")
     # AI is off without a key, so the AI sleeve holds nothing
     for b in st["bots"]:
         assert not [p for p in b["positions"] if p["sleeve"] == "ai"]

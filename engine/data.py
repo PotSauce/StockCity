@@ -33,6 +33,23 @@ class YahooPrices:
         closes.index = pd.to_datetime(closes.index).tz_localize(None).normalize()
         return closes.dropna(how="all").ffill()
 
+    def intraday(self, tickers):
+        """Today's 1-minute closes and volumes (two DataFrames, one column per ticker)."""
+        import yfinance as yf
+
+        syms = sorted(set(tickers))
+        df = yf.download(syms, period="1d", interval="1m", progress=False, threads=True, auto_adjust=True, prepost=False)
+        if df.empty:
+            return pd.DataFrame(), pd.DataFrame()
+        if isinstance(df.columns, pd.MultiIndex):
+            close, vol = df["Close"], df["Volume"]
+        else:
+            close, vol = df[["Close"]].set_axis(syms, axis=1), df[["Volume"]].set_axis(syms, axis=1)
+        idx = pd.to_datetime(close.index)
+        idx = (idx.tz_convert("America/New_York") if idx.tz is not None else idx).tz_localize(None)
+        close.index = vol.index = idx
+        return close.ffill(), vol.fillna(0)
+
     def info(self, ticker):
         """Company name / sector / industry, cached so we only ask Yahoo once per ticker."""
         if ticker in self._info:
@@ -100,6 +117,32 @@ class SyntheticPrices:
             h = int(hashlib.sha256(f"{t}:{tick}".encode()).hexdigest()[:6], 16) / 0xFFFFFF
             out[t] = round(float(s.iloc[-1]) * (1 + (h - 0.5) * 0.01), 2)
         return out
+
+    def intraday(self, tickers, day=None, until=None):
+        """Seeded 1-minute bars for one day, starting from the previous close, with trending
+        stretches so intraday signals actually fire. `until` (a time) cuts the day short."""
+        import datetime as dt
+
+        day = pd.Timestamp(day or self.end).normalize()
+        start = day + pd.Timedelta(hours=9, minutes=30)
+        end = day + pd.Timedelta(hours=16)
+        if until is not None:
+            end = min(end, day + pd.Timedelta(hours=until.hour, minutes=until.minute))
+        idx = pd.date_range(start, end, freq="1min", inclusive="left")
+        closes, vols = {}, {}
+        for t in sorted(set(tickers)):
+            s = self._series(t)
+            prev = s[s.index < day]
+            base = float(prev.iloc[-1]) if len(prev) else float(s.iloc[0])
+            h = int(hashlib.sha256(f"{self.seed}:{t}:{day.date()}".encode()).hexdigest()[:8], 16)
+            rng = np.random.default_rng(h)
+            n = 390
+            drift = np.repeat(rng.normal(0, 0.00012, n // 30 + 1), 30)[:n]  # mild half-hour trends
+            rets = rng.normal(0, 0.0009, n) + drift
+            path = base * np.exp(np.cumsum(rets))
+            closes[t] = np.round(path[: len(idx)], 2)
+            vols[t] = rng.integers(2_000, 40_000, n)[: len(idx)]
+        return pd.DataFrame(closes, index=idx), pd.DataFrame(vols, index=idx)
 
     def trading_days(self, n):
         return list(pd.bdate_range(end=self.end, periods=n))
