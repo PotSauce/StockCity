@@ -22,6 +22,7 @@ LIMITS = {
 }
 
 DEFAULT_BOT = {
+    "market": "us_stocks",
     "enabled": True,
     "starting_cash": 2500,
     "ai_share": 0.2,
@@ -77,7 +78,10 @@ def normalize_bot(raw):
 
 
 def load_config(path=CONFIG_PATH):
-    raw = json.loads(Path(path).read_text())
+    return parse_config(json.loads(Path(path).read_text()), source=path)
+
+
+def parse_config(raw, source="config"):
     cfg = {
         "broker": raw.get("broker", "paper"),
         "live_trading_confirmed": bool(raw.get("live_trading_confirmed", False)),
@@ -85,7 +89,7 @@ def load_config(path=CONFIG_PATH):
     }
     ids = [b["id"] for b in cfg["bots"]]
     if len(ids) != len(set(ids)):
-        raise ValueError(f"Duplicate bot ids in {path}: {ids}")
+        raise ValueError(f"Duplicate bot ids in {source}: {ids}")
     if cfg["broker"] not in ("paper", "schwab"):
         raise ValueError(f"Unknown broker {cfg['broker']!r}; use 'paper' or 'schwab'")
     return cfg

@@ -16,12 +16,38 @@ let STATE = null;
 const money = (x, dp = 0) =>
   (x < 0 ? "−$" : "$") + Math.abs(x).toLocaleString("en-US", { minimumFractionDigits: dp, maximumFractionDigits: dp });
 const signedMoney = (x) => (x >= 0 ? "+" : "−") + money(Math.abs(x));
-const pct = (x, dp = 1) => (x >= 0 ? "+" : "−") + Math.abs(x * 100).toFixed(dp) + "%";
+const pct = (x, dp = 1) => {
+  const v = Math.abs(x * 100).toFixed(dp);
+  return (Number(v) === 0 ? "" : x >= 0 ? "+" : "−") + v + "%";
+};
 const cls = (x) => (x >= 0 ? "up" : "down");
 const esc = (s) => String(s ?? "").replace(/[&<>"']/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" })[c]);
 
+// "server": the always-on server (live prices, password-protected settings)
+// "static": GitHub Pages reading data/state.json; "preview": data baked into the page
+let MODE = "static";
+
 async function loadState() {
-  if (window.__STATE__) return window.__STATE__;
+  if (window.__STATE__) {
+    MODE = "preview";
+    return window.__STATE__;
+  }
+  for (let attempt = 0; attempt < 20; attempt++) {
+    let res;
+    try {
+      res = await fetch("api/state", { cache: "no-store" });
+    } catch {
+      break;
+    }
+    if (res.ok) {
+      MODE = "server";
+      return res.json();
+    }
+    if (res.status !== 503) break;
+    $("banner").textContent = "The city is loading market data…";
+    $("banner").hidden = false;
+    await new Promise((r) => setTimeout(r, 3000));
+  }
   const res = await fetch("data/state.json", { cache: "no-store" });
   if (!res.ok) throw new Error(`Could not load data/state.json (${res.status})`);
   return res.json();
@@ -65,6 +91,24 @@ const gh = {
     return gh.call("/actions/workflows/trade.yml/dispatches", { method: "POST", body: JSON.stringify({ ref: "main", inputs: { force: "true" } }) });
   },
 };
+
+const api = {
+  pass: () => store.get("sc.pass"),
+  unlocked: () => !!store.get("sc.pass"),
+  async call(path, opts = {}) {
+    const res = await fetch(path, {
+      ...opts,
+      headers: { "Content-Type": "application/json", "X-City-Password": api.pass() || "", ...(opts.headers || {}) },
+    });
+    const body = await res.json().catch(() => ({}));
+    if (!res.ok) {
+      if (res.status === 401) store.del("sc.pass");
+      throw new Error(body.detail || `Server said ${res.status}`);
+    }
+    return body;
+  },
+};
+const canSave = () => (MODE === "server" ? api.unlocked() : gh.connected());
 
 function toast(msg, ms = 4200) {
   const t = $("toast");
@@ -595,12 +639,28 @@ function renderHUD() {
   pill.textContent = live ? "Live · Schwab" : "Paper money";
   pill.classList.toggle("live", live);
 
+  const mk = STATE.server?.markets?.[0];
+  const mp = $("market-pill");
+  if (mk) {
+    mp.hidden = false;
+    mp.textContent = mk.open ? "Market open" : "Market closed";
+    mp.className = "pill " + (mk.open ? "on" : "paused");
+    const q = STATE.server.last_quote_at ? new Date(STATE.server.last_quote_at).toLocaleTimeString([], { hour: "numeric", minute: "2-digit" }) : "–";
+    mp.title = `Prices updated ${q}. Bots trade daily at ${STATE.server.trade_time_ny} New York time; stop losses are checked every 5 minutes while the market is open.`;
+  }
+
   const banner = $("banner");
   const ageH = (Date.now() - Date.parse(STATE.generated_at)) / 36e5;
-  if (STATE.price_source === "simulated") {
+  if (STATE.server?.last_error) {
+    banner.textContent = `Price feed problem: ${STATE.server.last_error}. Retrying automatically.`;
+    banner.hidden = false;
+  } else if (STATE.price_source === "simulated" && MODE === "server") {
+    banner.textContent = "Test mode: the server is using simulated prices (MARKET_DATA=simulated).";
+    banner.hidden = false;
+  } else if (STATE.price_source === "simulated") {
     banner.textContent = "Preview with simulated prices. Real prices take over after the first run on GitHub.";
     banner.hidden = false;
-  } else if (ageH > 80) {
+  } else if (MODE !== "server" && ageH > 80) {
     banner.textContent = `Last update was ${Math.round(ageH / 24)} days ago. Check the Actions tab on GitHub.`;
     banner.hidden = false;
   } else banner.hidden = true;
@@ -614,6 +674,7 @@ function renderHUD() {
     const btn = document.createElement("button");
     btn.type = "button";
     btn.dataset.id = b.id;
+    if (b.id === openId) btn.classList.add("active");
     btn.innerHTML = `<span class="dot" style="color:${esc(b.color)}"></span><span class="bl-name">${esc(b.name)}</span><span class="bl-pnl ${cls(b.pnl)}">${pct(b.pnl_pct)}</span>`;
     btn.addEventListener("click", () => openPanel(b.id));
     list.appendChild(btn);
@@ -627,11 +688,12 @@ function renderHUD() {
     .flatMap((b) => b.trades.slice(0, 8).map((t) => ({ ...t, bot: b.name, color: b.color })))
     .sort((a, b) => (a.date < b.date ? 1 : -1))
     .slice(0, 24);
-  $("tape").innerHTML = trades.length
+  const tapeHTML = trades.length
     ? trades
         .map((t) => `<span><b style="color:${esc(t.color)}">${esc(t.bot)}</b> <span class="${t.side === "buy" ? "up" : "down"}">${t.side.toUpperCase()}</span> ${t.shares} ${esc(t.ticker)} @ ${money(t.price, 2)}</span>`)
         .join("")
     : "<span>No trades yet. The bots trade on their first run.</span>";
+  if ($("tape").innerHTML !== tapeHTML) $("tape").innerHTML = tapeHTML;
 }
 
 /* =========================================================================
@@ -799,7 +861,7 @@ function settingsHTML(b) {
       <div class="chips" id="s-chips">${d.universe.map((t) => `<span class="chip">${esc(t)}<button type="button" data-rm="${esc(t)}" aria-label="Remove ${esc(t)}">✕</button></span>`).join("")}</div>
       <div class="add-row"><input id="s-add" type="text" placeholder="Add ticker, e.g. IBM" maxlength="8" autocomplete="off"><button type="button" id="s-add-btn">Add</button></div>
       <span class="err" id="s-err"></span></div>
-    <div class="actions"><button type="submit" class="primary" id="s-save">${gh.connected() ? "Save to GitHub" : "Save changes"}</button><button type="button" id="s-reset">Undo changes</button></div>
+    <div class="actions"><button type="submit" class="primary" id="s-save">${MODE === "server" ? (api.unlocked() ? "Save changes" : "Unlock to save") : gh.connected() ? "Save to GitHub" : "Save changes"}</button><button type="button" id="s-reset">Undo changes</button></div>
     <div id="s-out"></div>
   </form>`;
 }
@@ -864,6 +926,26 @@ function wireSettings(root, b) {
     e.preventDefault();
     sync();
     const out = root.querySelector("#s-out");
+    if (MODE === "server") {
+      if (!api.unlocked()) return openUnlock();
+      const btn = root.querySelector("#s-save");
+      btn.disabled = true;
+      btn.textContent = "Saving…";
+      try {
+        const saved = await api.call(`api/bots/${encodeURIComponent(draft.id)}`, { method: "PUT", body: JSON.stringify(draft) });
+        b.settings = saved;
+        b.enabled = saved.enabled;
+        draft = structuredClone(saved);
+        renderHUD();
+        renderPanel();
+        toast(`Saved. ${saved.name} uses the new settings from its next check.`);
+      } catch (err) {
+        out.innerHTML = `<p class="err">Couldn't save: ${esc(err.message)}</p>`;
+        btn.disabled = false;
+        btn.textContent = "Save changes";
+      }
+      return;
+    }
     if (!gh.connected()) {
       const json = JSON.stringify(draft, null, 2);
       out.innerHTML = `<p class="help">Connect your repo (top right) to save straight from here. Or copy this into <b>config/bots.json</b> on GitHub, replacing the "${esc(b.id)}" building:</p>
@@ -911,7 +993,35 @@ function openConnect() {
   $("connect-modal").hidden = false;
   $("c-repo").focus();
 }
-$("btn-connect").addEventListener("click", openConnect);
+$("btn-connect").addEventListener("click", () => (MODE === "server" ? openUnlock() : openConnect()));
+
+function openUnlock() {
+  $("u-pass").value = "";
+  $("u-msg").textContent = STATE?.server && !STATE.server.password_set ? "No password is set on the server yet. Add APP_PASSWORD in the server's settings first." : "";
+  $("unlock-modal").hidden = false;
+  $("u-pass").focus();
+}
+$("u-cancel").addEventListener("click", () => ($("unlock-modal").hidden = true));
+$("u-lock").addEventListener("click", () => {
+  store.del("sc.pass");
+  $("u-msg").textContent = "Locked on this browser.";
+  syncConnectButton();
+  if (openId) renderPanel();
+});
+$("unlock-form").addEventListener("submit", async (e) => {
+  e.preventDefault();
+  store.set("sc.pass", $("u-pass").value);
+  try {
+    await api.call("api/login", { method: "POST" });
+    $("unlock-modal").hidden = true;
+    toast("Unlocked. You can change settings and run the bots.");
+  } catch (err) {
+    store.del("sc.pass");
+    $("u-msg").textContent = err.message;
+  }
+  syncConnectButton();
+  if (openId) renderPanel();
+});
 $("c-cancel").addEventListener("click", () => ($("connect-modal").hidden = true));
 $("c-forget").addEventListener("click", () => {
   store.del("sc.repo");
@@ -935,9 +1045,23 @@ $("connect-form").addEventListener("submit", async (e) => {
   }
 });
 function syncConnectButton() {
-  $("btn-connect").textContent = gh.connected() ? "Connected" : "Connect";
+  $("btn-connect").textContent = MODE === "server" ? (api.unlocked() ? "Unlocked" : "Unlock") : gh.connected() ? "Connected" : "Connect";
 }
 $("btn-run").addEventListener("click", async () => {
+  if (MODE === "server") {
+    if (!api.unlocked()) return openUnlock();
+    $("btn-run").disabled = true;
+    toast("Running the bots…", 20000);
+    try {
+      const r = await api.call("api/run", { method: "POST" });
+      await refresh();
+      toast(r.note || "Done.", 6000);
+    } catch (err) {
+      toast(`Couldn't run: ${err.message}`, 7000);
+    }
+    $("btn-run").disabled = false;
+    return;
+  }
   if (!gh.connected()) return openConnect();
   try {
     await gh.runNow();
@@ -963,4 +1087,15 @@ $("btn-run").addEventListener("click", async () => {
   syncConnectButton();
   renderHUD();
   frame();
+  if (MODE === "server") setInterval(refresh, 20000);
 })();
+
+async function refresh() {
+  try {
+    const res = await fetch("api/state", { cache: "no-store" });
+    if (!res.ok) return;
+    STATE = await res.json();
+    renderHUD();
+    if (openId && tab !== "settings") renderPanel();
+  } catch {}
+}

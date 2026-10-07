@@ -34,7 +34,7 @@ def load_ledger(path, cfg):
 
 
 def no_ai_picker(*_):
-    raise RuntimeError("AI picks are off: add an ANTHROPIC_API_KEY secret to turn them on")
+    raise RuntimeError("AI picks are off: add an ANTHROPIC_API_KEY to the server settings to turn them on")
 
 
 def all_tickers(cfg, ledger):

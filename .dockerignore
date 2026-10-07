@@ -1,0 +1,6 @@
+.git
+__pycache__
+.pytest_cache
+data
+state/sim_ledger.json
+preview

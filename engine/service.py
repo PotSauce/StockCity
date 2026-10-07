@@ -1,0 +1,232 @@
+"""The always-on city: keeps prices fresh, runs each building's trading day, guards stop losses.
+
+The web server (server/app.py) owns one City and calls these methods from a background loop.
+Everything that must survive a restart lives in DATA_DIR: settings (bots.json) and the ledger.
+"""
+import json
+import os
+import shutil
+import threading
+from datetime import datetime, time, timezone
+from pathlib import Path
+from zoneinfo import ZoneInfo
+
+import pandas as pd
+
+from .brokers import PaperBroker, make_broker
+from .city import BotDay, new_ledger
+from .config import CONFIG_PATH, load_exclusions, normalize_bot, parse_config
+from .data import SyntheticPrices, YahooPrices
+from .exclusions import Exclusions
+from .markets import make_market
+from .run import build_state, no_ai_picker
+from .strategy import ai_picks
+
+NY = ZoneInfo("America/New_York")
+HISTORY_DAYS = 300
+TRADE_AT = time(15, 35)  # New York time; late in the day so momentum sees most of the session
+STOP_CHECK_SECONDS = 300
+
+
+def now_utc():
+    return datetime.now(timezone.utc)
+
+
+class City:
+    def __init__(self, data_dir, price_source="yahoo"):
+        self.data_dir = Path(data_dir)
+        self.data_dir.mkdir(parents=True, exist_ok=True)
+        self.config_path = self.data_dir / "bots.json"
+        self.ledger_path = self.data_dir / "ledger.json"
+        if not self.config_path.exists():
+            shutil.copy(CONFIG_PATH, self.config_path)
+        self.lock = threading.RLock()
+        self.excl_raw = load_exclusions()
+        self.excl = Exclusions(self.excl_raw)
+        self.price_source = price_source
+        self.cfg = parse_config(json.loads(self.config_path.read_text()), source=self.config_path)
+        self.ledger = self._load_ledger()
+        self.markets = {}
+        self.closes = {}  # market id -> daily closes
+        self.quotes = {}  # market id -> {symbol: price}
+        self.closes_day = None
+        self.last_quote_at = None
+        self.last_stop_check = None
+        self.last_error = None
+        self.run_note = "Starting up"
+
+    # ---- persistence -----------------------------------------------------------
+    def _load_ledger(self):
+        data = json.loads(self.ledger_path.read_text()) if self.ledger_path.exists() else {"bots": {}, "meta": {}}
+        data.setdefault("meta", {})
+        for bot in self.cfg["bots"]:
+            data["bots"].setdefault(bot["id"], new_ledger(bot["starting_cash"]))
+        return data
+
+    def save(self):
+        tmp = self.ledger_path.with_suffix(".tmp")
+        tmp.write_text(json.dumps(self.ledger, indent=1))
+        tmp.replace(self.ledger_path)
+
+    # ---- markets & prices --------------------------------------------------------
+    def market(self, market_id):
+        if market_id not in self.markets:
+            prices = SyntheticPrices() if self.price_source == "simulated" else YahooPrices(self.data_dir / "ticker_info.json")
+            self.markets[market_id] = make_market(market_id, prices=prices)
+        return self.markets[market_id]
+
+    def symbols(self, market_id):
+        out = set()
+        for bot in self.cfg["bots"]:
+            if bot["market"] == market_id:
+                out |= set(bot["universe"])
+                out |= {p["ticker"] for p in self.ledger["bots"][bot["id"]]["positions"].values()}
+        return sorted(out)
+
+    def market_ids(self):
+        return sorted({b["market"] for b in self.cfg["bots"]})
+
+    def refresh_prices(self, force_history=False):
+        """Daily history once a day (or when tickers change), live quotes every call."""
+        with self.lock:
+            self._refresh_prices(force_history)
+
+    def _refresh_prices(self, force_history):
+        today = now_utc().astimezone(NY).date()
+        for mid in self.market_ids():
+            m = self.market(mid)
+            syms = self.symbols(mid)
+            have = self.closes.get(mid)
+            if force_history or have is None or self.closes_day != today or not set(syms) <= set(have.columns):
+                self.closes[mid] = m.history(syms, HISTORY_DAYS)
+            try:
+                self.quotes[mid] = m.quotes(syms)
+            except Exception as e:  # keep the last quotes; history still works
+                self.last_error = f"Quotes failed: {e}"
+        self.closes_day = today
+        self.last_quote_at = now_utc()
+
+    def frame(self, market_id):
+        """Daily closes with today's row filled in from live quotes."""
+        closes = self.closes[market_id]
+        quotes = self.quotes.get(market_id) or {}
+        m = self.market(market_id)
+        today = pd.Timestamp(now_utc().astimezone(NY).date())
+        if not quotes or not m.is_trading_day(today.date()):
+            return closes
+        row = closes.iloc[-1].copy()
+        for t, p in quotes.items():
+            if t in row.index:
+                row[t] = p
+        out = closes[closes.index < today]
+        return pd.concat([out, row.to_frame(today).T])
+
+    # ---- trading -------------------------------------------------------------------
+    def _picker(self):
+        return ai_picks.claude_picks if ai_picks.ai_available() else no_ai_picker
+
+    def trade_cycle(self, force=False):
+        """Each building's full trading day: capital changes, stops, rebalances."""
+        with self.lock:
+            now = now_utc()
+            today = now.astimezone(NY).date()
+            self.refresh_prices()
+            notes = []
+            broker = None
+            for mid in self.market_ids():
+                m = self.market(mid)
+                open_now = m.is_open(now)
+                trade = open_now or (force and self.cfg["broker"] == "paper")
+                if not trade:
+                    notes.append(f"{m.name}: market closed, no trades")
+                    continue
+                broker = broker or make_broker(self.cfg)
+                live_cash = broker.available_cash()
+                frame = self.frame(mid)
+                for bot in self.cfg["bots"]:
+                    if bot["market"] != mid:
+                        continue
+                    led = self.ledger["bots"][bot["id"]]
+                    BotDay(bot, led, frame, today, broker, self.excl, self._picker(), info_fn=m.info, force=force).run(live_cash=live_cash)
+                    if live_cash is not None:
+                        live_cash = min(live_cash, broker.available_cash())
+                notes.append(f"{m.name}: traded")
+            self.ledger["meta"]["last_trade_date"] = str(today)
+            self.ledger["meta"]["last_trade_at"] = now.isoformat(timespec="seconds")
+            self.run_note = "; ".join(notes) or "Nothing to do"
+            self.save()
+            return self.run_note
+
+    def guard(self):
+        """Between trading cycles: stop losses and the do-not-buy list, on live prices."""
+        with self.lock:
+            now = now_utc()
+            today = now.astimezone(NY).date()
+            broker = None
+            for mid in self.market_ids():
+                m = self.market(mid)
+                frame = self.frame(mid)
+                for bot in self.cfg["bots"]:
+                    if bot["market"] != mid:
+                        continue
+                    led = self.ledger["bots"][bot["id"]]
+                    if bot["enabled"] and m.is_open(now) and led["positions"]:
+                        broker = broker or make_broker(self.cfg)
+                        day = BotDay(bot, led, frame, today, broker, self.excl, no_ai_picker, info_fn=m.info)
+                        day.sell_blocked()
+                        day.stop_losses()
+                        day.finish()
+                    elif m.is_trading_day(today):
+                        BotDay(bot, led, frame, today, PaperBroker(), self.excl, no_ai_picker).finish()
+            self.last_stop_check = now
+            self.save()
+
+    def due_for_trade(self):
+        now = now_utc().astimezone(NY)
+        if now.time() < TRADE_AT:
+            return False
+        if self.ledger["meta"].get("last_trade_date") == str(now.date()):
+            return False
+        return any(self.market(mid).is_open(now_utc()) for mid in self.market_ids())
+
+    # ---- settings ------------------------------------------------------------------
+    def update_bot(self, bot_id, settings):
+        with self.lock:
+            idx = next((i for i, b in enumerate(self.cfg["bots"]) if b["id"] == bot_id), None)
+            if idx is None:
+                raise KeyError(bot_id)
+            merged = normalize_bot({**self.cfg["bots"][idx], **settings, "id": bot_id})
+            blocked = [t for t in merged["universe"] if self.excl.is_blocked(t)]
+            if blocked:
+                raise ValueError(f"On the do-not-buy list: {', '.join(blocked)}")
+            raw = json.loads(self.config_path.read_text())
+            raw["bots"] = [merged if b["id"] == bot_id else b for b in raw["bots"]]
+            self.cfg = parse_config(raw, source=self.config_path)
+            tmp = self.config_path.with_suffix(".tmp")
+            tmp.write_text(json.dumps(raw, indent=2) + "\n")
+            tmp.replace(self.config_path)
+            return merged
+
+    # ---- website data --------------------------------------------------------------
+    def state(self):
+        with self.lock:
+            mid = self.market_ids()[0]
+            frames = [self.frame(m) for m in self.market_ids()]
+            closes = pd.concat(frames, axis=1) if len(frames) > 1 else frames[0]
+            st = build_state(
+                self.cfg, self.ledger, closes, self.excl_raw, self.market(mid).source, self.cfg["broker"], self.run_note
+            )
+            now = now_utc()
+            st["server"] = {
+                "mode": "live",
+                "markets": [
+                    {"id": m, "name": self.market(m).name, "open": self.market(m).is_open(now)} for m in self.market_ids()
+                ],
+                "last_quote_at": self.last_quote_at.isoformat(timespec="seconds") if self.last_quote_at else None,
+                "last_trade_at": self.ledger["meta"].get("last_trade_at"),
+                "trade_time_ny": TRADE_AT.strftime("%-I:%M %p"),
+                "ai_enabled": ai_picks.ai_available(),
+                "password_set": bool(os.environ.get("APP_PASSWORD")),
+                "last_error": self.last_error,
+            }
+            return st

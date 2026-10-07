@@ -89,5 +89,17 @@ class SyntheticPrices:
     def info(self, ticker):
         return {"name": ticker, "sector": None, "industry": None}
 
+    def live_quotes(self, tickers):
+        """Last close nudged by a small time-based wiggle, so a test server looks alive."""
+        import time
+
+        tick = int(time.time() // 60)
+        out = {}
+        for t in tickers:
+            s = self._series(t)
+            h = int(hashlib.sha256(f"{t}:{tick}".encode()).hexdigest()[:6], 16) / 0xFFFFFF
+            out[t] = round(float(s.iloc[-1]) * (1 + (h - 0.5) * 0.01), 2)
+        return out
+
     def trading_days(self, n):
         return list(pd.bdate_range(end=self.end, periods=n))

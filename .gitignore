@@ -4,3 +4,4 @@ __pycache__/
 state/sim_ledger.json
 schwab_token.json
 preview/
+data/
