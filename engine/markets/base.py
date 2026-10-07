@@ -43,6 +43,10 @@ class Market:
     def prefetch_info(self, symbols: list[str]):
         """Start looking up stocks in the background."""
 
+    def feed_status(self) -> dict | None:
+        """How the last batch price request went ({"ok", "at", ...}), or None if this market has no such feed."""
+        return None
+
     def poll_seconds(self, now: datetime) -> int:
         """How often the server should refresh quotes."""
         return 60 if self.is_open(now) else 900

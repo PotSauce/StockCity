@@ -121,7 +121,13 @@ RISK_LEVELS = {
         "intraday": {"entry_pct": 0.001, "take_profit_pct": 0.02, "stop_pct": 0.012, "max_positions": 1, "cooldown_minutes": 10},
         "momentum": {"stop_loss_pct": 0.15, "trailing_stop_pct": 0.12, "top_n": 1},
     },
+    6: {  # Aggressive with 50% more room each way
+        "name": "Insane",
+        "intraday": {"entry_pct": 0.0007, "take_profit_pct": 0.03, "stop_pct": 0.018, "max_positions": 1, "cooldown_minutes": 7},
+        "momentum": {"stop_loss_pct": 0.225, "trailing_stop_pct": 0.18, "top_n": 1},
+    },
 }
+MAX_RISK = max(RISK_LEVELS)
 
 
 def detect_risk(bot):
@@ -145,7 +151,7 @@ def normalize_bot(raw):
     # risk level: the slider's numbers win; a building saved before the slider existed gets the
     # level matching its numbers, or "custom"
     risk = raw.get("risk")
-    risk = detect_risk(bot) if risk is None else int(min(max(int(risk), 0), 5))
+    risk = detect_risk(bot) if risk is None else int(min(max(int(risk), 0), MAX_RISK))
     if risk:
         apply_risk(bot, risk)
     bot["risk"] = risk

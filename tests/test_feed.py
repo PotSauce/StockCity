@@ -3,6 +3,7 @@ import json
 from datetime import datetime, timezone
 
 import pandas as pd
+import pytest
 
 from engine.brokers import PaperBroker
 from engine.city import BotDay, new_ledger
@@ -73,6 +74,23 @@ def test_yahoo_intraday_uses_one_snapshot_per_minute(tmp_path, monkeypatch):
     # with the market closed it just reads the tape
     close, _ = prices.intraday(tickers, now_ny=NY_11.replace(hour=17), is_open=False)
     assert len(calls) == 3 and close.shape == (3, 500)
+
+
+def test_feed_status_says_whether_the_batch_request_worked(tmp_path, monkeypatch):
+    from engine.markets.us_stocks import UsStocks
+
+    prices = YahooPrices(tape_path=tmp_path / "tape.pkl")
+    market = UsStocks(prices)
+    assert market.feed_status() is None  # nothing asked yet
+    monkeypatch.setattr(prices, "_snapshot", lambda t: {"AAA": {"price": 1.0, "volume": 5.0}})
+    prices.quotes(["AAA", "BBB"])
+    assert market.feed_status()["ok"] and market.feed_status()["got"] == 1 and market.feed_status()["asked"] == 2
+    monkeypatch.setattr(prices, "_snapshot", lambda t: (_ for _ in ()).throw(RuntimeError("Invalid Crumb")))
+    try:
+        prices.quotes(["AAA"])
+    except RuntimeError:
+        pass
+    assert market.feed_status()["ok"] is False and "Invalid Crumb" in market.feed_status()["error"]
 
 
 def test_failed_snapshot_falls_back_to_charts_for_holdings_first(tmp_path, monkeypatch):
@@ -173,6 +191,10 @@ def test_risk_slider_sets_the_numbers():
     bold = normalize_bot({**base, "risk": 5})
     assert bold["intraday"]["take_profit_pct"] == RISK_LEVELS[5]["intraday"]["take_profit_pct"]
     assert bold["intraday"]["max_positions"] == 1 and bold["momentum"]["top_n"] == 1
+    insane = normalize_bot({**base, "risk": 6})  # 50% more room than Aggressive
+    assert insane["risk"] == 6 and insane["intraday"]["stop_pct"] == pytest.approx(1.5 * bold["intraday"]["stop_pct"])
+    assert insane["intraday"]["take_profit_pct"] == pytest.approx(1.5 * bold["intraday"]["take_profit_pct"])
+    assert normalize_bot({**base, "risk": 9})["risk"] == 6
     careful = normalize_bot({**base, "risk": 1})
     assert careful["intraday"]["stop_pct"] < bold["intraday"]["stop_pct"]
     # the slider's level wins over stale numbers sent with it

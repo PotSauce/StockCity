@@ -69,3 +69,6 @@ class UsStocks(Market):
 
     def prefetch_info(self, symbols):
         self.prices.prefetch_info(symbols)
+
+    def feed_status(self):
+        return getattr(self.prices, "feed", None)

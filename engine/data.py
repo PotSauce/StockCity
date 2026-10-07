@@ -30,6 +30,7 @@ class YahooPrices:
         self._info_queue = []
         self._info_lock = threading.Lock()
         self._info_thread = None
+        self.feed = None  # how the last batch quote request went, shown on the site
 
     def closes(self, tickers, days=300):
         """Daily closes, downloaded about 100 stocks at a time."""
@@ -61,6 +62,16 @@ class YahooPrices:
 
     def snapshot(self, tickers):
         """Latest price and the day's volume so far for many stocks, about 100 per request."""
+        at = pd.Timestamp.now(tz="UTC").isoformat(timespec="seconds")
+        try:
+            out = self._snapshot(tickers)
+        except Exception as e:
+            self.feed = {"ok": False, "at": at, "error": f"{type(e).__name__}: {e}"[:200]}
+            raise
+        self.feed = {"ok": True, "at": at, "asked": len(set(tickers)), "got": len(out)}
+        return out
+
+    def _snapshot(self, tickers):
         from yfinance.data import YfData
 
         data = YfData()
