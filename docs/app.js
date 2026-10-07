@@ -646,7 +646,7 @@ function renderHUD() {
     mp.textContent = mk.open ? "Market open" : "Market closed";
     mp.className = "pill " + (mk.open ? "on" : "paused");
     const q = STATE.server.last_quote_at ? new Date(STATE.server.last_quote_at).toLocaleTimeString([], { hour: "numeric", minute: "2-digit" }) : "–";
-    mp.title = `Prices updated ${q}. Bots trade daily at ${STATE.server.trade_time_ny} New York time; stop losses are checked every 5 minutes while the market is open.`;
+    mp.title = `Prices updated ${q}. Bots trade ${STATE.server.trade_window_ny} New York time on market days, each on its own check interval.`;
   }
 
   const banner = $("banner");
@@ -796,7 +796,7 @@ function tradesHTML(b) {
     .map(
       (t) => `<div class="trade"><span class="side ${t.side}">${t.side.toUpperCase()}</span>
       <span class="what">${t.shares} ${esc(t.ticker)} @ ${money(t.price, 2)}<span class="sleeve ${t.sleeve}">${t.sleeve === "ai" ? "AI" : "MOM"}</span></span>
-      <span class="when">${esc(t.date)}</span><span class="why">${esc(t.reason)}</span></div>`,
+      <span class="when">${esc(t.date)}${t.time ? " " + esc(t.time) : ""}</span><span class="why">${esc(t.reason)}</span></div>`,
     )
     .join("");
 }
@@ -829,10 +829,12 @@ function picksHTML(b) {
     : "";
 
   return `<div class="section-title">AI picks · ${Math.round(b.settings.ai_share * 100)}% of this building</div>${aiPart}
-    <div class="section-title">Momentum leaderboard · top ${b.settings.momentum.top_n} with ✓ get bought</div>${rank}${blocked}`;
+    <div class="section-title">Momentum leaderboard · top ${b.settings.momentum.top_n} with ✓ get bought · re-checked every ${b.settings.check_every_minutes} min</div>${rank}${blocked}`;
 }
 
 /* ---------- settings ---------- */
+const CHECKS = [[2, "2 minutes"], [3, "3 minutes"], [5, "5 minutes"], [15, "15 minutes"], [30, "30 minutes"], [60, "hour"], [390, "day"]];
+const AI_EVERY = [[60, "hour"], [120, "2 hours"], [240, "4 hours"], [390, "day"], [1950, "week"]];
 const LOOKBACKS = [[63, "3 months"], [126, "6 months"], [189, "9 months"], [252, "12 months"]];
 
 function settingsHTML(b) {
@@ -852,11 +854,20 @@ function settingsHTML(b) {
       <div class="field"><label for="s-aipicks">AI stocks held</label><input id="s-aipicks" type="number" min="1" max="5" value="${d.ai.max_picks}"></div>
     </div>
     <div class="two">
+      <div class="field"><label for="s-check">Check for trades every</label><select id="s-check">${CHECKS.map(([v, l]) => `<option value="${v}" ${v === d.check_every_minutes ? "selected" : ""}>${l}</option>`).join("")}</select></div>
       <div class="field"><label for="s-look">Momentum looks back</label><select id="s-look">${LOOKBACKS.map(([v, l]) => `<option value="${v}" ${v === d.momentum.lookback_days ? "selected" : ""}>${l}</option>`).join("")}</select></div>
-      <div class="field"><label for="s-rebal">Re-check every (days)</label><input id="s-rebal" type="number" min="1" max="90" value="${d.momentum.rebalance_days}"></div>
     </div>
-    <div class="field"><label for="s-stop">Stop loss (%)</label><input id="s-stop" type="number" min="1" max="90" step="1" value="${Math.round(d.momentum.stop_loss_pct * 100)}">
-      <span class="help">Sells any holding that falls this far below what the bot paid.</span></div>
+    <div class="two">
+      <div class="field"><label for="s-stop">Stop loss (%)</label><input id="s-stop" type="number" min="1" max="90" step="1" value="${Math.round(d.momentum.stop_loss_pct * 100)}"></div>
+      <div class="field"><label for="s-trail">Trailing stop (%)</label><input id="s-trail" type="number" min="1" max="90" step="1" value="${Math.round(d.momentum.trailing_stop_pct * 100)}"></div>
+    </div>
+    <span class="help">Stop loss sells a holding that falls this far below what the bot paid. Trailing stop sells a winner that falls this far from its high. Both are checked on every trade check.</span>
+    <div class="two">
+      <div class="field"><label for="s-hold">Hold at least (minutes)</label><input id="s-hold" type="number" min="0" max="10080" step="15" value="${d.min_hold_minutes}"></div>
+      <div class="field"><label for="s-cap">Max trades per day</label><input id="s-cap" type="number" min="1" max="200" value="${d.max_trades_per_day}"></div>
+    </div>
+    <div class="field"><label for="s-aievery">AI re-picks every</label><select id="s-aievery">${AI_EVERY.map(([v, l]) => `<option value="${v}" ${v === d.ai.review_every_minutes ? "selected" : ""}>${l}</option>`).join("")}</select>
+      <span class="help">Each AI review is one Claude request, roughly 3–5¢.</span></div>
     <div class="field"><span class="flabel">Stocks this building can trade</span>
       <div class="chips" id="s-chips">${d.universe.map((t) => `<span class="chip">${esc(t)}<button type="button" data-rm="${esc(t)}" aria-label="Remove ${esc(t)}">✕</button></span>`).join("")}</div>
       <div class="add-row"><input id="s-add" type="text" placeholder="Add ticker, e.g. IBM" maxlength="8" autocomplete="off"><button type="button" id="s-add-btn">Add</button></div>
@@ -881,9 +892,12 @@ function wireSettings(root, b) {
     draft.ai.max_picks = Math.min(5, Math.max(1, Math.round(num("#s-aipicks"))));
     draft.momentum.lookback_days = num("#s-look");
     draft.momentum.short_lookback_days = Math.round(num("#s-look") / 2);
-    draft.momentum.rebalance_days = Math.min(90, Math.max(1, Math.round(num("#s-rebal"))));
-    draft.ai.rebalance_days = draft.momentum.rebalance_days;
+    draft.check_every_minutes = num("#s-check");
+    draft.ai.review_every_minutes = num("#s-aievery");
+    draft.min_hold_minutes = Math.min(10080, Math.max(0, Math.round(num("#s-hold"))));
+    draft.max_trades_per_day = Math.min(200, Math.max(1, Math.round(num("#s-cap"))));
     draft.momentum.stop_loss_pct = Math.min(90, Math.max(1, num("#s-stop"))) / 100;
+    draft.momentum.trailing_stop_pct = Math.min(90, Math.max(1, num("#s-trail"))) / 100;
   };
   root.querySelector("#s-ai").addEventListener("input", (e) => {
     const v = Number(e.target.value);
@@ -1087,7 +1101,7 @@ $("btn-run").addEventListener("click", async () => {
   syncConnectButton();
   renderHUD();
   frame();
-  if (MODE === "server") setInterval(refresh, 20000);
+  if (MODE === "server") setInterval(refresh, 15000);
 })();
 
 async function refresh() {

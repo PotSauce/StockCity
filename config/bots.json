@@ -10,17 +10,22 @@
       "enabled": true,
       "starting_cash": 10000,
       "ai_share": 0.2,
+      "check_every_minutes": 3,
+      "min_hold_minutes": 30,
+      "max_trades_per_day": 20,
       "momentum": {
         "top_n": 3,
         "lookback_days": 126,
         "short_lookback_days": 63,
         "trend_sma_days": 50,
-        "rebalance_days": 7,
-        "stop_loss_pct": 0.1
+        "fast_lookback_days": 5,
+        "stop_loss_pct": 0.1,
+        "trailing_stop_pct": 0.07,
+        "rank_buffer": 2
       },
       "ai": {
         "max_picks": 2,
-        "rebalance_days": 7
+        "review_every_minutes": 120
       },
       "universe": ["AAPL", "MSFT", "NVDA", "GOOGL", "META", "AVGO", "AMD", "ORCL", "CRM", "ADBE", "CSCO", "QCOM", "TXN", "NOW", "PLTR", "MU", "AMAT", "INTC"]
     },
@@ -32,17 +37,22 @@
       "enabled": true,
       "starting_cash": 10000,
       "ai_share": 0.2,
+      "check_every_minutes": 3,
+      "min_hold_minutes": 30,
+      "max_trades_per_day": 20,
       "momentum": {
         "top_n": 3,
         "lookback_days": 126,
         "short_lookback_days": 63,
         "trend_sma_days": 50,
-        "rebalance_days": 7,
-        "stop_loss_pct": 0.1
+        "fast_lookback_days": 5,
+        "stop_loss_pct": 0.1,
+        "trailing_stop_pct": 0.07,
+        "rank_buffer": 2
       },
       "ai": {
         "max_picks": 2,
-        "rebalance_days": 7
+        "review_every_minutes": 120
       },
       "universe": ["XOM", "CVX", "COP", "EOG", "SLB", "OXY", "PSX", "MPC", "VLO", "KMI", "WMB", "OKE", "HAL", "DVN", "FANG", "NEE", "FSLR"]
     },
@@ -54,17 +64,22 @@
       "enabled": true,
       "starting_cash": 10000,
       "ai_share": 0.2,
+      "check_every_minutes": 3,
+      "min_hold_minutes": 30,
+      "max_trades_per_day": 20,
       "momentum": {
         "top_n": 3,
         "lookback_days": 126,
         "short_lookback_days": 63,
         "trend_sma_days": 50,
-        "rebalance_days": 7,
-        "stop_loss_pct": 0.1
+        "fast_lookback_days": 5,
+        "stop_loss_pct": 0.1,
+        "trailing_stop_pct": 0.07,
+        "rank_buffer": 2
       },
       "ai": {
         "max_picks": 2,
-        "rebalance_days": 7
+        "review_every_minutes": 120
       },
       "universe": ["JPM", "BAC", "WFC", "GS", "MS", "C", "SCHW", "BLK", "AXP", "V", "MA", "SPGI", "PGR", "CB", "USB", "PNC"]
     },
@@ -76,17 +91,22 @@
       "enabled": true,
       "starting_cash": 10000,
       "ai_share": 0.2,
+      "check_every_minutes": 3,
+      "min_hold_minutes": 30,
+      "max_trades_per_day": 20,
       "momentum": {
         "top_n": 3,
         "lookback_days": 126,
         "short_lookback_days": 63,
         "trend_sma_days": 50,
-        "rebalance_days": 7,
-        "stop_loss_pct": 0.1
+        "fast_lookback_days": 5,
+        "stop_loss_pct": 0.1,
+        "trailing_stop_pct": 0.07,
+        "rank_buffer": 2
       },
       "ai": {
         "max_picks": 2,
-        "rebalance_days": 7
+        "review_every_minutes": 120
       },
       "universe": ["AMZN", "TSLA", "HD", "MCD", "NKE", "SBUX", "COST", "WMT", "PG", "KO", "PEP", "LOW", "TJX", "BKNG", "CMG", "LULU", "TGT"]
     }

@@ -15,10 +15,15 @@ LIMITS = {
     "momentum.lookback_days": (20, 252),
     "momentum.short_lookback_days": (5, 252),
     "momentum.trend_sma_days": (5, 200),
-    "momentum.rebalance_days": (1, 90),
+    "momentum.fast_lookback_days": (2, 63),
     "momentum.stop_loss_pct": (0.01, 0.9),
+    "momentum.trailing_stop_pct": (0.01, 0.9),
+    "momentum.rank_buffer": (0, 10),
     "ai.max_picks": (1, 5),
-    "ai.rebalance_days": (1, 90),
+    "ai.review_every_minutes": (30, 10080),
+    "check_every_minutes": (2, 390),
+    "min_hold_minutes": (0, 10080),
+    "max_trades_per_day": (1, 200),
 }
 
 DEFAULT_BOT = {
@@ -26,15 +31,20 @@ DEFAULT_BOT = {
     "enabled": True,
     "starting_cash": 2500,
     "ai_share": 0.2,
+    "check_every_minutes": 3,
+    "min_hold_minutes": 30,
+    "max_trades_per_day": 20,
     "momentum": {
         "top_n": 3,
         "lookback_days": 126,
         "short_lookback_days": 63,
         "trend_sma_days": 50,
-        "rebalance_days": 7,
+        "fast_lookback_days": 5,
         "stop_loss_pct": 0.1,
+        "trailing_stop_pct": 0.07,
+        "rank_buffer": 2,
     },
-    "ai": {"max_picks": 2, "rebalance_days": 7},
+    "ai": {"max_picks": 2, "review_every_minutes": 120},
     "universe": [],
 }
 
@@ -62,8 +72,14 @@ def _merge(base, override):
     return out
 
 
+RETIRED_KEYS = {"momentum": ["rebalance_days"], "ai": ["rebalance_days"]}
+
+
 def normalize_bot(raw):
     bot = _merge(DEFAULT_BOT, raw)
+    for section, keys in RETIRED_KEYS.items():
+        for k in keys:
+            bot[section].pop(k, None)
     for key, (lo, hi) in LIMITS.items():
         val = _get(bot, key)
         cast = int if isinstance(lo, int) and key != "starting_cash" else float

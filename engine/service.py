@@ -14,7 +14,7 @@ from zoneinfo import ZoneInfo
 import pandas as pd
 
 from .brokers import PaperBroker, make_broker
-from .city import BotDay, new_ledger
+from .city import BotDay, minutes_since, new_ledger
 from .config import CONFIG_PATH, load_exclusions, normalize_bot, parse_config
 from .data import SyntheticPrices, YahooPrices
 from .exclusions import Exclusions
@@ -24,7 +24,9 @@ from .strategy import ai_picks
 
 NY = ZoneInfo("America/New_York")
 HISTORY_DAYS = 300
-TRADE_AT = time(15, 35)  # New York time; late in the day so momentum sees most of the session
+# Bots trade inside this New York-time window, skipping the jumpy first 15 minutes and the
+# closing auction. Each building checks on its own interval (check_every_minutes).
+TRADE_START, TRADE_END = time(9, 45), time(15, 55)
 STOP_CHECK_SECONDS = 300
 
 
@@ -125,11 +127,15 @@ class City:
     def _picker(self):
         return ai_picks.claude_picks if ai_picks.ai_available() else no_ai_picker
 
+    def bot_due(self, bot, now):
+        return minutes_since(self.ledger["bots"][bot["id"]].get("last_check"), now) >= bot["check_every_minutes"]
+
     def trade_cycle(self, force=False):
-        """Each building's full trading day: capital changes, stops, rebalances."""
+        """A trading check for every building that's due (or all of them when forced)."""
         with self.lock:
             now = now_utc()
-            today = now.astimezone(NY).date()
+            now_ny = now.astimezone(NY)
+            today = now_ny.date()
             self.refresh_prices()
             notes = []
             broker = None
@@ -143,17 +149,25 @@ class City:
                 broker = broker or make_broker(self.cfg)
                 live_cash = broker.available_cash()
                 frame = self.frame(mid)
+                checked = 0
                 for bot in self.cfg["bots"]:
-                    if bot["market"] != mid:
+                    if bot["market"] != mid or not (force or self.bot_due(bot, now)):
                         continue
                     led = self.ledger["bots"][bot["id"]]
-                    BotDay(bot, led, frame, today, broker, self.excl, self._picker(), info_fn=m.info, force=force).run(live_cash=live_cash)
+                    before = len(led["trades"])
+                    BotDay(
+                        bot, led, frame, today, broker, self.excl, self._picker(), info_fn=m.info, force=force, now=now_ny.replace(tzinfo=None)
+                    ).run(live_cash=live_cash)
+                    led["last_check"] = now.isoformat(timespec="seconds")
+                    checked += 1
                     if live_cash is not None:
                         live_cash = min(live_cash, broker.available_cash())
-                notes.append(f"{m.name}: traded")
-            self.ledger["meta"]["last_trade_date"] = str(today)
-            self.ledger["meta"]["last_trade_at"] = now.isoformat(timespec="seconds")
-            self.run_note = "; ".join(notes) or "Nothing to do"
+                    if len(led["trades"]) != before:
+                        notes.append(f"{bot['name']}: {len(led['trades']) - before} trade(s)")
+                if checked:
+                    self.ledger["meta"]["last_trade_at"] = now.isoformat(timespec="seconds")
+            when = now_ny.strftime("%-I:%M %p")
+            self.run_note = f"Last check {when}: " + ("; ".join(notes) if notes else "no trades needed")
             self.save()
             return self.run_note
 
@@ -182,12 +196,11 @@ class City:
             self.save()
 
     def due_for_trade(self):
-        now = now_utc().astimezone(NY)
-        if now.time() < TRADE_AT:
+        now = now_utc()
+        if not (TRADE_START <= now.astimezone(NY).time() < TRADE_END):
             return False
-        if self.ledger["meta"].get("last_trade_date") == str(now.date()):
-            return False
-        return any(self.market(mid).is_open(now_utc()) for mid in self.market_ids())
+        open_markets = {mid for mid in self.market_ids() if self.market(mid).is_open(now)}
+        return any(b["market"] in open_markets and self.bot_due(b, now) for b in self.cfg["bots"])
 
     # ---- settings ------------------------------------------------------------------
     def update_bot(self, bot_id, settings):
@@ -224,7 +237,7 @@ class City:
                 ],
                 "last_quote_at": self.last_quote_at.isoformat(timespec="seconds") if self.last_quote_at else None,
                 "last_trade_at": self.ledger["meta"].get("last_trade_at"),
-                "trade_time_ny": TRADE_AT.strftime("%-I:%M %p"),
+                "trade_window_ny": f"{TRADE_START.strftime('%-I:%M')}–{TRADE_END.strftime('%-I:%M %p')}",
                 "ai_enabled": ai_picks.ai_available(),
                 "password_set": bool(os.environ.get("APP_PASSWORD")),
                 "last_error": self.last_error,

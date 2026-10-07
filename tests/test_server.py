@@ -66,3 +66,14 @@ def test_market_hours():
     assert not m.is_open(datetime(2026, 10, 7, 21, 0, tzinfo=timezone.utc))  # 5pm NY
     assert not m.is_open(datetime(2026, 10, 10, 15, 0, tzinfo=timezone.utc))  # Saturday
     assert not m.is_open(datetime(2026, 11, 26, 15, 0, tzinfo=timezone.utc))  # Thanksgiving
+
+
+def test_each_building_checks_on_its_own_interval(client):
+    from datetime import timedelta
+
+    city = client.city
+    now = datetime(2026, 10, 7, 15, 0, tzinfo=timezone.utc)
+    tech = city.cfg["bots"][0]
+    city.ledger["bots"][tech["id"]]["last_check"] = (now - timedelta(minutes=2)).isoformat()
+    assert not city.bot_due(tech, now)  # default 3 minutes
+    assert city.bot_due(tech, now + timedelta(minutes=1))

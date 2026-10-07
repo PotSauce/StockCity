@@ -34,4 +34,4 @@ class Market:
 
     def poll_seconds(self, now: datetime) -> int:
         """How often the server should refresh quotes."""
-        return 120 if self.is_open(now) else 900
+        return 60 if self.is_open(now) else 900

@@ -42,7 +42,7 @@ class UsStocks(Market):
             return self.prices.live_quotes(symbols)
         import yfinance as yf
 
-        df = yf.download(sorted(set(symbols)), period="1d", interval="2m", progress=False, threads=True, auto_adjust=True)
+        df = yf.download(sorted(set(symbols)), period="1d", interval="1m", progress=False, threads=True, auto_adjust=True)
         if df.empty:
             return {}
         close = df["Close"] if isinstance(df.columns, pd.MultiIndex) else df[["Close"]].set_axis(sorted(set(symbols)), axis=1)

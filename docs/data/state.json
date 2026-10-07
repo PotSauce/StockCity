@@ -1,14 +1,14 @@
 {
- "generated_at": "2026-10-07T20:26:58+00:00",
+ "generated_at": "2026-10-07T20:49:16+00:00",
  "price_source": "simulated",
  "broker": "paper",
  "run_note": "Simulated 90 trading days with fake prices",
  "totals": {
-  "equity": 44214.43,
+  "equity": 42912.64,
   "contributed": 40000.0,
-  "pnl": 4214.43,
-  "pnl_pct": 0.1054,
-  "day_change": 128.51
+  "pnl": 2912.64,
+  "pnl_pct": 0.0728,
+  "day_change": 239.75
  },
  "bots": [
   {
@@ -18,20 +18,26 @@
    "color": "#38bdf8",
    "enabled": true,
    "settings": {
+    "market": "us_stocks",
     "enabled": true,
     "starting_cash": 10000.0,
     "ai_share": 0.2,
+    "check_every_minutes": 3,
+    "min_hold_minutes": 30,
+    "max_trades_per_day": 20,
     "momentum": {
      "top_n": 3,
      "lookback_days": 126,
      "short_lookback_days": 63,
      "trend_sma_days": 50,
-     "rebalance_days": 7,
-     "stop_loss_pct": 0.1
+     "fast_lookback_days": 5,
+     "stop_loss_pct": 0.1,
+     "trailing_stop_pct": 0.07,
+     "rank_buffer": 2
     },
     "ai": {
      "max_picks": 2,
-     "rebalance_days": 7
+     "review_every_minutes": 120
     },
     "universe": [
      "AAPL",
@@ -58,83 +64,150 @@
     "sector": "Technology",
     "color": "#38bdf8"
    },
-   "cash": 1533.98,
-   "equity": 10887.9,
+   "cash": 1291.37,
+   "equity": 10430.13,
    "contributed": 10000.0,
-   "pnl": 887.9,
-   "pnl_pct": 0.0888,
-   "day_change": 13.62,
-   "day_change_pct": 0.0013,
+   "pnl": 430.13,
+   "pnl_pct": 0.043,
+   "day_change": 174.91,
+   "day_change_pct": 0.0171,
    "positions": [
     {
      "ticker": "META",
      "sleeve": "momentum",
      "shares": 9,
-     "avg_cost": 274.127,
-     "opened": "2026-09-10",
+     "avg_cost": 277.8263,
+     "opened": "2026-09-07",
+     "opened_at": "2026-09-07T15:35:00",
+     "high": 301.28,
      "price": 301.28,
      "value": 2711.52,
-     "pnl_pct": 0.0991,
-     "weight": 0.249
-    },
-    {
-     "ticker": "AAPL",
-     "sleeve": "momentum",
-     "shares": 7,
-     "avg_cost": 380.6302,
-     "opened": "2026-10-01",
-     "price": 378.66,
-     "value": 2650.62,
-     "pnl_pct": -0.0052,
-     "weight": 0.2434
+     "pnl_pct": 0.0844,
+     "weight": 0.26
     },
     {
      "ticker": "ORCL",
      "sleeve": "momentum",
      "shares": 2,
-     "avg_cost": 886.9666,
-     "opened": "2026-06-18",
+     "avg_cost": 969.9347,
+     "opened": "2026-08-03",
+     "opened_at": "2026-08-03T15:35:00",
+     "high": 1253.53,
      "price": 1253.53,
      "value": 2507.06,
-     "pnl_pct": 0.4133,
-     "weight": 0.2303
+     "pnl_pct": 0.2924,
+     "weight": 0.2404
     },
     {
-     "ticker": "NVDA",
-     "sleeve": "ai",
-     "shares": 6,
-     "avg_cost": 162.9114,
-     "opened": "2026-10-01",
-     "price": 159.93,
-     "value": 959.58,
-     "pnl_pct": -0.0183,
-     "weight": 0.0881
+     "ticker": "MSFT",
+     "sleeve": "momentum",
+     "shares": 3,
+     "avg_cost": 724.5421,
+     "opened": "2026-09-22",
+     "opened_at": "2026-09-22T15:35:00",
+     "high": 818.96,
+     "price": 818.96,
+     "value": 2456.88,
+     "pnl_pct": 0.1303,
+     "weight": 0.2356
     },
     {
-     "ticker": "CSCO",
+     "ticker": "GOOGL",
      "sleeve": "ai",
-     "shares": 1,
-     "avg_cost": 540.7402,
-     "opened": "2026-10-01",
-     "price": 525.14,
-     "value": 525.14,
-     "pnl_pct": -0.0288,
-     "weight": 0.0482
+     "shares": 2,
+     "avg_cost": 367.2635,
+     "opened": "2026-10-05",
+     "opened_at": "2026-10-05T15:35:00",
+     "high": 373.62,
+     "price": 371.31,
+     "value": 742.62,
+     "pnl_pct": 0.011,
+     "weight": 0.0712
+    },
+    {
+     "ticker": "QCOM",
+     "sleeve": "ai",
+     "shares": 2,
+     "avg_cost": 339.3796,
+     "opened": "2026-10-02",
+     "opened_at": "2026-10-02T15:35:00",
+     "high": 360.34,
+     "price": 360.34,
+     "value": 720.68,
+     "pnl_pct": 0.0618,
+     "weight": 0.0691
     }
    ],
    "trades": [
     {
-     "date": "2026-10-01",
-     "ticker": "CSCO",
+     "date": "2026-10-05",
+     "time": "15:35",
+     "ticker": "GOOGL",
      "side": "buy",
-     "shares": 1,
-     "price": 540.74,
-     "value": 540.74,
+     "shares": 2,
+     "price": 367.26,
+     "value": 734.53,
      "sleeve": "ai",
      "reason": "New pick"
     },
     {
+     "date": "2026-10-05",
+     "time": "15:35",
+     "ticker": "CRM",
+     "side": "sell",
+     "shares": 1,
+     "price": 498.04,
+     "value": 498.04,
+     "sleeve": "ai",
+     "reason": "Rotated out: no longer a top pick"
+    },
+    {
+     "date": "2026-10-02",
+     "time": "15:35",
+     "ticker": "CRM",
+     "side": "buy",
+     "shares": 1,
+     "price": 533.01,
+     "value": 533.01,
+     "sleeve": "ai",
+     "reason": "New pick"
+    },
+    {
+     "date": "2026-10-02",
+     "time": "15:35",
+     "ticker": "QCOM",
+     "side": "buy",
+     "shares": 2,
+     "price": 339.38,
+     "value": 678.76,
+     "sleeve": "ai",
+     "reason": "New pick"
+    },
+    {
+     "date": "2026-10-02",
+     "time": "15:35",
+     "ticker": "NVDA",
+     "side": "sell",
+     "shares": 6,
+     "price": 163.63,
+     "value": 981.77,
+     "sleeve": "ai",
+     "reason": "Rotated out: no longer a top pick"
+    },
+    {
+     "date": "2026-10-02",
+     "time": "15:35",
+     "ticker": "CSCO",
+     "side": "sell",
+     "shares": 1,
+     "price": 524.77,
+     "value": 524.77,
+     "sleeve": "ai",
+     "reason": "Rotated out: no longer a top pick"
+    },
+    {
      "date": "2026-10-01",
+     "time": "15:35",
      "ticker": "NVDA",
      "side": "buy",
      "shares": 6,
@@ -145,16 +218,7 @@
     },
     {
      "date": "2026-10-01",
-     "ticker": "AAPL",
-     "side": "buy",
-     "shares": 7,
-     "price": 380.63,
-     "value": 2664.41,
-     "sleeve": "momentum",
-     "reason": "New pick"
-    },
-    {
-     "date": "2026-10-01",
+     "time": "15:35",
      "ticker": "AAPL",
      "side": "sell",
      "shares": 2,
@@ -164,157 +228,538 @@
      "reason": "Rotated out: no longer a top pick"
     },
     {
-     "date": "2026-10-01",
-     "ticker": "MSFT",
-     "side": "sell",
-     "shares": 3,
-     "price": 782.08,
-     "value": 2346.24,
-     "sleeve": "momentum",
-     "reason": "Rotated out: no longer a top pick"
+     "date": "2026-09-30",
+     "time": "15:35",
+     "ticker": "CSCO",
+     "side": "buy",
+     "shares": 1,
+     "price": 542.35,
+     "value": 542.35,
+     "sleeve": "ai",
+     "reason": "New pick"
     },
     {
-     "date": "2026-09-24",
+     "date": "2026-09-30",
+     "time": "15:35",
      "ticker": "AAPL",
      "side": "buy",
      "shares": 2,
-     "price": 358.57,
-     "value": 717.14,
+     "price": 365.93,
+     "value": 731.87,
      "sleeve": "ai",
      "reason": "New pick"
     },
     {
-     "date": "2026-09-24",
-     "ticker": "MSFT",
+     "date": "2026-09-30",
+     "time": "15:35",
+     "ticker": "QCOM",
+     "side": "sell",
+     "shares": 2,
+     "price": 343.57,
+     "value": 687.14,
+     "sleeve": "ai",
+     "reason": "Rotated out: no longer a top pick"
+    },
+    {
+     "date": "2026-09-30",
+     "time": "15:35",
+     "ticker": "CRM",
+     "side": "sell",
+     "shares": 1,
+     "price": 523.3,
+     "value": 523.3,
+     "sleeve": "ai",
+     "reason": "Rotated out: no longer a top pick"
+    },
+    {
+     "date": "2026-09-29",
+     "time": "15:35",
+     "ticker": "QCOM",
      "side": "buy",
-     "shares": 3,
-     "price": 740.48,
-     "value": 2221.44,
-     "sleeve": "momentum",
+     "shares": 2,
+     "price": 346.52,
+     "value": 693.05,
+     "sleeve": "ai",
      "reason": "New pick"
     },
     {
-     "date": "2026-09-24",
-     "ticker": "CSCO",
+     "date": "2026-09-29",
+     "time": "15:35",
+     "ticker": "CRM",
+     "side": "buy",
+     "shares": 1,
+     "price": 493.45,
+     "value": 493.45,
+     "sleeve": "ai",
+     "reason": "New pick"
+    },
+    {
+     "date": "2026-09-29",
+     "time": "15:35",
+     "ticker": "META",
+     "side": "buy",
+     "shares": 1,
+     "price": 285.09,
+     "value": 285.09,
+     "sleeve": "momentum",
+     "reason": "Topped up to target size"
+    },
+    {
+     "date": "2026-09-29",
+     "time": "15:35",
+     "ticker": "AMD",
+     "side": "sell",
+     "shares": 5,
+     "price": 201.49,
+     "value": 1007.45,
+     "sleeve": "ai",
+     "reason": "Rotated out: no longer a top pick"
+    },
+    {
+     "date": "2026-09-29",
+     "time": "15:35",
+     "ticker": "AAPL",
      "side": "sell",
      "shares": 2,
-     "price": 504.03,
-     "value": 1008.06,
+     "price": 378.94,
+     "value": 757.88,
+     "sleeve": "ai",
+     "reason": "Rotated out: no longer a top pick"
+    },
+    {
+     "date": "2026-09-28",
+     "time": "15:35",
+     "ticker": "AMD",
+     "side": "buy",
+     "shares": 5,
+     "price": 193.26,
+     "value": 966.28,
+     "sleeve": "ai",
+     "reason": "New pick"
+    },
+    {
+     "date": "2026-09-28",
+     "time": "15:35",
+     "ticker": "AMAT",
+     "side": "sell",
+     "shares": 4,
+     "price": 222.08,
+     "value": 888.32,
      "sleeve": "ai",
      "reason": "Rotated out: no longer a top pick"
     },
     {
      "date": "2026-09-24",
+     "time": "15:35",
      "ticker": "AMAT",
+     "side": "buy",
+     "shares": 4,
+     "price": 225.52,
+     "value": 902.09,
+     "sleeve": "ai",
+     "reason": "New pick"
+    },
+    {
+     "date": "2026-09-23",
+     "time": "15:35",
+     "ticker": "QCOM",
      "side": "sell",
-     "shares": 11,
-     "price": 225.3,
-     "value": 2478.27,
-     "sleeve": "momentum",
+     "shares": 2,
+     "price": 326.51,
+     "value": 653.01,
+     "sleeve": "ai",
      "reason": "Rotated out: no longer a top pick"
     },
     {
-     "date": "2026-09-18",
-     "ticker": "PLTR",
-     "side": "sell",
-     "shares": 3,
-     "price": 255.21,
-     "value": 765.64,
-     "sleeve": "ai",
-     "reason": "Stop loss: down 11.1%"
-    },
-    {
-     "date": "2026-09-17",
-     "ticker": "CSCO",
-     "side": "buy",
-     "shares": 2,
-     "price": 472.93,
-     "value": 945.85,
-     "sleeve": "ai",
-     "reason": "New pick"
-    },
-    {
-     "date": "2026-09-17",
-     "ticker": "AMAT",
-     "side": "buy",
-     "shares": 11,
-     "price": 234.78,
-     "value": 2582.55,
-     "sleeve": "momentum",
-     "reason": "New pick"
-    },
-    {
-     "date": "2026-09-17",
+     "date": "2026-09-23",
+     "time": "15:35",
      "ticker": "META",
      "side": "sell",
      "shares": 1,
-     "price": 285.19,
-     "value": 285.19,
+     "price": 286.98,
+     "value": 286.98,
+     "sleeve": "momentum",
+     "reason": "Trimmed back to target size"
+    },
+    {
+     "date": "2026-09-22",
+     "time": "15:35",
+     "ticker": "QCOM",
+     "side": "buy",
+     "shares": 2,
+     "price": 331.78,
+     "value": 663.55,
+     "sleeve": "ai",
+     "reason": "New pick"
+    },
+    {
+     "date": "2026-09-22",
+     "time": "15:35",
+     "ticker": "MSFT",
+     "side": "buy",
+     "shares": 3,
+     "price": 724.54,
+     "value": 2173.63,
+     "sleeve": "momentum",
+     "reason": "New pick"
+    },
+    {
+     "date": "2026-09-22",
+     "time": "15:35",
+     "ticker": "AMAT",
+     "side": "sell",
+     "shares": 10,
+     "price": 225.73,
+     "value": 2257.27,
+     "sleeve": "momentum",
+     "reason": "Rotated out: no longer a top pick"
+    },
+    {
+     "date": "2026-09-21",
+     "time": "15:35",
+     "ticker": "META",
+     "side": "buy",
+     "shares": 1,
+     "price": 283.61,
+     "value": 283.61,
+     "sleeve": "momentum",
+     "reason": "Topped up to target size"
+    },
+    {
+     "date": "2026-09-18",
+     "time": "15:35",
+     "ticker": "META",
+     "side": "sell",
+     "shares": 1,
+     "price": 285.15,
+     "value": 285.15,
      "sleeve": "momentum",
      "reason": "Trimmed back to target size"
     },
     {
      "date": "2026-09-17",
-     "ticker": "AAPL",
-     "side": "sell",
-     "shares": 7,
-     "price": 358.58,
-     "value": 2510.06,
-     "sleeve": "momentum",
-     "reason": "Rotated out: no longer a top pick"
-    },
-    {
-     "date": "2026-09-10",
-     "ticker": "PLTR",
-     "side": "buy",
-     "shares": 3,
-     "price": 287.15,
-     "value": 861.46,
-     "sleeve": "ai",
-     "reason": "New pick"
-    },
-    {
-     "date": "2026-09-10",
+     "time": "15:35",
      "ticker": "META",
      "side": "buy",
+     "shares": 1,
+     "price": 285.47,
+     "value": 285.47,
+     "sleeve": "momentum",
+     "reason": "Topped up to target size"
+    },
+    {
+     "date": "2026-09-16",
+     "time": "15:35",
+     "ticker": "META",
+     "side": "sell",
+     "shares": 1,
+     "price": 286.94,
+     "value": 286.94,
+     "sleeve": "momentum",
+     "reason": "Trimmed back to target size"
+    },
+    {
+     "date": "2026-09-15",
+     "time": "15:35",
+     "ticker": "AAPL",
+     "side": "buy",
+     "shares": 2,
+     "price": 359.19,
+     "value": 718.38,
+     "sleeve": "ai",
+     "reason": "New pick"
+    },
+    {
+     "date": "2026-09-15",
+     "time": "15:35",
+     "ticker": "ADBE",
+     "side": "sell",
+     "shares": 5,
+     "price": 175.51,
+     "value": 877.56,
+     "sleeve": "ai",
+     "reason": "Rotated out: no longer a top pick"
+    },
+    {
+     "date": "2026-09-15",
+     "time": "15:35",
+     "ticker": "CSCO",
+     "side": "sell",
+     "shares": 1,
+     "price": 472.71,
+     "value": 472.71,
+     "sleeve": "ai",
+     "reason": "Rotated out: no longer a top pick"
+    },
+    {
+     "date": "2026-09-14",
+     "time": "15:35",
+     "ticker": "ADBE",
+     "side": "buy",
+     "shares": 5,
+     "price": 172.93,
+     "value": 864.63,
+     "sleeve": "ai",
+     "reason": "New pick"
+    },
+    {
+     "date": "2026-09-14",
+     "time": "15:35",
+     "ticker": "AMAT",
+     "side": "buy",
      "shares": 10,
-     "price": 274.13,
-     "value": 2741.27,
+     "price": 231.65,
+     "value": 2316.46,
      "sleeve": "momentum",
      "reason": "New pick"
     },
     {
-     "date": "2026-09-10",
-     "ticker": "AMAT",
+     "date": "2026-09-14",
+     "time": "15:35",
+     "ticker": "PLTR",
      "side": "sell",
-     "shares": 4,
-     "price": 227.22,
-     "value": 908.87,
+     "shares": 3,
+     "price": 271.65,
+     "value": 814.96,
      "sleeve": "ai",
      "reason": "Rotated out: no longer a top pick"
+    },
+    {
+     "date": "2026-09-14",
+     "time": "15:35",
+     "ticker": "AAPL",
+     "side": "sell",
+     "shares": 6,
+     "price": 364.37,
+     "value": 2186.21,
+     "sleeve": "momentum",
+     "reason": "Rotated out: no longer a top pick"
+    },
+    {
+     "date": "2026-09-11",
+     "time": "15:35",
+     "ticker": "CSCO",
+     "side": "buy",
+     "shares": 1,
+     "price": 487.83,
+     "value": 487.83,
+     "sleeve": "ai",
+     "reason": "New pick"
+    },
+    {
+     "date": "2026-09-10",
+     "time": "15:35",
+     "ticker": "CSCO",
+     "side": "sell",
+     "shares": 1,
+     "price": 484.74,
+     "value": 484.74,
+     "sleeve": "ai",
+     "reason": "Rotated out: no longer a top pick"
+    },
+    {
+     "date": "2026-09-09",
+     "time": "15:35",
+     "ticker": "CSCO",
+     "side": "buy",
+     "shares": 1,
+     "price": 494.37,
+     "value": 494.37,
+     "sleeve": "ai",
+     "reason": "New pick"
     },
     {
      "date": "2026-09-08",
+     "time": "15:35",
      "ticker": "CSCO",
      "side": "sell",
-     "shares": 5,
+     "shares": 1,
      "price": 506.69,
-     "value": 2533.43,
+     "value": 506.69,
+     "sleeve": "ai",
+     "reason": "Rotated out: no longer a top pick"
+    },
+    {
+     "date": "2026-09-07",
+     "time": "15:35",
+     "ticker": "META",
+     "side": "buy",
+     "shares": 9,
+     "price": 274.91,
+     "value": 2474.17,
      "sleeve": "momentum",
-     "reason": "Stop loss: down 10.0%"
+     "reason": "New pick"
+    },
+    {
+     "date": "2026-09-07",
+     "time": "15:35",
+     "ticker": "AMD",
+     "side": "sell",
+     "shares": 11,
+     "price": 207.77,
+     "value": 2285.43,
+     "sleeve": "momentum",
+     "reason": "Rotated out: no longer a top pick"
+    },
+    {
+     "date": "2026-09-04",
+     "time": "15:35",
+     "ticker": "PLTR",
+     "side": "buy",
+     "shares": 3,
+     "price": 282.99,
+     "value": 848.97,
+     "sleeve": "ai",
+     "reason": "New pick"
+    },
+    {
+     "date": "2026-09-04",
+     "time": "15:35",
+     "ticker": "AMAT",
+     "side": "sell",
+     "shares": 4,
+     "price": 219.56,
+     "value": 878.24,
+     "sleeve": "ai",
+     "reason": "Rotated out: no longer a top pick"
     },
     {
      "date": "2026-09-03",
+     "time": "15:35",
+     "ticker": "AMAT",
+     "side": "buy",
+     "shares": 4,
+     "price": 221.43,
+     "value": 885.72,
+     "sleeve": "ai",
+     "reason": "New pick"
+    },
+    {
+     "date": "2026-09-03",
+     "time": "15:35",
+     "ticker": "CSCO",
+     "side": "buy",
+     "shares": 1,
+     "price": 529.66,
+     "value": 529.66,
+     "sleeve": "ai",
+     "reason": "New pick"
+    },
+    {
+     "date": "2026-09-03",
+     "time": "15:35",
+     "ticker": "AMD",
+     "side": "buy",
+     "shares": 11,
+     "price": 221.28,
+     "value": 2434.09,
+     "sleeve": "momentum",
+     "reason": "New pick"
+    },
+    {
+     "date": "2026-09-03",
+     "time": "15:35",
+     "ticker": "AAPL",
+     "side": "buy",
+     "shares": 6,
+     "price": 387.89,
+     "value": 2327.36,
+     "sleeve": "momentum",
+     "reason": "New pick"
+    },
+    {
+     "date": "2026-09-03",
+     "time": "15:35",
+     "ticker": "META",
+     "side": "sell",
+     "shares": 9,
+     "price": 268.29,
+     "value": 2414.57,
+     "sleeve": "momentum",
+     "reason": "Rotated out: no longer a top pick"
+    },
+    {
+     "date": "2026-09-02",
+     "time": "15:35",
+     "ticker": "META",
+     "side": "buy",
+     "shares": 9,
+     "price": 272.8,
+     "value": 2455.17,
+     "sleeve": "momentum",
+     "reason": "New pick"
+    },
+    {
+     "date": "2026-09-02",
+     "time": "15:35",
+     "ticker": "META",
+     "side": "sell",
+     "shares": 3,
+     "price": 272.52,
+     "value": 817.57,
+     "sleeve": "ai",
+     "reason": "Rotated out: no longer a top pick"
+    },
+    {
+     "date": "2026-09-02",
+     "time": "15:35",
      "ticker": "PLTR",
      "side": "sell",
      "shares": 3,
-     "price": 287.51,
-     "value": 862.52,
+     "price": 289.33,
+     "value": 867.98,
+     "sleeve": "ai",
+     "reason": "Rotated out: no longer a top pick"
+    },
+    {
+     "date": "2026-09-02",
+     "time": "15:35",
+     "ticker": "CSCO",
+     "side": "sell",
+     "shares": 4,
+     "price": 519.22,
+     "value": 2076.88,
+     "sleeve": "momentum",
+     "reason": "Trailing stop: down 9.1% from its high of $571.43",
+     "protective": true
+    },
+    {
+     "date": "2026-09-02",
+     "time": "15:35",
+     "ticker": "AAPL",
+     "side": "sell",
+     "shares": 6,
+     "price": 385.85,
+     "value": 2315.08,
+     "sleeve": "momentum",
+     "reason": "Trailing stop: down 7.0% from its high of $415.26",
+     "protective": true
+    },
+    {
+     "date": "2026-08-31",
+     "time": "15:35",
+     "ticker": "META",
+     "side": "buy",
+     "shares": 3,
+     "price": 264.5,
+     "value": 793.51,
+     "sleeve": "ai",
+     "reason": "New pick"
+    },
+    {
+     "date": "2026-08-31",
+     "time": "15:35",
+     "ticker": "AMAT",
+     "side": "sell",
+     "shares": 4,
+     "price": 226.39,
+     "value": 905.55,
      "sleeve": "ai",
      "reason": "Rotated out: no longer a top pick"
     },
     {
      "date": "2026-08-27",
+     "time": "15:35",
      "ticker": "AMAT",
      "side": "buy",
      "shares": 4,
@@ -325,6 +770,7 @@
     },
     {
      "date": "2026-08-27",
+     "time": "15:35",
      "ticker": "PLTR",
      "side": "buy",
      "shares": 3,
@@ -334,97 +780,164 @@
      "reason": "New pick"
     },
     {
-     "date": "2026-08-27",
-     "ticker": "CSCO",
-     "side": "buy",
-     "shares": 1,
-     "price": 550.44,
-     "value": 550.44,
-     "sleeve": "momentum",
-     "reason": "Topped up to target size"
-    },
-    {
-     "date": "2026-08-27",
-     "ticker": "META",
+     "date": "2026-08-26",
+     "time": "15:35",
+     "ticker": "PLTR",
      "side": "sell",
      "shares": 3,
-     "price": 265.53,
-     "value": 796.58,
+     "price": 279.02,
+     "value": 837.06,
+     "sleeve": "ai",
+     "reason": "Stop loss: down 11.7% from cost",
+     "protective": true
+    },
+    {
+     "date": "2026-08-25",
+     "time": "15:35",
+     "ticker": "AMAT",
+     "side": "sell",
+     "shares": 4,
+     "price": 226.3,
+     "value": 905.19,
      "sleeve": "ai",
      "reason": "Rotated out: no longer a top pick"
     },
     {
+     "date": "2026-08-21",
+     "time": "15:35",
+     "ticker": "PLTR",
+     "side": "buy",
+     "shares": 3,
+     "price": 316.29,
+     "value": 948.86,
+     "sleeve": "ai",
+     "reason": "New pick"
+    },
+    {
+     "date": "2026-08-21",
+     "time": "15:35",
+     "ticker": "META",
+     "side": "sell",
+     "shares": 3,
+     "price": 261.11,
+     "value": 783.33,
+     "sleeve": "ai",
+     "reason": "Rotated out: no longer a top pick"
+    },
+    {
+     "date": "2026-08-21",
+     "time": "15:35",
+     "ticker": "AAPL",
+     "side": "sell",
+     "shares": 1,
+     "price": 394.71,
+     "value": 394.71,
+     "sleeve": "momentum",
+     "reason": "Trimmed back to target size"
+    },
+    {
      "date": "2026-08-20",
+     "time": "15:35",
+     "ticker": "AMAT",
+     "side": "buy",
+     "shares": 4,
+     "price": 225.94,
+     "value": 903.77,
+     "sleeve": "ai",
+     "reason": "New pick"
+    },
+    {
+     "date": "2026-08-20",
+     "time": "15:35",
+     "ticker": "PLTR",
+     "side": "sell",
+     "shares": 3,
+     "price": 318.8,
+     "value": 956.4,
+     "sleeve": "ai",
+     "reason": "Rotated out: no longer a top pick"
+    },
+    {
+     "date": "2026-08-18",
+     "time": "15:35",
+     "ticker": "PLTR",
+     "side": "buy",
+     "shares": 3,
+     "price": 312.12,
+     "value": 936.35,
+     "sleeve": "ai",
+     "reason": "New pick"
+    },
+    {
+     "date": "2026-08-18",
+     "time": "15:35",
      "ticker": "CSCO",
      "side": "buy",
      "shares": 4,
-     "price": 566.85,
-     "value": 2267.41,
+     "price": 558.88,
+     "value": 2235.52,
      "sleeve": "momentum",
      "reason": "New pick"
     },
     {
-     "date": "2026-08-20",
+     "date": "2026-08-18",
+     "time": "15:35",
+     "ticker": "GOOGL",
+     "side": "sell",
+     "shares": 3,
+     "price": 295.67,
+     "value": 887.02,
+     "sleeve": "ai",
+     "reason": "Rotated out: no longer a top pick"
+    },
+    {
+     "date": "2026-08-18",
+     "time": "15:35",
      "ticker": "AMAT",
      "side": "sell",
-     "shares": 12,
-     "price": 225.72,
-     "value": 2708.61,
+     "shares": 11,
+     "price": 225.12,
+     "value": 2476.29,
      "sleeve": "momentum",
      "reason": "Rotated out: no longer a top pick"
     },
     {
-     "date": "2026-08-19",
-     "ticker": "GOOGL",
-     "side": "sell",
-     "shares": 3,
-     "price": 292.0,
-     "value": 876.01,
-     "sleeve": "ai",
-     "reason": "Stop loss: down 11.1%"
-    },
-    {
-     "date": "2026-08-13",
+     "date": "2026-08-17",
+     "time": "15:35",
      "ticker": "GOOGL",
      "side": "buy",
      "shares": 3,
-     "price": 328.51,
-     "value": 985.54,
+     "price": 310.48,
+     "value": 931.43,
      "sleeve": "ai",
      "reason": "New pick"
     },
     {
+     "date": "2026-08-14",
+     "time": "15:35",
+     "ticker": "GOOGL",
+     "side": "sell",
+     "shares": 3,
+     "price": 313.6,
+     "value": 940.81,
+     "sleeve": "ai",
+     "reason": "Trailing stop: down 7.6% from its high of $339.60",
+     "protective": true
+    },
+    {
      "date": "2026-08-13",
+     "time": "15:35",
      "ticker": "AMAT",
      "side": "buy",
-     "shares": 12,
+     "shares": 11,
      "price": 231.47,
-     "value": 2777.59,
+     "value": 2546.12,
      "sleeve": "momentum",
      "reason": "New pick"
     },
     {
      "date": "2026-08-13",
-     "ticker": "META",
-     "side": "sell",
-     "shares": 1,
-     "price": 265.93,
-     "value": 265.93,
-     "sleeve": "ai",
-     "reason": "Trimmed back to target size"
-    },
-    {
-     "date": "2026-08-13",
-     "ticker": "ORCL",
-     "side": "sell",
-     "shares": 1,
-     "price": 974.44,
-     "value": 974.44,
-     "sleeve": "momentum",
-     "reason": "Trimmed back to target size"
-    },
-    {
-     "date": "2026-08-13",
+     "time": "15:35",
      "ticker": "PLTR",
      "side": "sell",
      "shares": 8,
@@ -434,464 +947,83 @@
      "reason": "Rotated out: no longer a top pick"
     },
     {
-     "date": "2026-08-06",
-     "ticker": "META",
-     "side": "buy",
-     "shares": 4,
-     "price": 270.61,
-     "value": 1082.42,
-     "sleeve": "ai",
-     "reason": "New pick"
-    },
-    {
-     "date": "2026-08-06",
-     "ticker": "AMAT",
-     "side": "sell",
-     "shares": 4,
-     "price": 236.13,
-     "value": 944.53,
-     "sleeve": "ai",
-     "reason": "Rotated out: no longer a top pick"
-    },
-    {
-     "date": "2026-07-30",
-     "ticker": "AMAT",
-     "side": "buy",
-     "shares": 4,
-     "price": 226.17,
-     "value": 904.69,
-     "sleeve": "ai",
-     "reason": "New pick"
-    },
-    {
-     "date": "2026-07-30",
-     "ticker": "MSFT",
-     "side": "sell",
-     "shares": 1,
-     "price": 676.78,
-     "value": 676.78,
-     "sleeve": "ai",
-     "reason": "Rotated out: no longer a top pick"
-    },
-    {
-     "date": "2026-07-30",
-     "ticker": "GOOGL",
-     "side": "sell",
-     "shares": 3,
-     "price": 336.84,
-     "value": 1010.52,
-     "sleeve": "ai",
-     "reason": "Rotated out: no longer a top pick"
-    },
-    {
-     "date": "2026-07-23",
-     "ticker": "MSFT",
-     "side": "buy",
-     "shares": 1,
-     "price": 656.59,
-     "value": 656.59,
-     "sleeve": "ai",
-     "reason": "New pick"
-    },
-    {
-     "date": "2026-07-23",
+     "date": "2026-08-12",
+     "time": "15:35",
      "ticker": "GOOGL",
      "side": "buy",
-     "shares": 3,
-     "price": 328.41,
-     "value": 985.24,
-     "sleeve": "ai",
-     "reason": "New pick"
-    },
-    {
-     "date": "2026-07-23",
-     "ticker": "ORCL",
-     "side": "buy",
      "shares": 1,
-     "price": 900.96,
-     "value": 900.96,
-     "sleeve": "momentum",
+     "price": 325.33,
+     "value": 325.33,
+     "sleeve": "ai",
      "reason": "Topped up to target size"
     },
     {
-     "date": "2026-07-23",
+     "date": "2026-08-12",
+     "time": "15:35",
      "ticker": "PLTR",
-     "side": "buy",
-     "shares": 1,
-     "price": 318.39,
-     "value": 318.39,
-     "sleeve": "momentum",
-     "reason": "Topped up to target size"
-    },
-    {
-     "date": "2026-07-23",
-     "ticker": "META",
-     "side": "sell",
-     "shares": 3,
-     "price": 269.05,
-     "value": 807.14,
-     "sleeve": "ai",
-     "reason": "Rotated out: no longer a top pick"
-    },
-    {
-     "date": "2026-07-23",
-     "ticker": "AAPL",
-     "side": "sell",
-     "shares": 1,
-     "price": 353.72,
-     "value": 353.72,
-     "sleeve": "momentum",
-     "reason": "Trimmed back to target size"
-    },
-    {
-     "date": "2026-07-16",
-     "ticker": "AAPL",
      "side": "buy",
      "shares": 8,
-     "price": 323.01,
-     "value": 2584.09,
+     "price": 323.95,
+     "value": 2591.62,
      "sleeve": "momentum",
      "reason": "New pick"
     },
     {
-     "date": "2026-07-16",
+     "date": "2026-08-11",
+     "time": "15:35",
      "ticker": "PLTR",
-     "side": "sell",
-     "shares": 1,
-     "price": 349.53,
-     "value": 349.53,
-     "sleeve": "momentum",
-     "reason": "Trimmed back to target size"
-    },
-    {
-     "date": "2026-07-16",
-     "ticker": "AMAT",
-     "side": "sell",
-     "shares": 12,
-     "price": 222.73,
-     "value": 2672.74,
-     "sleeve": "momentum",
-     "reason": "Rotated out: no longer a top pick"
-    },
-    {
-     "date": "2026-07-15",
-     "ticker": "AMD",
-     "side": "sell",
-     "shares": 4,
-     "price": 199.37,
-     "value": 797.48,
-     "sleeve": "ai",
-     "reason": "Stop loss: down 10.5%"
-    },
-    {
-     "date": "2026-07-09",
-     "ticker": "AMD",
-     "side": "buy",
-     "shares": 4,
-     "price": 222.9,
-     "value": 891.61,
-     "sleeve": "ai",
-     "reason": "New pick"
-    },
-    {
-     "date": "2026-07-09",
-     "ticker": "META",
-     "side": "buy",
-     "shares": 3,
-     "price": 279.57,
-     "value": 838.71,
-     "sleeve": "ai",
-     "reason": "New pick"
-    },
-    {
-     "date": "2026-07-09",
-     "ticker": "AMAT",
-     "side": "buy",
-     "shares": 12,
-     "price": 230.52,
-     "value": 2766.18,
-     "sleeve": "momentum",
-     "reason": "New pick"
-    },
-    {
-     "date": "2026-07-09",
-     "ticker": "GOOGL",
-     "side": "sell",
-     "shares": 3,
-     "price": 344.5,
-     "value": 1033.49,
-     "sleeve": "ai",
-     "reason": "Rotated out: no longer a top pick"
-    },
-    {
-     "date": "2026-07-09",
-     "ticker": "INTC",
-     "side": "sell",
-     "shares": 2,
-     "price": 474.08,
-     "value": 948.17,
-     "sleeve": "ai",
-     "reason": "Rotated out: no longer a top pick"
-    },
-    {
-     "date": "2026-07-09",
-     "ticker": "AAPL",
      "side": "sell",
      "shares": 8,
-     "price": 318.6,
-     "value": 2548.8,
+     "price": 324.66,
+     "value": 2597.26,
      "sleeve": "momentum",
-     "reason": "Rotated out: no longer a top pick"
+     "reason": "Trailing stop: down 7.9% from its high of $352.80",
+     "protective": true
     },
     {
-     "date": "2026-07-02",
+     "date": "2026-08-10",
+     "time": "15:35",
      "ticker": "GOOGL",
      "side": "buy",
-     "shares": 3,
-     "price": 351.5,
-     "value": 1054.49,
-     "sleeve": "ai",
-     "reason": "New pick"
-    },
-    {
-     "date": "2026-07-02",
-     "ticker": "INTC",
-     "side": "buy",
      "shares": 2,
-     "price": 505.61,
-     "value": 1011.23,
+     "price": 339.6,
+     "value": 679.2,
      "sleeve": "ai",
      "reason": "New pick"
     },
     {
-     "date": "2026-07-02",
-     "ticker": "MU",
-     "side": "sell",
-     "shares": 4,
-     "price": 217.82,
-     "value": 871.28,
-     "sleeve": "ai",
-     "reason": "Rotated out: no longer a top pick"
-    },
-    {
-     "date": "2026-07-02",
-     "ticker": "ORCL",
-     "side": "sell",
-     "shares": 1,
-     "price": 958.82,
-     "value": 958.82,
-     "sleeve": "momentum",
-     "reason": "Trimmed back to target size"
-    },
-    {
-     "date": "2026-06-25",
-     "ticker": "MU",
-     "side": "buy",
-     "shares": 4,
-     "price": 229.02,
-     "value": 916.1,
-     "sleeve": "ai",
-     "reason": "New pick"
-    },
-    {
-     "date": "2026-06-25",
-     "ticker": "AAPL",
-     "side": "buy",
-     "shares": 1,
-     "price": 344.78,
-     "value": 344.78,
-     "sleeve": "momentum",
-     "reason": "Topped up to target size"
-    },
-    {
-     "date": "2026-06-25",
-     "ticker": "NOW",
-     "side": "sell",
-     "shares": 3,
-     "price": 287.77,
-     "value": 863.3,
-     "sleeve": "ai",
-     "reason": "Rotated out: no longer a top pick"
-    },
-    {
-     "date": "2026-06-25",
-     "ticker": "CSCO",
-     "side": "sell",
-     "shares": 1,
-     "price": 505.77,
-     "value": 505.77,
-     "sleeve": "ai",
-     "reason": "Rotated out: no longer a top pick"
-    },
-    {
-     "date": "2026-06-25",
-     "ticker": "PLTR",
-     "side": "sell",
-     "shares": 1,
-     "price": 341.43,
-     "value": 341.43,
-     "sleeve": "momentum",
-     "reason": "Trimmed back to target size"
-    },
-    {
-     "date": "2026-06-18",
-     "ticker": "NOW",
-     "side": "buy",
-     "shares": 3,
-     "price": 292.93,
-     "value": 878.78,
-     "sleeve": "ai",
-     "reason": "New pick"
-    },
-    {
-     "date": "2026-06-18",
-     "ticker": "ORCL",
-     "side": "buy",
-     "shares": 3,
-     "price": 879.97,
-     "value": 2639.91,
-     "sleeve": "momentum",
-     "reason": "New pick"
-    },
-    {
-     "date": "2026-06-18",
-     "ticker": "INTC",
-     "side": "sell",
-     "shares": 2,
-     "price": 481.75,
-     "value": 963.5,
-     "sleeve": "ai",
-     "reason": "Rotated out: no longer a top pick"
-    },
-    {
-     "date": "2026-06-18",
-     "ticker": "PLTR",
-     "side": "sell",
-     "shares": 1,
-     "price": 300.94,
-     "value": 300.94,
-     "sleeve": "momentum",
-     "reason": "Trimmed back to target size"
-    },
-    {
-     "date": "2026-06-18",
-     "ticker": "AMD",
-     "side": "sell",
-     "shares": 11,
-     "price": 214.92,
-     "value": 2364.15,
-     "sleeve": "momentum",
-     "reason": "Rotated out: no longer a top pick"
-    },
-    {
-     "date": "2026-06-11",
-     "ticker": "CSCO",
-     "side": "buy",
-     "shares": 1,
-     "price": 524.26,
-     "value": 524.26,
-     "sleeve": "ai",
-     "reason": "New pick"
-    },
-    {
-     "date": "2026-06-11",
-     "ticker": "INTC",
-     "side": "buy",
-     "shares": 2,
-     "price": 473.3,
-     "value": 946.59,
-     "sleeve": "ai",
-     "reason": "New pick"
-    },
-    {
-     "date": "2026-06-11",
-     "ticker": "AMD",
-     "side": "buy",
-     "shares": 11,
-     "price": 226.21,
-     "value": 2488.34,
-     "sleeve": "momentum",
-     "reason": "New pick"
-    },
-    {
-     "date": "2026-06-11",
-     "ticker": "ORCL",
-     "side": "sell",
-     "shares": 1,
-     "price": 862.85,
-     "value": 862.85,
-     "sleeve": "ai",
-     "reason": "Rotated out: no longer a top pick"
-    },
-    {
-     "date": "2026-06-11",
-     "ticker": "AMD",
-     "side": "sell",
-     "shares": 4,
-     "price": 225.99,
-     "value": 903.95,
-     "sleeve": "ai",
-     "reason": "Rotated out: no longer a top pick"
-    },
-    {
-     "date": "2026-06-11",
-     "ticker": "AMAT",
-     "side": "sell",
-     "shares": 11,
-     "price": 209.94,
-     "value": 2309.39,
-     "sleeve": "momentum",
-     "reason": "Rotated out: no longer a top pick"
-    },
-    {
-     "date": "2026-06-04",
-     "ticker": "ORCL",
-     "side": "buy",
-     "shares": 1,
-     "price": 813.37,
-     "value": 813.37,
-     "sleeve": "ai",
-     "reason": "New pick"
-    },
-    {
-     "date": "2026-06-04",
-     "ticker": "AMD",
-     "side": "buy",
-     "shares": 4,
-     "price": 219.83,
-     "value": 879.32,
-     "sleeve": "ai",
-     "reason": "New pick"
-    },
-    {
-     "date": "2026-06-04",
-     "ticker": "AMAT",
-     "side": "buy",
-     "shares": 11,
-     "price": 222.52,
-     "value": 2447.73,
-     "sleeve": "momentum",
-     "reason": "New pick"
-    },
-    {
-     "date": "2026-06-04",
-     "ticker": "PLTR",
-     "side": "buy",
-     "shares": 10,
-     "price": 254.19,
-     "value": 2541.87,
-     "sleeve": "momentum",
-     "reason": "New pick"
-    },
-    {
-     "date": "2026-06-04",
+     "date": "2026-08-10",
+     "time": "15:35",
      "ticker": "AAPL",
      "side": "buy",
      "shares": 7,
-     "price": 347.22,
-     "value": 2430.56,
+     "price": 360.53,
+     "value": 2523.71,
      "sleeve": "momentum",
      "reason": "New pick"
+    },
+    {
+     "date": "2026-08-10",
+     "time": "15:35",
+     "ticker": "PLTR",
+     "side": "buy",
+     "shares": 1,
+     "price": 332.59,
+     "value": 332.59,
+     "sleeve": "momentum",
+     "reason": "Topped up to target size"
+    },
+    {
+     "date": "2026-08-07",
+     "time": "15:35",
+     "ticker": "AAPL",
+     "side": "sell",
+     "shares": 7,
+     "price": 359.24,
+     "value": 2514.68,
+     "sleeve": "momentum",
+     "reason": "Trailing stop: down 9.3% from its high of $396.37",
+     "protective": true
     }
    ],
    "history": [
@@ -901,494 +1033,547 @@
     },
     {
      "date": "2026-06-05",
-     "equity": 9954.21
+     "equity": 9952.58
     },
     {
      "date": "2026-06-08",
-     "equity": 9857.68
+     "equity": 9820.21
     },
     {
      "date": "2026-06-09",
-     "equity": 9878.97
+     "equity": 9806.72
     },
     {
      "date": "2026-06-10",
-     "equity": 9893.34
+     "equity": 9769.01
     },
     {
      "date": "2026-06-11",
-     "equity": 9830.85
+     "equity": 9807.8
     },
     {
      "date": "2026-06-12",
-     "equity": 9795.26
+     "equity": 9757.74
     },
     {
      "date": "2026-06-15",
-     "equity": 9768.47
+     "equity": 9689.51
     },
     {
      "date": "2026-06-16",
-     "equity": 9968.98
+     "equity": 9750.28
     },
     {
      "date": "2026-06-17",
-     "equity": 10150.88
+     "equity": 9758.7
     },
     {
      "date": "2026-06-18",
-     "equity": 10305.68
+     "equity": 9809.48
     },
     {
      "date": "2026-06-19",
-     "equity": 10204.49
+     "equity": 9717.43
     },
     {
      "date": "2026-06-22",
-     "equity": 10266.61
+     "equity": 9763.05
     },
     {
      "date": "2026-06-23",
-     "equity": 10430.43
+     "equity": 9875.83
     },
     {
      "date": "2026-06-24",
-     "equity": 10644.11
+     "equity": 10053.88
     },
     {
      "date": "2026-06-25",
-     "equity": 10775.05
+     "equity": 10172.71
     },
     {
      "date": "2026-06-26",
-     "equity": 10646.03
+     "equity": 10066.47
     },
     {
      "date": "2026-06-29",
-     "equity": 10732.71
+     "equity": 10145.74
     },
     {
      "date": "2026-06-30",
-     "equity": 10830.75
+     "equity": 10218.12
     },
     {
      "date": "2026-07-01",
-     "equity": 10924.29
+     "equity": 10277.99
     },
     {
      "date": "2026-07-02",
-     "equity": 10773.16
+     "equity": 10142.79
     },
     {
      "date": "2026-07-03",
-     "equity": 10722.73
+     "equity": 10098.18
     },
     {
      "date": "2026-07-06",
-     "equity": 10514.77
+     "equity": 9939.35
     },
     {
      "date": "2026-07-07",
-     "equity": 10486.54
+     "equity": 10002.04
     },
     {
      "date": "2026-07-08",
-     "equity": 10557.21
+     "equity": 10009.03
     },
     {
      "date": "2026-07-09",
-     "equity": 10483.94
+     "equity": 9940.77
     },
     {
      "date": "2026-07-10",
-     "equity": 10496.79
+     "equity": 9955.29
     },
     {
      "date": "2026-07-13",
-     "equity": 10423.06
+     "equity": 9943.68
     },
     {
      "date": "2026-07-14",
-     "equity": 10449.29
+     "equity": 9965.7
     },
     {
      "date": "2026-07-15",
-     "equity": 10405.07
+     "equity": 9962.85
     },
     {
      "date": "2026-07-16",
-     "equity": 10264.79
+     "equity": 9826.68
     },
     {
      "date": "2026-07-17",
-     "equity": 10185.63
+     "equity": 9701.03
     },
     {
      "date": "2026-07-20",
-     "equity": 10115.24
+     "equity": 9634.33
     },
     {
      "date": "2026-07-21",
-     "equity": 10222.37
+     "equity": 9716.64
     },
     {
      "date": "2026-07-22",
-     "equity": 10158.0
+     "equity": 9644.66
     },
     {
      "date": "2026-07-23",
-     "equity": 10263.03
+     "equity": 9730.53
     },
     {
      "date": "2026-07-24",
-     "equity": 10287.33
+     "equity": 9743.31
     },
     {
      "date": "2026-07-27",
-     "equity": 10398.78
+     "equity": 9878.27
     },
     {
      "date": "2026-07-28",
-     "equity": 10523.59
+     "equity": 10054.14
     },
     {
      "date": "2026-07-29",
-     "equity": 10762.04
+     "equity": 10169.56
     },
     {
      "date": "2026-07-30",
-     "equity": 10916.9
+     "equity": 10342.96
     },
     {
      "date": "2026-07-31",
-     "equity": 10902.39
+     "equity": 10338.0
     },
     {
      "date": "2026-08-03",
-     "equity": 11075.09
+     "equity": 10438.74
     },
     {
      "date": "2026-08-04",
-     "equity": 10870.48
+     "equity": 10237.13
     },
     {
      "date": "2026-08-05",
-     "equity": 10939.56
+     "equity": 10306.59
     },
     {
      "date": "2026-08-06",
-     "equity": 10970.06
+     "equity": 10330.93
     },
     {
      "date": "2026-08-07",
-     "equity": 10760.42
+     "equity": 10127.52
     },
     {
      "date": "2026-08-10",
-     "equity": 10637.76
+     "equity": 10019.21
     },
     {
      "date": "2026-08-11",
-     "equity": 10513.61
+     "equity": 9898.21
     },
     {
      "date": "2026-08-12",
-     "equity": 10520.51
+     "equity": 9868.61
     },
     {
      "date": "2026-08-13",
-     "equity": 10517.3
+     "equity": 9860.1
     },
     {
      "date": "2026-08-14",
-     "equity": 10506.43
+     "equity": 9849.5
     },
     {
      "date": "2026-08-17",
-     "equity": 10465.01
+     "equity": 9819.86
     },
     {
      "date": "2026-08-18",
-     "equity": 10450.2
+     "equity": 9805.24
     },
     {
      "date": "2026-08-19",
-     "equity": 10440.49
+     "equity": 9887.32
     },
     {
      "date": "2026-08-20",
-     "equity": 10422.49
+     "equity": 9836.21
     },
     {
      "date": "2026-08-21",
-     "equity": 10635.48
+     "equity": 10045.85
     },
     {
      "date": "2026-08-24",
-     "equity": 10531.88
+     "equity": 9899.2
     },
     {
      "date": "2026-08-25",
-     "equity": 10463.69
+     "equity": 9802.86
     },
     {
      "date": "2026-08-26",
-     "equity": 10607.66
+     "equity": 9916.95
     },
     {
      "date": "2026-08-27",
-     "equity": 10479.3
+     "equity": 9779.76
     },
     {
      "date": "2026-08-28",
-     "equity": 10599.27
+     "equity": 9888.13
     },
     {
      "date": "2026-08-31",
-     "equity": 10727.92
+     "equity": 10009.52
     },
     {
      "date": "2026-09-01",
-     "equity": 10615.84
+     "equity": 9950.33
     },
     {
      "date": "2026-09-02",
-     "equity": 10450.79
+     "equity": 9819.31
     },
     {
      "date": "2026-09-03",
-     "equity": 10507.2
+     "equity": 9780.05
     },
     {
      "date": "2026-09-04",
-     "equity": 10471.9
+     "equity": 9669.42
     },
     {
      "date": "2026-09-07",
-     "equity": 10366.95
+     "equity": 9467.07
     },
     {
      "date": "2026-09-08",
-     "equity": 10306.43
+     "equity": 9475.87
     },
     {
      "date": "2026-09-09",
-     "equity": 10384.82
+     "equity": 9597.02
     },
     {
      "date": "2026-09-10",
-     "equity": 10349.36
+     "equity": 9542.55
     },
     {
      "date": "2026-09-11",
-     "equity": 10370.35
+     "equity": 9566.44
     },
     {
      "date": "2026-09-14",
-     "equity": 10327.39
+     "equity": 9530.6
     },
     {
      "date": "2026-09-15",
-     "equity": 10326.15
+     "equity": 9561.44
     },
     {
      "date": "2026-09-16",
-     "equity": 10444.31
+     "equity": 9618.98
     },
     {
      "date": "2026-09-17",
-     "equity": 10368.41
+     "equity": 9659.66
     },
     {
      "date": "2026-09-18",
-     "equity": 10260.43
+     "equity": 9583.94
     },
     {
      "date": "2026-09-21",
-     "equity": 10301.04
+     "equity": 9623.6
     },
     {
      "date": "2026-09-22",
-     "equity": 10347.64
+     "equity": 9640.73
     },
     {
      "date": "2026-09-23",
-     "equity": 10477.65
+     "equity": 9660.47
     },
     {
      "date": "2026-09-24",
-     "equity": 10388.77
+     "equity": 9688.97
     },
     {
      "date": "2026-09-25",
-     "equity": 10403.06
+     "equity": 9710.14
     },
     {
      "date": "2026-09-28",
-     "equity": 10486.26
+     "equity": 9770.15
     },
     {
      "date": "2026-09-29",
-     "equity": 10449.95
+     "equity": 9781.56
     },
     {
      "date": "2026-09-30",
-     "equity": 10592.33
+     "equity": 9974.6
     },
     {
      "date": "2026-10-01",
-     "equity": 10683.36
+     "equity": 10066.79
     },
     {
      "date": "2026-10-02",
-     "equity": 10815.92
+     "equity": 10076.89
     },
     {
      "date": "2026-10-05",
-     "equity": 10876.21
+     "equity": 10091.16
     },
     {
      "date": "2026-10-06",
-     "equity": 10874.28
+     "equity": 10255.22
     },
     {
      "date": "2026-10-07",
-     "equity": 10887.9
+     "equity": 10430.13
     }
    ],
    "ranking": [
     {
      "ticker": "ORCL",
      "price": 1253.53,
-     "score": 0.523,
+     "score": 0.3727,
      "ret_long": 0.7135,
      "ret_short": 0.3325,
+     "ret_fast": 0.072,
      "above_trend": true,
      "qualifies": true
     },
     {
      "ticker": "AAPL",
      "price": 378.66,
-     "score": 0.2636,
+     "score": 0.1875,
      "ret_long": 0.3073,
      "ret_short": 0.2199,
+     "ret_fast": 0.0353,
      "above_trend": true,
      "qualifies": true
     },
     {
      "ticker": "MSFT",
      "price": 818.96,
-     "score": 0.202,
+     "score": 0.1557,
      "ret_long": 0.1981,
      "ret_short": 0.2059,
+     "ret_fast": 0.063,
      "above_trend": true,
      "qualifies": true
     },
     {
      "ticker": "META",
      "price": 301.28,
-     "score": 0.1851,
+     "score": 0.1375,
      "ret_long": 0.2729,
      "ret_short": 0.0972,
+     "ret_fast": 0.0425,
+     "above_trend": true,
+     "qualifies": true
+    },
+    {
+     "ticker": "AMD",
+     "price": 228.3,
+     "score": 0.0664,
+     "ret_long": 0.0505,
+     "ret_short": 0.0464,
+     "ret_fast": 0.1023,
      "above_trend": true,
      "qualifies": true
     },
     {
      "ticker": "GOOGL",
      "price": 371.31,
-     "score": 0.0774,
+     "score": 0.0555,
      "ret_long": 0.0393,
      "ret_short": 0.1156,
-     "above_trend": true,
-     "qualifies": true
-    },
-    {
-     "ticker": "AMAT",
-     "price": 223.48,
-     "score": 0.0494,
-     "ret_long": 0.1446,
-     "ret_short": -0.0458,
-     "above_trend": false,
-     "qualifies": false
-    },
-    {
-     "ticker": "AMD",
-     "price": 228.3,
-     "score": 0.0485,
-     "ret_long": 0.0505,
-     "ret_short": 0.0464,
+     "ret_fast": 0.0118,
      "above_trend": true,
      "qualifies": true
     },
     {
      "ticker": "QCOM",
      "price": 360.34,
-     "score": 0.0232,
+     "score": 0.0316,
      "ret_long": -0.0375,
      "ret_short": 0.084,
+     "ret_fast": 0.0483,
      "above_trend": true,
      "qualifies": true
     },
     {
+     "ticker": "AMAT",
+     "price": 223.48,
+     "score": 0.0309,
+     "ret_long": 0.1446,
+     "ret_short": -0.0458,
+     "ret_fast": -0.0062,
+     "above_trend": false,
+     "qualifies": false
+    },
+    {
      "ticker": "CSCO",
      "price": 525.14,
-     "score": -0.0416,
+     "score": -0.0382,
      "ret_long": -0.0289,
      "ret_short": -0.0544,
+     "ret_fast": -0.0313,
      "above_trend": true,
      "qualifies": false
     },
     {
      "ticker": "ADBE",
      "price": 172.75,
-     "score": -0.0894,
+     "score": -0.0486,
      "ret_long": -0.1045,
      "ret_short": -0.0743,
+     "ret_fast": 0.033,
      "above_trend": false,
      "qualifies": false
     },
     {
      "ticker": "NVDA",
      "price": 159.93,
-     "score": -0.1069,
+     "score": -0.082,
      "ret_long": -0.1687,
      "ret_short": -0.0451,
+     "ret_fast": -0.0322,
      "above_trend": false,
      "qualifies": false
     },
     {
-     "ticker": "NOW",
-     "price": 256.66,
-     "score": -0.1337,
-     "ret_long": -0.1854,
-     "ret_short": -0.0821,
+     "ticker": "PLTR",
+     "price": 229.05,
+     "score": -0.0895,
+     "ret_long": 0.0636,
+     "ret_short": -0.3328,
+     "ret_fast": 0.0007,
      "above_trend": false,
      "qualifies": false
     }
    ],
    "ai": {
     "status": "ok",
-    "date": "2026-10-01",
+    "date": "2026-10-07 15:35",
     "model": "simulated",
     "market_view": "Simulated AI picks (no Claude API key in this run).",
     "picks": [
      {
-      "ticker": "NVDA",
+      "ticker": "GOOGL",
       "confidence": 0.5,
-      "reason": "-4% over 3 months, -2.6% this week."
+      "reason": "+12% over 3 months, +1.2% this week."
      },
      {
-      "ticker": "CSCO",
+      "ticker": "QCOM",
       "confidence": 0.5,
-      "reason": "+5% over 3 months, +7.2% this week."
+      "reason": "+8% over 3 months, +4.8% this week."
      }
     ],
     "rejected": []
    },
    "blocked_in_universe": [],
-   "notes": [],
-   "last_momentum": "2026-10-01",
-   "last_ai": "2026-10-01"
+   "notes": [
+    {
+     "date": "2026-09-02",
+     "text": "CSCO: not buying back today after a stop"
+    },
+    {
+     "date": "2026-09-02",
+     "text": "AAPL: not buying back today after a stop"
+    },
+    {
+     "date": "2026-08-26",
+     "text": "PLTR: not buying back today after a stop"
+    },
+    {
+     "date": "2026-08-14",
+     "text": "GOOGL: not buying back today after a stop"
+    },
+    {
+     "date": "2026-08-11",
+     "text": "PLTR: not buying back today after a stop"
+    },
+    {
+     "date": "2026-08-07",
+     "text": "AAPL: not buying back today after a stop"
+    },
+    {
+     "date": "2026-07-20",
+     "text": "ORCL: not buying back today after a stop"
+    },
+    {
+     "date": "2026-07-17",
+     "text": "PLTR: not buying back today after a stop"
+    },
+    {
+     "date": "2026-07-06",
+     "text": "PLTR: not buying back today after a stop"
+    },
+    {
+     "date": "2026-07-03",
+     "text": "AAPL: not buying back today after a stop"
+    }
+   ],
+   "last_momentum": "2026-10-07T15:35:00",
+   "last_ai": "2026-10-07T15:35:00"
   },
   {
    "id": "energy",
@@ -1397,20 +1582,26 @@
    "color": "#f59e0b",
    "enabled": true,
    "settings": {
+    "market": "us_stocks",
     "enabled": true,
     "starting_cash": 10000.0,
     "ai_share": 0.2,
+    "check_every_minutes": 3,
+    "min_hold_minutes": 30,
+    "max_trades_per_day": 20,
     "momentum": {
      "top_n": 3,
      "lookback_days": 126,
      "short_lookback_days": 63,
      "trend_sma_days": 50,
-     "rebalance_days": 7,
-     "stop_loss_pct": 0.1
+     "fast_lookback_days": 5,
+     "stop_loss_pct": 0.1,
+     "trailing_stop_pct": 0.07,
+     "rank_buffer": 2
     },
     "ai": {
      "max_picks": 2,
-     "rebalance_days": 7
+     "review_every_minutes": 120
     },
     "universe": [
      "XOM",
@@ -1436,73 +1627,139 @@
     "sector": "Energy",
     "color": "#f59e0b"
    },
-   "cash": 748.48,
-   "equity": 11166.52,
+   "cash": 701.32,
+   "equity": 11319.11,
    "contributed": 10000.0,
-   "pnl": 1166.52,
-   "pnl_pct": 0.1167,
-   "day_change": 69.61,
-   "day_change_pct": 0.0063,
+   "pnl": 1319.11,
+   "pnl_pct": 0.1319,
+   "day_change": 21.64,
+   "day_change_pct": 0.0019,
    "positions": [
+    {
+     "ticker": "FSLR",
+     "sleeve": "momentum",
+     "shares": 22,
+     "avg_cost": 129.7548,
+     "opened": "2026-09-14",
+     "opened_at": "2026-09-14T15:35:00",
+     "high": 136.84,
+     "price": 134.71,
+     "value": 2963.62,
+     "pnl_pct": 0.0382,
+     "weight": 0.2618
+    },
     {
      "ticker": "EOG",
      "sleeve": "momentum",
      "shares": 2,
-     "avg_cost": 797.7487,
-     "opened": "2026-06-04",
+     "avg_cost": 1100.0998,
+     "opened": "2026-08-25",
+     "opened_at": "2026-08-25T15:35:00",
+     "high": 1447.38,
      "price": 1447.38,
      "value": 2894.76,
-     "pnl_pct": 0.8143,
-     "weight": 0.2592
+     "pnl_pct": 0.3157,
+     "weight": 0.2557
     },
     {
      "ticker": "DVN",
      "sleeve": "momentum",
      "shares": 21,
-     "avg_cost": 133.0765,
-     "opened": "2026-10-01",
+     "avg_cost": 133.7168,
+     "opened": "2026-09-22",
+     "opened_at": "2026-09-22T15:35:00",
+     "high": 138.85,
      "price": 137.67,
      "value": 2891.07,
-     "pnl_pct": 0.0345,
-     "weight": 0.2589
+     "pnl_pct": 0.0296,
+     "weight": 0.2554
     },
     {
-     "ticker": "FSLR",
-     "sleeve": "momentum",
-     "shares": 21,
-     "avg_cost": 134.9474,
-     "opened": "2026-09-17",
-     "price": 134.71,
-     "value": 2828.91,
-     "pnl_pct": -0.0018,
-     "weight": 0.2533
-    },
-    {
-     "ticker": "SLB",
+     "ticker": "VLO",
      "sleeve": "ai",
      "shares": 4,
-     "avg_cost": 256.3881,
-     "opened": "2026-10-01",
-     "price": 260.65,
-     "value": 1042.6,
-     "pnl_pct": 0.0166,
-     "weight": 0.0934
+     "avg_cost": 267.5787,
+     "opened": "2026-09-30",
+     "opened_at": "2026-09-30T15:35:00",
+     "high": 275.26,
+     "price": 262.77,
+     "value": 1051.08,
+     "pnl_pct": -0.018,
+     "weight": 0.0929
     },
     {
-     "ticker": "CVX",
+     "ticker": "PSX",
      "sleeve": "ai",
-     "shares": 1,
-     "avg_cost": 785.3525,
-     "opened": "2026-09-24",
-     "price": 760.7,
-     "value": 760.7,
-     "pnl_pct": -0.0314,
-     "weight": 0.0681
+     "shares": 2,
+     "avg_cost": 419.2495,
+     "opened": "2026-10-06",
+     "opened_at": "2026-10-06T15:35:00",
+     "high": 419.2495,
+     "price": 408.63,
+     "value": 817.26,
+     "pnl_pct": -0.0253,
+     "weight": 0.0722
     }
    ],
    "trades": [
     {
+     "date": "2026-10-06",
+     "time": "15:35",
+     "ticker": "PSX",
+     "side": "buy",
+     "shares": 2,
+     "price": 419.25,
+     "value": 838.5,
+     "sleeve": "ai",
+     "reason": "New pick"
+    },
+    {
+     "date": "2026-10-05",
+     "time": "15:35",
+     "ticker": "MPC",
+     "side": "sell",
+     "shares": 3,
+     "price": 284.87,
+     "value": 854.6,
+     "sleeve": "ai",
+     "reason": "Rotated out: no longer a top pick"
+    },
+    {
+     "date": "2026-10-02",
+     "time": "15:35",
+     "ticker": "MPC",
+     "side": "buy",
+     "shares": 3,
+     "price": 282.24,
+     "value": 846.72,
+     "sleeve": "ai",
+     "reason": "New pick"
+    },
+    {
+     "date": "2026-10-02",
+     "time": "15:35",
+     "ticker": "VLO",
+     "side": "buy",
+     "shares": 1,
+     "price": 272.91,
+     "value": 272.91,
+     "sleeve": "ai",
+     "reason": "Topped up to target size"
+    },
+    {
+     "date": "2026-10-02",
+     "time": "15:35",
+     "ticker": "SLB",
+     "side": "sell",
+     "shares": 4,
+     "price": 247.24,
+     "value": 988.95,
+     "sleeve": "ai",
+     "reason": "Rotated out: no longer a top pick"
+    },
+    {
      "date": "2026-10-01",
+     "time": "15:35",
      "ticker": "SLB",
      "side": "buy",
      "shares": 4,
@@ -1513,166 +1770,428 @@
     },
     {
      "date": "2026-10-01",
+     "time": "15:35",
+     "ticker": "VLO",
+     "side": "sell",
+     "shares": 1,
+     "price": 275.12,
+     "value": 275.12,
+     "sleeve": "ai",
+     "reason": "Trimmed back to target size"
+    },
+    {
+     "date": "2026-10-01",
+     "time": "15:35",
+     "ticker": "CVX",
+     "side": "sell",
+     "shares": 1,
+     "price": 773.8,
+     "value": 773.8,
+     "sleeve": "ai",
+     "reason": "Rotated out: no longer a top pick"
+    },
+    {
+     "date": "2026-09-30",
+     "time": "15:35",
+     "ticker": "CVX",
+     "side": "buy",
+     "shares": 1,
+     "price": 777.44,
+     "value": 777.44,
+     "sleeve": "ai",
+     "reason": "New pick"
+    },
+    {
+     "date": "2026-09-30",
+     "time": "15:35",
+     "ticker": "VLO",
+     "side": "buy",
+     "shares": 4,
+     "price": 265.8,
+     "value": 1063.21,
+     "sleeve": "ai",
+     "reason": "New pick"
+    },
+    {
+     "date": "2026-09-30",
+     "time": "15:35",
+     "ticker": "SLB",
+     "side": "sell",
+     "shares": 4,
+     "price": 246.24,
+     "value": 984.95,
+     "sleeve": "ai",
+     "reason": "Rotated out: no longer a top pick"
+    },
+    {
+     "date": "2026-09-30",
+     "time": "15:35",
+     "ticker": "MPC",
+     "side": "sell",
+     "shares": 3,
+     "price": 267.94,
+     "value": 803.81,
+     "sleeve": "ai",
+     "reason": "Rotated out: no longer a top pick"
+    },
+    {
+     "date": "2026-09-29",
+     "time": "15:35",
+     "ticker": "SLB",
+     "side": "buy",
+     "shares": 4,
+     "price": 243.7,
+     "value": 974.81,
+     "sleeve": "ai",
+     "reason": "New pick"
+    },
+    {
+     "date": "2026-09-29",
+     "time": "15:35",
+     "ticker": "CVX",
+     "side": "sell",
+     "shares": 1,
+     "price": 781.98,
+     "value": 781.98,
+     "sleeve": "ai",
+     "reason": "Rotated out: no longer a top pick"
+    },
+    {
+     "date": "2026-09-23",
+     "time": "15:35",
+     "ticker": "CVX",
+     "side": "buy",
+     "shares": 1,
+     "price": 812.67,
+     "value": 812.67,
+     "sleeve": "ai",
+     "reason": "New pick"
+    },
+    {
+     "date": "2026-09-23",
+     "time": "15:35",
+     "ticker": "MPC",
+     "side": "buy",
+     "shares": 3,
+     "price": 294.88,
+     "value": 884.63,
+     "sleeve": "ai",
+     "reason": "New pick"
+    },
+    {
+     "date": "2026-09-22",
+     "time": "15:35",
      "ticker": "DVN",
      "side": "buy",
      "shares": 21,
-     "price": 133.08,
-     "value": 2794.61,
+     "price": 133.72,
+     "value": 2808.05,
      "sleeve": "momentum",
      "reason": "New pick"
     },
     {
-     "date": "2026-10-01",
-     "ticker": "MPC",
-     "side": "sell",
-     "shares": 3,
-     "price": 264.79,
-     "value": 794.36,
-     "sleeve": "ai",
-     "reason": "Rotated out: no longer a top pick"
-    },
-    {
-     "date": "2026-10-01",
-     "ticker": "VLO",
-     "side": "sell",
-     "shares": 10,
-     "price": 275.12,
-     "value": 2751.22,
-     "sleeve": "momentum",
-     "reason": "Rotated out: no longer a top pick"
-    },
-    {
-     "date": "2026-09-24",
-     "ticker": "CVX",
-     "side": "buy",
-     "shares": 1,
-     "price": 785.35,
-     "value": 785.35,
-     "sleeve": "ai",
-     "reason": "New pick"
-    },
-    {
-     "date": "2026-09-24",
-     "ticker": "MPC",
-     "side": "buy",
-     "shares": 3,
-     "price": 293.66,
-     "value": 880.97,
-     "sleeve": "ai",
-     "reason": "New pick"
-    },
-    {
-     "date": "2026-09-24",
-     "ticker": "VLO",
-     "side": "buy",
-     "shares": 10,
-     "price": 276.53,
-     "value": 2765.28,
-     "sleeve": "momentum",
-     "reason": "New pick"
-    },
-    {
-     "date": "2026-09-24",
+     "date": "2026-09-22",
+     "time": "15:35",
      "ticker": "PSX",
      "side": "sell",
      "shares": 2,
-     "price": 424.13,
-     "value": 848.26,
+     "price": 419.57,
+     "value": 839.14,
      "sleeve": "ai",
      "reason": "Rotated out: no longer a top pick"
     },
     {
-     "date": "2026-09-24",
+     "date": "2026-09-22",
+     "time": "15:35",
+     "ticker": "MPC",
+     "side": "sell",
+     "shares": 3,
+     "price": 305.99,
+     "value": 917.96,
+     "sleeve": "ai",
+     "reason": "Rotated out: no longer a top pick"
+    },
+    {
+     "date": "2026-09-22",
+     "time": "15:35",
      "ticker": "CVX",
      "side": "sell",
      "shares": 3,
-     "price": 784.57,
-     "value": 2353.7,
+     "price": 811.59,
+     "value": 2434.78,
      "sleeve": "momentum",
-     "reason": "Stop loss: down 12.1%"
+     "reason": "Trailing stop: down 9.7% from its high of $899.68",
+     "protective": true
     },
     {
-     "date": "2026-09-17",
+     "date": "2026-09-21",
+     "time": "15:35",
      "ticker": "PSX",
      "side": "buy",
      "shares": 2,
-     "price": 414.79,
-     "value": 829.57,
+     "price": 414.77,
+     "value": 829.53,
      "sleeve": "ai",
      "reason": "New pick"
     },
     {
-     "date": "2026-09-17",
-     "ticker": "FSLR",
+     "date": "2026-09-18",
+     "time": "15:35",
+     "ticker": "PSX",
+     "side": "sell",
+     "shares": 2,
+     "price": 416.55,
+     "value": 833.1,
+     "sleeve": "ai",
+     "reason": "Rotated out: no longer a top pick"
+    },
+    {
+     "date": "2026-09-16",
+     "time": "15:35",
+     "ticker": "PSX",
      "side": "buy",
-     "shares": 21,
-     "price": 134.95,
-     "value": 2833.9,
-     "sleeve": "momentum",
+     "shares": 2,
+     "price": 411.06,
+     "value": 822.11,
+     "sleeve": "ai",
      "reason": "New pick"
     },
     {
-     "date": "2026-09-17",
+     "date": "2026-09-16",
+     "time": "15:35",
      "ticker": "VLO",
      "side": "sell",
      "shares": 4,
-     "price": 279.65,
-     "value": 1118.6,
+     "price": 269.96,
+     "value": 1079.86,
      "sleeve": "ai",
      "reason": "Rotated out: no longer a top pick"
     },
     {
-     "date": "2026-09-17",
+     "date": "2026-09-15",
+     "time": "15:35",
      "ticker": "MPC",
-     "side": "sell",
-     "shares": 9,
-     "price": 301.61,
-     "value": 2714.48,
-     "sleeve": "momentum",
-     "reason": "Rotated out: no longer a top pick"
-    },
-    {
-     "date": "2026-09-10",
-     "ticker": "FSLR",
-     "side": "sell",
-     "shares": 9,
-     "price": 127.49,
-     "value": 1147.38,
-     "sleeve": "ai",
-     "reason": "Rotated out: no longer a top pick"
-    },
-    {
-     "date": "2026-09-03",
-     "ticker": "FSLR",
      "side": "buy",
-     "shares": 9,
-     "price": 119.65,
-     "value": 1076.85,
+     "shares": 3,
+     "price": 306.27,
+     "value": 918.82,
      "sleeve": "ai",
      "reason": "New pick"
     },
     {
-     "date": "2026-09-03",
+     "date": "2026-09-14",
+     "time": "15:35",
+     "ticker": "FSLR",
+     "side": "buy",
+     "shares": 22,
+     "price": 129.75,
+     "value": 2854.61,
+     "sleeve": "momentum",
+     "reason": "New pick"
+    },
+    {
+     "date": "2026-09-14",
+     "time": "15:35",
+     "ticker": "MPC",
+     "side": "sell",
+     "shares": 9,
+     "price": 309.17,
+     "value": 2782.49,
+     "sleeve": "momentum",
+     "reason": "Trailing stop: down 7.2% from its high of $333.18",
+     "protective": true
+    },
+    {
+     "date": "2026-09-10",
+     "time": "15:35",
      "ticker": "MPC",
      "side": "buy",
      "shares": 1,
-     "price": 313.03,
-     "value": 313.03,
+     "price": 314.92,
+     "value": 314.92,
      "sleeve": "momentum",
      "reason": "Topped up to target size"
     },
     {
+     "date": "2026-09-09",
+     "time": "15:35",
+     "ticker": "MPC",
+     "side": "sell",
+     "shares": 1,
+     "price": 333.01,
+     "value": 333.01,
+     "sleeve": "momentum",
+     "reason": "Trimmed back to target size"
+    },
+    {
+     "date": "2026-09-04",
+     "time": "15:35",
+     "ticker": "FSLR",
+     "side": "sell",
+     "shares": 9,
+     "price": 121.37,
+     "value": 1092.32,
+     "sleeve": "ai",
+     "reason": "Rotated out: no longer a top pick"
+    },
+    {
      "date": "2026-09-03",
+     "time": "15:35",
+     "ticker": "VLO",
+     "side": "buy",
+     "shares": 4,
+     "price": 269.41,
+     "value": 1077.66,
+     "sleeve": "ai",
+     "reason": "New pick"
+    },
+    {
+     "date": "2026-09-03",
+     "time": "15:35",
+     "ticker": "FSLR",
+     "side": "buy",
+     "shares": 1,
+     "price": 119.65,
+     "value": 119.65,
+     "sleeve": "ai",
+     "reason": "Topped up to target size"
+    },
+    {
+     "date": "2026-09-03",
+     "time": "15:35",
+     "ticker": "DVN",
+     "side": "sell",
+     "shares": 8,
+     "price": 121.0,
+     "value": 968.0,
+     "sleeve": "ai",
+     "reason": "Rotated out: no longer a top pick"
+    },
+    {
+     "date": "2026-09-02",
+     "time": "15:35",
+     "ticker": "DVN",
+     "side": "buy",
+     "shares": 8,
+     "price": 123.91,
+     "value": 991.3,
+     "sleeve": "ai",
+     "reason": "New pick"
+    },
+    {
+     "date": "2026-09-02",
+     "time": "15:35",
+     "ticker": "FSLR",
+     "side": "sell",
+     "shares": 1,
+     "price": 122.7,
+     "value": 122.7,
+     "sleeve": "ai",
+     "reason": "Trimmed back to target size"
+    },
+    {
+     "date": "2026-09-02",
+     "time": "15:35",
+     "ticker": "VLO",
+     "side": "sell",
+     "shares": 3,
+     "price": 280.72,
+     "value": 842.16,
+     "sleeve": "ai",
+     "reason": "Rotated out: no longer a top pick"
+    },
+    {
+     "date": "2026-09-01",
+     "time": "15:35",
+     "ticker": "FSLR",
+     "side": "buy",
+     "shares": 1,
+     "price": 120.22,
+     "value": 120.22,
+     "sleeve": "ai",
+     "reason": "Topped up to target size"
+    },
+    {
+     "date": "2026-09-01",
+     "time": "15:35",
+     "ticker": "MPC",
+     "side": "buy",
+     "shares": 9,
+     "price": 311.01,
+     "value": 2799.05,
+     "sleeve": "momentum",
+     "reason": "New pick"
+    },
+    {
+     "date": "2026-08-31",
+     "time": "15:35",
+     "ticker": "VLO",
+     "side": "sell",
+     "shares": 1,
+     "price": 272.68,
+     "value": 272.68,
+     "sleeve": "ai",
+     "reason": "Trimmed back to target size"
+    },
+    {
+     "date": "2026-08-31",
+     "time": "15:35",
+     "ticker": "FSLR",
+     "side": "sell",
+     "shares": 1,
+     "price": 121.29,
+     "value": 121.29,
+     "sleeve": "ai",
+     "reason": "Trimmed back to target size"
+    },
+    {
+     "date": "2026-08-31",
+     "time": "15:35",
+     "ticker": "MPC",
+     "side": "sell",
+     "shares": 9,
+     "price": 304.36,
+     "value": 2739.22,
+     "sleeve": "momentum",
+     "reason": "Trailing stop: down 8.8% from its high of $333.95",
+     "protective": true
+    },
+    {
+     "date": "2026-08-28",
+     "time": "15:35",
+     "ticker": "FSLR",
+     "side": "buy",
+     "shares": 9,
+     "price": 120.08,
+     "value": 1080.72,
+     "sleeve": "ai",
+     "reason": "New pick"
+    },
+    {
+     "date": "2026-08-28",
+     "time": "15:35",
+     "ticker": "MPC",
+     "side": "buy",
+     "shares": 1,
+     "price": 321.06,
+     "value": 321.06,
+     "sleeve": "momentum",
+     "reason": "Topped up to target size"
+    },
+    {
+     "date": "2026-08-28",
+     "time": "15:35",
      "ticker": "FANG",
      "side": "sell",
      "shares": 1,
-     "price": 696.18,
-     "value": 696.18,
+     "price": 700.55,
+     "value": 700.55,
      "sleeve": "ai",
      "reason": "Rotated out: no longer a top pick"
     },
     {
      "date": "2026-08-27",
+     "time": "15:35",
      "ticker": "FANG",
      "side": "buy",
      "shares": 1,
@@ -1683,36 +2202,7 @@
     },
     {
      "date": "2026-08-27",
-     "ticker": "VLO",
-     "side": "buy",
-     "shares": 1,
-     "price": 270.13,
-     "value": 270.13,
-     "sleeve": "ai",
-     "reason": "Topped up to target size"
-    },
-    {
-     "date": "2026-08-27",
-     "ticker": "CVX",
-     "side": "buy",
-     "shares": 3,
-     "price": 892.96,
-     "value": 2678.87,
-     "sleeve": "momentum",
-     "reason": "New pick"
-    },
-    {
-     "date": "2026-08-27",
-     "ticker": "DVN",
-     "side": "sell",
-     "shares": 8,
-     "price": 129.2,
-     "value": 1033.56,
-     "sleeve": "ai",
-     "reason": "Rotated out: no longer a top pick"
-    },
-    {
-     "date": "2026-08-27",
+     "time": "15:35",
      "ticker": "MPC",
      "side": "sell",
      "shares": 1,
@@ -1722,97 +2212,252 @@
      "reason": "Trimmed back to target size"
     },
     {
-     "date": "2026-08-27",
-     "ticker": "FSLR",
-     "side": "sell",
-     "shares": 23,
-     "price": 126.1,
-     "value": 2900.23,
+     "date": "2026-08-26",
+     "time": "15:35",
+     "ticker": "VLO",
+     "side": "buy",
+     "shares": 1,
+     "price": 272.71,
+     "value": 272.71,
+     "sleeve": "ai",
+     "reason": "Topped up to target size"
+    },
+    {
+     "date": "2026-08-26",
+     "time": "15:35",
+     "ticker": "MPC",
+     "side": "buy",
+     "shares": 1,
+     "price": 325.71,
+     "value": 325.71,
      "sleeve": "momentum",
+     "reason": "Topped up to target size"
+    },
+    {
+     "date": "2026-08-26",
+     "time": "15:35",
+     "ticker": "FANG",
+     "side": "sell",
+     "shares": 1,
+     "price": 699.55,
+     "value": 699.55,
+     "sleeve": "ai",
      "reason": "Rotated out: no longer a top pick"
     },
     {
-     "date": "2026-08-20",
-     "ticker": "DVN",
-     "side": "buy",
-     "shares": 8,
-     "price": 126.72,
-     "value": 1013.79,
-     "sleeve": "ai",
-     "reason": "New pick"
-    },
-    {
-     "date": "2026-08-20",
+     "date": "2026-08-25",
+     "time": "15:35",
      "ticker": "VLO",
      "side": "buy",
      "shares": 3,
-     "price": 287.1,
-     "value": 861.31,
+     "price": 283.5,
+     "value": 850.51,
      "sleeve": "ai",
      "reason": "New pick"
     },
     {
-     "date": "2026-08-20",
-     "ticker": "FSLR",
+     "date": "2026-08-25",
+     "time": "15:35",
+     "ticker": "EOG",
      "side": "buy",
-     "shares": 23,
-     "price": 121.44,
-     "value": 2793.14,
+     "shares": 2,
+     "price": 1100.1,
+     "value": 2200.2,
      "sleeve": "momentum",
      "reason": "New pick"
     },
     {
-     "date": "2026-08-20",
-     "ticker": "WMB",
+     "date": "2026-08-24",
+     "time": "15:35",
+     "ticker": "VLO",
      "side": "sell",
-     "shares": 2,
-     "price": 417.64,
-     "value": 835.28,
+     "shares": 3,
+     "price": 285.78,
+     "value": 857.33,
      "sleeve": "ai",
      "reason": "Rotated out: no longer a top pick"
     },
     {
-     "date": "2026-08-20",
+     "date": "2026-08-24",
+     "time": "15:35",
+     "ticker": "MPC",
+     "side": "sell",
+     "shares": 1,
+     "price": 326.95,
+     "value": 326.95,
+     "sleeve": "momentum",
+     "reason": "Trimmed back to target size"
+    },
+    {
+     "date": "2026-08-24",
+     "time": "15:35",
+     "ticker": "EOG",
+     "side": "sell",
+     "shares": 2,
+     "price": 1061.04,
+     "value": 2122.08,
+     "sleeve": "momentum",
+     "reason": "Trailing stop: down 8.0% from its high of $1,153.58",
+     "protective": true
+    },
+    {
+     "date": "2026-08-21",
+     "time": "15:35",
+     "ticker": "FANG",
+     "side": "buy",
+     "shares": 1,
+     "price": 763.42,
+     "value": 763.42,
+     "sleeve": "ai",
+     "reason": "New pick"
+    },
+    {
+     "date": "2026-08-21",
+     "time": "15:35",
+     "ticker": "DVN",
+     "side": "sell",
+     "shares": 8,
+     "price": 125.81,
+     "value": 1006.46,
+     "sleeve": "ai",
+     "reason": "Rotated out: no longer a top pick"
+    },
+    {
+     "date": "2026-08-17",
+     "time": "15:35",
+     "ticker": "DVN",
+     "side": "buy",
+     "shares": 8,
+     "price": 125.88,
+     "value": 1007.06,
+     "sleeve": "ai",
+     "reason": "New pick"
+    },
+    {
+     "date": "2026-08-17",
+     "time": "15:35",
      "ticker": "NEE",
      "side": "sell",
      "shares": 2,
-     "price": 419.06,
-     "value": 838.12,
+     "price": 428.41,
+     "value": 856.81,
      "sleeve": "ai",
      "reason": "Rotated out: no longer a top pick"
     },
     {
-     "date": "2026-08-20",
-     "ticker": "CVX",
-     "side": "sell",
+     "date": "2026-08-14",
+     "time": "15:35",
+     "ticker": "VLO",
+     "side": "buy",
      "shares": 3,
-     "price": 817.92,
-     "value": 2453.76,
-     "sleeve": "momentum",
+     "price": 289.07,
+     "value": 867.22,
+     "sleeve": "ai",
+     "reason": "New pick"
+    },
+    {
+     "date": "2026-08-14",
+     "time": "15:35",
+     "ticker": "FSLR",
+     "side": "sell",
+     "shares": 9,
+     "price": 112.68,
+     "value": 1014.15,
+     "sleeve": "ai",
      "reason": "Rotated out: no longer a top pick"
     },
     {
-     "date": "2026-08-13",
+     "date": "2026-08-12",
+     "time": "15:35",
+     "ticker": "FSLR",
+     "side": "buy",
+     "shares": 9,
+     "price": 111.04,
+     "value": 999.32,
+     "sleeve": "ai",
+     "reason": "New pick"
+    },
+    {
+     "date": "2026-08-11",
+     "time": "15:35",
      "ticker": "CVX",
      "side": "buy",
      "shares": 3,
-     "price": 830.08,
-     "value": 2490.25,
+     "price": 789.86,
+     "value": 2369.59,
      "sleeve": "momentum",
      "reason": "New pick"
     },
     {
-     "date": "2026-08-13",
+     "date": "2026-08-11",
+     "time": "15:35",
+     "ticker": "WMB",
+     "side": "sell",
+     "shares": 2,
+     "price": 448.28,
+     "value": 896.55,
+     "sleeve": "ai",
+     "reason": "Rotated out: no longer a top pick"
+    },
+    {
+     "date": "2026-08-11",
+     "time": "15:35",
      "ticker": "FSLR",
      "side": "sell",
-     "shares": 25,
-     "price": 112.55,
-     "value": 2813.84,
+     "shares": 24,
+     "price": 107.7,
+     "value": 2584.71,
      "sleeve": "momentum",
+     "reason": "Trailing stop: down 7.4% from its high of $116.38",
+     "protective": true
+    },
+    {
+     "date": "2026-08-10",
+     "time": "15:35",
+     "ticker": "NEE",
+     "side": "buy",
+     "shares": 2,
+     "price": 429.28,
+     "value": 858.57,
+     "sleeve": "ai",
+     "reason": "New pick"
+    },
+    {
+     "date": "2026-08-10",
+     "time": "15:35",
+     "ticker": "DVN",
+     "side": "sell",
+     "shares": 8,
+     "price": 128.59,
+     "value": 1028.69,
+     "sleeve": "ai",
+     "reason": "Rotated out: no longer a top pick"
+    },
+    {
+     "date": "2026-08-07",
+     "time": "15:35",
+     "ticker": "DVN",
+     "side": "buy",
+     "shares": 8,
+     "price": 125.46,
+     "value": 1003.7,
+     "sleeve": "ai",
+     "reason": "New pick"
+    },
+    {
+     "date": "2026-08-07",
+     "time": "15:35",
+     "ticker": "NEE",
+     "side": "sell",
+     "shares": 2,
+     "price": 445.1,
+     "value": 890.19,
+     "sleeve": "ai",
      "reason": "Rotated out: no longer a top pick"
     },
     {
      "date": "2026-08-06",
+     "time": "15:35",
      "ticker": "WMB",
      "side": "buy",
      "shares": 2,
@@ -1823,66 +2468,62 @@
     },
     {
      "date": "2026-08-06",
-     "ticker": "NEE",
-     "side": "buy",
-     "shares": 2,
-     "price": 444.44,
-     "value": 888.88,
-     "sleeve": "ai",
-     "reason": "New pick"
-    },
-    {
-     "date": "2026-08-06",
-     "ticker": "FSLR",
-     "side": "buy",
-     "shares": 25,
-     "price": 113.91,
-     "value": 2847.67,
-     "sleeve": "momentum",
-     "reason": "New pick"
-    },
-    {
-     "date": "2026-08-06",
-     "ticker": "FANG",
+     "time": "15:35",
+     "ticker": "DVN",
      "side": "sell",
-     "shares": 1,
-     "price": 749.59,
-     "value": 749.59,
+     "shares": 8,
+     "price": 124.29,
+     "value": 994.3,
      "sleeve": "ai",
      "reason": "Rotated out: no longer a top pick"
     },
     {
-     "date": "2026-08-06",
+     "date": "2026-08-04",
+     "time": "15:35",
+     "ticker": "DVN",
+     "side": "buy",
+     "shares": 8,
+     "price": 127.22,
+     "value": 1017.79,
+     "sleeve": "ai",
+     "reason": "New pick"
+    },
+    {
+     "date": "2026-08-04",
+     "time": "15:35",
      "ticker": "CVX",
      "side": "sell",
      "shares": 1,
-     "price": 775.25,
-     "value": 775.25,
+     "price": 769.27,
+     "value": 769.27,
      "sleeve": "ai",
      "reason": "Rotated out: no longer a top pick"
     },
     {
-     "date": "2026-08-06",
+     "date": "2026-07-31",
+     "time": "15:35",
+     "ticker": "FSLR",
+     "side": "buy",
+     "shares": 24,
+     "price": 114.16,
+     "value": 2739.77,
+     "sleeve": "momentum",
+     "reason": "New pick"
+    },
+    {
+     "date": "2026-07-31",
+     "time": "15:35",
      "ticker": "DVN",
      "side": "sell",
      "shares": 22,
-     "price": 124.29,
-     "value": 2734.33,
+     "price": 128.03,
+     "value": 2816.57,
      "sleeve": "momentum",
      "reason": "Rotated out: no longer a top pick"
     },
     {
      "date": "2026-07-30",
-     "ticker": "FANG",
-     "side": "buy",
-     "shares": 1,
-     "price": 716.02,
-     "value": 716.02,
-     "sleeve": "ai",
-     "reason": "New pick"
-    },
-    {
-     "date": "2026-07-30",
+     "time": "15:35",
      "ticker": "CVX",
      "side": "buy",
      "shares": 1,
@@ -1893,16 +2534,18 @@
     },
     {
      "date": "2026-07-30",
-     "ticker": "MPC",
+     "time": "15:35",
+     "ticker": "NEE",
      "side": "buy",
-     "shares": 9,
-     "price": 301.96,
-     "value": 2717.65,
-     "sleeve": "momentum",
+     "shares": 2,
+     "price": 455.78,
+     "value": 911.56,
+     "sleeve": "ai",
      "reason": "New pick"
     },
     {
      "date": "2026-07-30",
+     "time": "15:35",
      "ticker": "WMB",
      "side": "sell",
      "shares": 2,
@@ -1912,363 +2555,37 @@
      "reason": "Rotated out: no longer a top pick"
     },
     {
-     "date": "2026-07-30",
-     "ticker": "MPC",
-     "side": "sell",
-     "shares": 3,
-     "price": 301.66,
-     "value": 904.98,
-     "sleeve": "ai",
-     "reason": "Rotated out: no longer a top pick"
-    },
-    {
-     "date": "2026-07-30",
-     "ticker": "NEE",
-     "side": "sell",
-     "shares": 5,
-     "price": 455.32,
-     "value": 2276.61,
-     "sleeve": "momentum",
-     "reason": "Rotated out: no longer a top pick"
-    },
-    {
-     "date": "2026-07-23",
-     "ticker": "WMB",
-     "side": "buy",
-     "shares": 2,
-     "price": 465.6,
-     "value": 931.21,
-     "sleeve": "ai",
-     "reason": "New pick"
-    },
-    {
-     "date": "2026-07-23",
+     "date": "2026-07-29",
+     "time": "15:35",
      "ticker": "MPC",
      "side": "buy",
-     "shares": 3,
-     "price": 286.47,
-     "value": 859.42,
-     "sleeve": "ai",
-     "reason": "New pick"
-    },
-    {
-     "date": "2026-07-23",
-     "ticker": "SLB",
-     "side": "sell",
-     "shares": 4,
-     "price": 255.15,
-     "value": 1020.61,
-     "sleeve": "ai",
-     "reason": "Rotated out: no longer a top pick"
-    },
-    {
-     "date": "2026-07-23",
-     "ticker": "CVX",
-     "side": "sell",
-     "shares": 1,
-     "price": 764.72,
-     "value": 764.72,
-     "sleeve": "ai",
-     "reason": "Rotated out: no longer a top pick"
-    },
-    {
-     "date": "2026-07-16",
-     "ticker": "SLB",
-     "side": "buy",
-     "shares": 4,
-     "price": 253.24,
-     "value": 1012.95,
-     "sleeve": "ai",
-     "reason": "New pick"
-    },
-    {
-     "date": "2026-07-16",
-     "ticker": "CVX",
-     "side": "buy",
-     "shares": 1,
-     "price": 770.18,
-     "value": 770.18,
-     "sleeve": "ai",
-     "reason": "New pick"
-    },
-    {
-     "date": "2026-07-16",
-     "ticker": "OXY",
-     "side": "sell",
-     "shares": 4,
-     "price": 260.17,
-     "value": 1040.68,
-     "sleeve": "ai",
-     "reason": "Rotated out: no longer a top pick"
-    },
-    {
-     "date": "2026-07-16",
-     "ticker": "WMB",
-     "side": "sell",
-     "shares": 2,
-     "price": 480.33,
-     "value": 960.66,
-     "sleeve": "ai",
-     "reason": "Rotated out: no longer a top pick"
-    },
-    {
-     "date": "2026-07-09",
-     "ticker": "OXY",
-     "side": "buy",
-     "shares": 4,
-     "price": 256.84,
-     "value": 1027.35,
-     "sleeve": "ai",
-     "reason": "New pick"
-    },
-    {
-     "date": "2026-07-09",
-     "ticker": "WMB",
-     "side": "buy",
-     "shares": 2,
-     "price": 474.51,
-     "value": 949.01,
-     "sleeve": "ai",
-     "reason": "New pick"
-    },
-    {
-     "date": "2026-07-09",
-     "ticker": "VLO",
-     "side": "sell",
-     "shares": 4,
-     "price": 257.1,
-     "value": 1028.41,
-     "sleeve": "ai",
-     "reason": "Rotated out: no longer a top pick"
-    },
-    {
-     "date": "2026-07-09",
-     "ticker": "KMI",
-     "side": "sell",
-     "shares": 6,
-     "price": 163.61,
-     "value": 981.65,
-     "sleeve": "ai",
-     "reason": "Rotated out: no longer a top pick"
-    },
-    {
-     "date": "2026-07-02",
-     "ticker": "VLO",
-     "side": "buy",
-     "shares": 4,
-     "price": 259.61,
-     "value": 1038.44,
-     "sleeve": "ai",
-     "reason": "New pick"
-    },
-    {
-     "date": "2026-07-02",
-     "ticker": "KMI",
-     "side": "buy",
-     "shares": 6,
-     "price": 169.22,
-     "value": 1015.35,
-     "sleeve": "ai",
-     "reason": "New pick"
-    },
-    {
-     "date": "2026-07-02",
-     "ticker": "NEE",
-     "side": "buy",
-     "shares": 5,
-     "price": 505.91,
-     "value": 2529.56,
+     "shares": 9,
+     "price": 309.61,
+     "value": 2786.53,
      "sleeve": "momentum",
      "reason": "New pick"
     },
     {
-     "date": "2026-07-02",
-     "ticker": "FSLR",
-     "side": "sell",
-     "shares": 10,
-     "price": 103.77,
-     "value": 1037.68,
-     "sleeve": "ai",
-     "reason": "Rotated out: no longer a top pick"
-    },
-    {
-     "date": "2026-07-02",
-     "ticker": "EOG",
-     "side": "sell",
-     "shares": 1,
-     "price": 976.68,
-     "value": 976.68,
-     "sleeve": "momentum",
-     "reason": "Trimmed back to target size"
-    },
-    {
-     "date": "2026-07-02",
-     "ticker": "WMB",
-     "side": "sell",
-     "shares": 5,
-     "price": 474.68,
-     "value": 2373.41,
-     "sleeve": "momentum",
-     "reason": "Rotated out: no longer a top pick"
-    },
-    {
-     "date": "2026-06-25",
-     "ticker": "FSLR",
-     "side": "buy",
-     "shares": 10,
-     "price": 101.02,
-     "value": 1010.2,
-     "sleeve": "ai",
-     "reason": "New pick"
-    },
-    {
-     "date": "2026-06-25",
-     "ticker": "VLO",
-     "side": "sell",
-     "shares": 4,
-     "price": 263.38,
-     "value": 1053.51,
-     "sleeve": "ai",
-     "reason": "Rotated out: no longer a top pick"
-    },
-    {
-     "date": "2026-06-25",
-     "ticker": "CVX",
-     "side": "sell",
-     "shares": 1,
-     "price": 705.26,
-     "value": 705.26,
-     "sleeve": "ai",
-     "reason": "Rotated out: no longer a top pick"
-    },
-    {
-     "date": "2026-06-18",
-     "ticker": "VLO",
-     "side": "buy",
-     "shares": 4,
-     "price": 245.59,
-     "value": 982.37,
-     "sleeve": "ai",
-     "reason": "New pick"
-    },
-    {
-     "date": "2026-06-18",
-     "ticker": "WMB",
-     "side": "buy",
-     "shares": 5,
-     "price": 482.36,
-     "value": 2411.81,
-     "sleeve": "momentum",
-     "reason": "New pick"
-    },
-    {
-     "date": "2026-06-18",
-     "ticker": "FSLR",
-     "side": "sell",
-     "shares": 10,
-     "price": 103.17,
-     "value": 1031.68,
-     "sleeve": "ai",
-     "reason": "Rotated out: no longer a top pick"
-    },
-    {
-     "date": "2026-06-18",
+     "date": "2026-07-29",
+     "time": "15:35",
      "ticker": "NEE",
      "side": "sell",
-     "shares": 6,
-     "price": 409.17,
-     "value": 2454.99,
+     "shares": 5,
+     "price": 461.38,
+     "value": 2306.9,
      "sleeve": "momentum",
-     "reason": "Rotated out: no longer a top pick"
+     "reason": "Trailing stop: down 8.0% from its high of $501.82",
+     "protective": true
     },
     {
-     "date": "2026-06-11",
-     "ticker": "FSLR",
-     "side": "buy",
-     "shares": 10,
-     "price": 100.97,
-     "value": 1009.71,
-     "sleeve": "ai",
-     "reason": "New pick"
-    },
-    {
-     "date": "2026-06-11",
-     "ticker": "CVX",
-     "side": "buy",
-     "shares": 1,
-     "price": 717.46,
-     "value": 717.46,
-     "sleeve": "ai",
-     "reason": "New pick"
-    },
-    {
-     "date": "2026-06-11",
-     "ticker": "COP",
-     "side": "sell",
-     "shares": 2,
-     "price": 477.26,
-     "value": 954.52,
-     "sleeve": "ai",
-     "reason": "Rotated out: no longer a top pick"
-    },
-    {
-     "date": "2026-06-11",
-     "ticker": "WMB",
-     "side": "sell",
-     "shares": 2,
-     "price": 463.66,
-     "value": 927.32,
-     "sleeve": "ai",
-     "reason": "Rotated out: no longer a top pick"
-    },
-    {
-     "date": "2026-06-04",
-     "ticker": "COP",
-     "side": "buy",
-     "shares": 2,
-     "price": 497.33,
-     "value": 994.66,
-     "sleeve": "ai",
-     "reason": "New pick"
-    },
-    {
-     "date": "2026-06-04",
+     "date": "2026-07-28",
+     "time": "15:35",
      "ticker": "WMB",
      "side": "buy",
      "shares": 2,
-     "price": 427.99,
-     "value": 855.99,
+     "price": 451.31,
+     "value": 902.61,
      "sleeve": "ai",
-     "reason": "New pick"
-    },
-    {
-     "date": "2026-06-04",
-     "ticker": "NEE",
-     "side": "buy",
-     "shares": 6,
-     "price": 423.3,
-     "value": 2539.81,
-     "sleeve": "momentum",
-     "reason": "New pick"
-    },
-    {
-     "date": "2026-06-04",
-     "ticker": "DVN",
-     "side": "buy",
-     "shares": 22,
-     "price": 117.22,
-     "value": 2578.81,
-     "sleeve": "momentum",
-     "reason": "New pick"
-    },
-    {
-     "date": "2026-06-04",
-     "ticker": "EOG",
-     "side": "buy",
-     "shares": 3,
-     "price": 797.75,
-     "value": 2393.25,
-     "sleeve": "momentum",
      "reason": "New pick"
     }
    ],
@@ -2283,490 +2600,543 @@
     },
     {
      "date": "2026-06-08",
-     "equity": 10188.23
+     "equity": 10187.37
     },
     {
      "date": "2026-06-09",
-     "equity": 10305.56
+     "equity": 10316.18
     },
     {
      "date": "2026-06-10",
-     "equity": 10325.83
+     "equity": 10363.82
     },
     {
      "date": "2026-06-11",
-     "equity": 10373.15
+     "equity": 10420.9
     },
     {
      "date": "2026-06-12",
-     "equity": 10242.33
+     "equity": 10290.08
     },
     {
      "date": "2026-06-15",
-     "equity": 10251.17
+     "equity": 10297.98
     },
     {
      "date": "2026-06-16",
-     "equity": 10300.78
+     "equity": 10383.82
     },
     {
      "date": "2026-06-17",
-     "equity": 10250.36
+     "equity": 10283.9
     },
     {
      "date": "2026-06-18",
-     "equity": 10373.5
+     "equity": 10480.91
     },
     {
      "date": "2026-06-19",
-     "equity": 10294.88
+     "equity": 10332.75
     },
     {
      "date": "2026-06-22",
-     "equity": 10451.72
+     "equity": 10493.33
     },
     {
      "date": "2026-06-23",
-     "equity": 10477.35
+     "equity": 10544.9
     },
     {
      "date": "2026-06-24",
-     "equity": 10596.61
+     "equity": 10656.32
     },
     {
      "date": "2026-06-25",
-     "equity": 10753.86
+     "equity": 10798.86
     },
     {
      "date": "2026-06-26",
-     "equity": 10807.19
+     "equity": 10851.28
     },
     {
      "date": "2026-06-29",
-     "equity": 10693.1
+     "equity": 10763.4
     },
     {
      "date": "2026-06-30",
-     "equity": 10695.53
+     "equity": 10783.15
     },
     {
      "date": "2026-07-01",
-     "equity": 10793.76
+     "equity": 10857.1
     },
     {
      "date": "2026-07-02",
-     "equity": 10822.5
+     "equity": 10876.43
     },
     {
      "date": "2026-07-03",
-     "equity": 10936.59
+     "equity": 10989.55
     },
     {
      "date": "2026-07-06",
-     "equity": 10993.22
+     "equity": 11033.02
     },
     {
      "date": "2026-07-07",
-     "equity": 11086.4
+     "equity": 11128.82
     },
     {
      "date": "2026-07-08",
-     "equity": 10978.38
+     "equity": 10966.32
     },
     {
      "date": "2026-07-09",
-     "equity": 10942.31
+     "equity": 10973.21
     },
     {
      "date": "2026-07-10",
-     "equity": 11176.37
+     "equity": 11205.92
     },
     {
      "date": "2026-07-13",
-     "equity": 11056.29
+     "equity": 11072.66
     },
     {
      "date": "2026-07-14",
-     "equity": 11200.68
+     "equity": 11260.42
     },
     {
      "date": "2026-07-15",
-     "equity": 11263.44
+     "equity": 11320.98
     },
     {
      "date": "2026-07-16",
-     "equity": 11232.44
+     "equity": 11257.15
     },
     {
      "date": "2026-07-17",
-     "equity": 11166.68
+     "equity": 11190.45
     },
     {
      "date": "2026-07-20",
-     "equity": 11038.12
+     "equity": 11072.09
     },
     {
      "date": "2026-07-21",
-     "equity": 10979.1
+     "equity": 11000.68
     },
     {
      "date": "2026-07-22",
-     "equity": 10788.51
+     "equity": 10782.0
     },
     {
      "date": "2026-07-23",
-     "equity": 10798.26
+     "equity": 10762.46
     },
     {
      "date": "2026-07-24",
-     "equity": 10937.59
+     "equity": 10855.79
     },
     {
      "date": "2026-07-27",
-     "equity": 10922.41
+     "equity": 10898.82
     },
     {
      "date": "2026-07-28",
-     "equity": 10823.25
+     "equity": 10840.87
     },
     {
      "date": "2026-07-29",
-     "equity": 10821.28
+     "equity": 10814.93
     },
     {
      "date": "2026-07-30",
-     "equity": 10819.73
+     "equity": 10800.63
     },
     {
      "date": "2026-07-31",
-     "equity": 10735.84
+     "equity": 10668.63
     },
     {
      "date": "2026-08-03",
-     "equity": 10825.12
+     "equity": 10805.43
     },
     {
      "date": "2026-08-04",
-     "equity": 10910.76
+     "equity": 10828.43
     },
     {
      "date": "2026-08-05",
-     "equity": 11022.03
+     "equity": 11039.37
     },
     {
      "date": "2026-08-06",
-     "equity": 10960.69
+     "equity": 10932.27
     },
     {
      "date": "2026-08-07",
-     "equity": 10866.43
+     "equity": 10839.93
     },
     {
      "date": "2026-08-10",
-     "equity": 10707.09
+     "equity": 10739.13
     },
     {
      "date": "2026-08-11",
-     "equity": 10603.11
+     "equity": 10634.47
     },
     {
      "date": "2026-08-12",
-     "equity": 10654.52
+     "equity": 10668.04
     },
     {
      "date": "2026-08-13",
-     "equity": 10732.54
+     "equity": 10806.13
     },
     {
      "date": "2026-08-14",
-     "equity": 10622.14
+     "equity": 10700.54
     },
     {
      "date": "2026-08-17",
-     "equity": 10744.3
+     "equity": 10808.79
     },
     {
      "date": "2026-08-18",
-     "equity": 10712.99
+     "equity": 10774.67
     },
     {
      "date": "2026-08-19",
-     "equity": 10712.34
+     "equity": 10815.49
     },
     {
      "date": "2026-08-20",
-     "equity": 10581.98
+     "equity": 10713.77
     },
     {
      "date": "2026-08-21",
-     "equity": 10856.23
+     "equity": 10963.32
     },
     {
      "date": "2026-08-24",
-     "equity": 10821.1
+     "equity": 11003.19
     },
     {
      "date": "2026-08-25",
-     "equity": 11001.82
+     "equity": 11034.34
     },
     {
      "date": "2026-08-26",
-     "equity": 10967.1
+     "equity": 11077.81
     },
     {
      "date": "2026-08-27",
-     "equity": 10985.36
+     "equity": 11068.94
     },
     {
      "date": "2026-08-28",
-     "equity": 10919.68
+     "equity": 11002.2
     },
     {
      "date": "2026-08-31",
-     "equity": 10796.56
+     "equity": 10865.84
     },
     {
      "date": "2026-09-01",
-     "equity": 10818.33
+     "equity": 10822.58
     },
     {
      "date": "2026-09-02",
-     "equity": 10978.88
+     "equity": 11032.29
     },
     {
      "date": "2026-09-03",
-     "equity": 10829.3
+     "equity": 10863.51
     },
     {
      "date": "2026-09-04",
-     "equity": 10720.32
+     "equity": 10753.98
     },
     {
      "date": "2026-09-07",
-     "equity": 10985.21
+     "equity": 11007.44
     },
     {
      "date": "2026-09-08",
-     "equity": 11068.35
+     "equity": 11089.14
     },
     {
      "date": "2026-09-09",
-     "equity": 11186.62
+     "equity": 11194.83
     },
     {
      "date": "2026-09-10",
-     "equity": 11024.41
+     "equity": 11021.66
     },
     {
      "date": "2026-09-11",
-     "equity": 11070.47
+     "equity": 11067.72
     },
     {
      "date": "2026-09-14",
-     "equity": 10978.77
+     "equity": 10973.2
     },
     {
      "date": "2026-09-15",
-     "equity": 11097.16
+     "equity": 11179.33
     },
     {
      "date": "2026-09-16",
-     "equity": 11085.95
+     "equity": 11232.97
     },
     {
      "date": "2026-09-17",
-     "equity": 11099.66
+     "equity": 11234.27
     },
     {
      "date": "2026-09-18",
-     "equity": 11124.82
+     "equity": 11255.47
     },
     {
      "date": "2026-09-21",
-     "equity": 11015.63
+     "equity": 11155.8
     },
     {
      "date": "2026-09-22",
-     "equity": 10826.17
+     "equity": 10971.5
     },
     {
      "date": "2026-09-23",
-     "equity": 10793.01
+     "equity": 10881.79
     },
     {
      "date": "2026-09-24",
-     "equity": 10751.11
+     "equity": 10837.69
     },
     {
      "date": "2026-09-25",
-     "equity": 10720.56
+     "equity": 10890.2
     },
     {
      "date": "2026-09-28",
-     "equity": 10717.54
+     "equity": 10984.43
     },
     {
      "date": "2026-09-29",
-     "equity": 10663.04
+     "equity": 10996.7
     },
     {
      "date": "2026-09-30",
-     "equity": 10584.2
+     "equity": 10891.06
     },
     {
      "date": "2026-10-01",
-     "equity": 10673.87
+     "equity": 10924.79
     },
     {
      "date": "2026-10-02",
-     "equity": 10747.86
+     "equity": 11002.07
     },
     {
      "date": "2026-10-05",
-     "equity": 10971.6
+     "equity": 11185.66
     },
     {
      "date": "2026-10-06",
-     "equity": 11096.91
+     "equity": 11297.47
     },
     {
      "date": "2026-10-07",
-     "equity": 11166.52
+     "equity": 11319.11
     }
    ],
    "ranking": [
     {
      "ticker": "EOG",
      "price": 1447.38,
-     "score": 0.9532,
+     "score": 0.6847,
      "ret_long": 1.4677,
      "ret_short": 0.4387,
+     "ret_fast": 0.1476,
      "above_trend": true,
      "qualifies": true
     },
     {
      "ticker": "FSLR",
      "price": 134.71,
-     "score": 0.3102,
+     "score": 0.2102,
      "ret_long": 0.2734,
      "ret_short": 0.3471,
+     "ret_fast": 0.01,
      "above_trend": true,
      "qualifies": true
     },
     {
      "ticker": "MPC",
      "price": 298.39,
-     "score": 0.2464,
+     "score": 0.202,
      "ret_long": 0.4324,
      "ret_short": 0.0604,
+     "ret_fast": 0.1131,
      "above_trend": false,
      "qualifies": false
     },
     {
      "ticker": "DVN",
      "price": 137.67,
-     "score": 0.1299,
+     "score": 0.0972,
      "ret_long": 0.281,
      "ret_short": -0.0212,
+     "ret_fast": 0.0317,
      "above_trend": true,
      "qualifies": true
     },
     {
      "ticker": "CVX",
      "price": 760.7,
-     "score": 0.1094,
+     "score": 0.0659,
      "ret_long": 0.2378,
      "ret_short": -0.0189,
+     "ret_fast": -0.021,
      "above_trend": false,
      "qualifies": false
     },
     {
      "ticker": "NEE",
      "price": 460.06,
-     "score": 0.0415,
+     "score": 0.0411,
      "ret_long": 0.2099,
      "ret_short": -0.1268,
+     "ret_fast": 0.0401,
+     "above_trend": true,
+     "qualifies": true
+    },
+    {
+     "ticker": "SLB",
+     "price": 260.65,
+     "score": 0.0109,
+     "ret_long": -0.0373,
+     "ret_short": 0.0119,
+     "ret_fast": 0.058,
      "above_trend": true,
      "qualifies": true
     },
     {
      "ticker": "VLO",
      "price": 262.77,
-     "score": 0.0023,
+     "score": -0.0021,
      "ret_long": -0.0039,
      "ret_short": 0.0085,
+     "ret_fast": -0.0109,
      "above_trend": false,
-     "qualifies": false
-    },
-    {
-     "ticker": "PSX",
-     "price": 408.63,
-     "score": -0.0094,
-     "ret_long": -0.0931,
-     "ret_short": 0.0744,
-     "above_trend": false,
-     "qualifies": false
-    },
-    {
-     "ticker": "SLB",
-     "price": 260.65,
-     "score": -0.0127,
-     "ret_long": -0.0373,
-     "ret_short": 0.0119,
-     "above_trend": true,
      "qualifies": false
     },
     {
      "ticker": "OXY",
      "price": 237.03,
-     "score": -0.014,
+     "score": -0.0261,
      "ret_long": 0.032,
      "ret_short": -0.0601,
+     "ret_fast": -0.0503,
      "above_trend": false,
      "qualifies": false
     },
     {
      "ticker": "FANG",
      "price": 701.3,
-     "score": -0.0247,
+     "score": -0.0287,
      "ret_long": 0.0193,
      "ret_short": -0.0686,
+     "ret_fast": -0.0368,
+     "above_trend": false,
+     "qualifies": false
+    },
+    {
+     "ticker": "PSX",
+     "price": 408.63,
+     "score": -0.03,
+     "ret_long": -0.0931,
+     "ret_short": 0.0744,
+     "ret_fast": -0.0712,
      "above_trend": false,
      "qualifies": false
     },
     {
      "ticker": "WMB",
      "price": 378.23,
-     "score": -0.0699,
+     "score": -0.0457,
      "ret_long": 0.0684,
      "ret_short": -0.2083,
+     "ret_fast": 0.0027,
      "above_trend": false,
      "qualifies": false
     }
    ],
    "ai": {
     "status": "ok",
-    "date": "2026-10-01",
+    "date": "2026-10-07 15:35",
     "model": "simulated",
     "market_view": "Simulated AI picks (no Claude API key in this run).",
     "picks": [
      {
-      "ticker": "SLB",
+      "ticker": "PSX",
       "confidence": 0.5,
-      "reason": "+4% over 3 months, -0.8% this week."
+      "reason": "+7% over 3 months, -7.1% this week."
      },
      {
-      "ticker": "CVX",
+      "ticker": "VLO",
       "confidence": 0.5,
-      "reason": "+1% over 3 months, -1.4% this week."
+      "reason": "+1% over 3 months, -1.1% this week."
      }
     ],
     "rejected": []
    },
    "blocked_in_universe": [],
-   "notes": [],
-   "last_momentum": "2026-10-01",
-   "last_ai": "2026-10-01"
+   "notes": [
+    {
+     "date": "2026-09-22",
+     "text": "CVX: not buying back today after a stop"
+    },
+    {
+     "date": "2026-09-14",
+     "text": "MPC: not buying back today after a stop"
+    },
+    {
+     "date": "2026-08-31",
+     "text": "MPC: not buying back today after a stop"
+    },
+    {
+     "date": "2026-08-24",
+     "text": "EOG: not buying back today after a stop"
+    },
+    {
+     "date": "2026-08-11",
+     "text": "FSLR: not buying back today after a stop"
+    },
+    {
+     "date": "2026-07-29",
+     "text": "NEE: not buying back today after a stop"
+    },
+    {
+     "date": "2026-07-24",
+     "text": "DVN: not buying back today after a stop"
+    },
+    {
+     "date": "2026-07-23",
+     "text": "NEE: not buying back today after a stop"
+    },
+    {
+     "date": "2026-07-10",
+     "text": "OXY: not buying back today after a stop"
+    },
+    {
+     "date": "2026-06-16",
+     "text": "NEE: not buying back today after a stop"
+    }
+   ],
+   "last_momentum": "2026-10-07T15:35:00",
+   "last_ai": "2026-10-07T15:35:00"
   },
   {
    "id": "finance",
@@ -2775,20 +3145,26 @@
    "color": "#34d399",
    "enabled": true,
    "settings": {
+    "market": "us_stocks",
     "enabled": true,
     "starting_cash": 10000.0,
     "ai_share": 0.2,
+    "check_every_minutes": 3,
+    "min_hold_minutes": 30,
+    "max_trades_per_day": 20,
     "momentum": {
      "top_n": 3,
      "lookback_days": 126,
      "short_lookback_days": 63,
      "trend_sma_days": 50,
-     "rebalance_days": 7,
-     "stop_loss_pct": 0.1
+     "fast_lookback_days": 5,
+     "stop_loss_pct": 0.1,
+     "trailing_stop_pct": 0.07,
+     "rank_buffer": 2
     },
     "ai": {
      "max_picks": 2,
-     "rebalance_days": 7
+     "review_every_minutes": 120
     },
     "universe": [
      "JPM",
@@ -2813,72 +3189,159 @@
     "sector": "Financials",
     "color": "#34d399"
    },
-   "cash": 1905.56,
-   "equity": 11641.64,
+   "cash": 2231.29,
+   "equity": 10938.61,
    "contributed": 10000.0,
-   "pnl": 1641.64,
-   "pnl_pct": 0.1642,
-   "day_change": 85.56,
-   "day_change_pct": 0.0074,
+   "pnl": 938.61,
+   "pnl_pct": 0.0939,
+   "day_change": 82.52,
+   "day_change_pct": 0.0076,
    "positions": [
-    {
-     "ticker": "MS",
-     "sleeve": "momentum",
-     "shares": 10,
-     "avg_cost": 216.6383,
-     "opened": "2026-07-09",
-     "price": 294.27,
-     "value": 2942.7,
-     "pnl_pct": 0.3583,
-     "weight": 0.2528
-    },
-    {
-     "ticker": "PNC",
-     "sleeve": "momentum",
-     "shares": 4,
-     "avg_cost": 592.8738,
-     "opened": "2026-06-04",
-     "price": 734.49,
-     "value": 2937.96,
-     "pnl_pct": 0.2389,
-     "weight": 0.2524
-    },
     {
      "ticker": "V",
      "sleeve": "momentum",
      "shares": 7,
-     "avg_cost": 364.7723,
-     "opened": "2026-08-13",
+     "avg_cost": 382.141,
+     "opened": "2026-09-23",
+     "opened_at": "2026-09-23T15:35:00",
+     "high": 400.32,
      "price": 398.14,
      "value": 2786.98,
-     "pnl_pct": 0.0915,
-     "weight": 0.2394
+     "pnl_pct": 0.0419,
+     "weight": 0.2548
+    },
+    {
+     "ticker": "MS",
+     "sleeve": "momentum",
+     "shares": 9,
+     "avg_cost": 242.9114,
+     "opened": "2026-07-27",
+     "opened_at": "2026-07-27T15:35:00",
+     "high": 294.27,
+     "price": 294.27,
+     "value": 2648.43,
+     "pnl_pct": 0.2114,
+     "weight": 0.2421
+    },
+    {
+     "ticker": "PNC",
+     "sleeve": "momentum",
+     "shares": 3,
+     "avg_cost": 702.4035,
+     "opened": "2026-09-24",
+     "opened_at": "2026-09-24T15:35:00",
+     "high": 734.49,
+     "price": 734.49,
+     "value": 2203.47,
+     "pnl_pct": 0.0457,
+     "weight": 0.2014
     },
     {
      "ticker": "C",
      "sleeve": "ai",
      "shares": 2,
-     "avg_cost": 557.1084,
-     "opened": "2026-09-24",
+     "avg_cost": 541.3305,
+     "opened": "2026-10-01",
+     "opened_at": "2026-10-01T15:35:00",
+     "high": 541.3305,
      "price": 534.22,
      "value": 1068.44,
-     "pnl_pct": -0.0411,
-     "weight": 0.0918
+     "pnl_pct": -0.0131,
+     "weight": 0.0977
     }
    ],
    "trades": [
     {
      "date": "2026-10-07",
+     "time": "15:35",
+     "ticker": "CB",
+     "side": "sell",
+     "shares": 4,
+     "price": 215.99,
+     "value": 863.97,
+     "sleeve": "ai",
+     "reason": "Rotated out: no longer a top pick"
+    },
+    {
+     "date": "2026-10-07",
+     "time": "15:35",
+     "ticker": "PNC",
+     "side": "sell",
+     "shares": 1,
+     "price": 734.12,
+     "value": 734.12,
+     "sleeve": "momentum",
+     "reason": "Trimmed back to target size"
+    },
+    {
+     "date": "2026-10-06",
+     "time": "15:35",
+     "ticker": "CB",
+     "side": "buy",
+     "shares": 4,
+     "price": 221.82,
+     "value": 887.28,
+     "sleeve": "ai",
+     "reason": "New pick"
+    },
+    {
+     "date": "2026-10-05",
+     "time": "15:35",
+     "ticker": "MA",
+     "side": "sell",
+     "shares": 3,
+     "price": 336.28,
+     "value": 1008.85,
+     "sleeve": "ai",
+     "reason": "Rotated out: no longer a top pick"
+    },
+    {
+     "date": "2026-10-02",
+     "time": "15:35",
+     "ticker": "MA",
+     "side": "buy",
+     "shares": 3,
+     "price": 325.76,
+     "value": 977.29,
+     "sleeve": "ai",
+     "reason": "New pick"
+    },
+    {
+     "date": "2026-10-02",
+     "time": "15:35",
+     "ticker": "PNC",
+     "side": "buy",
+     "shares": 1,
+     "price": 712.8,
+     "value": 712.8,
+     "sleeve": "momentum",
+     "reason": "Topped up to target size"
+    },
+    {
+     "date": "2026-10-02",
+     "time": "15:35",
      "ticker": "PGR",
      "side": "sell",
      "shares": 6,
-     "price": 150.63,
-     "value": 903.81,
+     "price": 160.05,
+     "value": 960.3,
      "sleeve": "ai",
-     "reason": "Stop loss: down 10.5%"
+     "reason": "Rotated out: no longer a top pick"
+    },
+    {
+     "date": "2026-10-02",
+     "time": "15:35",
+     "ticker": "MS",
+     "side": "sell",
+     "shares": 2,
+     "price": 291.32,
+     "value": 582.65,
+     "sleeve": "momentum",
+     "reason": "Trimmed back to target size"
     },
     {
      "date": "2026-10-01",
+     "time": "15:35",
      "ticker": "PGR",
      "side": "buy",
      "shares": 6,
@@ -2889,36 +3352,139 @@
     },
     {
      "date": "2026-10-01",
-     "ticker": "PGR",
-     "side": "sell",
-     "shares": 6,
-     "price": 168.32,
-     "value": 1009.89,
-     "sleeve": "ai",
-     "reason": "Stop loss: down 11.2%"
-    },
-    {
-     "date": "2026-09-24",
-     "ticker": "PGR",
-     "side": "buy",
-     "shares": 6,
-     "price": 189.55,
-     "value": 1137.33,
-     "sleeve": "ai",
-     "reason": "New pick"
-    },
-    {
-     "date": "2026-09-24",
+     "time": "15:35",
      "ticker": "C",
      "side": "buy",
      "shares": 2,
-     "price": 557.11,
-     "value": 1114.22,
+     "price": 541.33,
+     "value": 1082.66,
+     "sleeve": "ai",
+     "reason": "New pick"
+    },
+    {
+     "date": "2026-10-01",
+     "time": "15:35",
+     "ticker": "MA",
+     "side": "sell",
+     "shares": 3,
+     "price": 335.64,
+     "value": 1006.93,
+     "sleeve": "ai",
+     "reason": "Rotated out: no longer a top pick"
+    },
+    {
+     "date": "2026-10-01",
+     "time": "15:35",
+     "ticker": "AXP",
+     "side": "sell",
+     "shares": 4,
+     "price": 252.58,
+     "value": 1010.33,
+     "sleeve": "ai",
+     "reason": "Rotated out: no longer a top pick"
+    },
+    {
+     "date": "2026-09-29",
+     "time": "15:35",
+     "ticker": "MA",
+     "side": "buy",
+     "shares": 3,
+     "price": 324.9,
+     "value": 974.71,
+     "sleeve": "ai",
+     "reason": "New pick"
+    },
+    {
+     "date": "2026-09-29",
+     "time": "15:35",
+     "ticker": "CB",
+     "side": "sell",
+     "shares": 4,
+     "price": 233.14,
+     "value": 932.57,
+     "sleeve": "ai",
+     "reason": "Rotated out: no longer a top pick"
+    },
+    {
+     "date": "2026-09-28",
+     "time": "15:35",
+     "ticker": "PNC",
+     "side": "sell",
+     "shares": 1,
+     "price": 720.69,
+     "value": 720.69,
+     "sleeve": "momentum",
+     "reason": "Trimmed back to target size"
+    },
+    {
+     "date": "2026-09-25",
+     "time": "15:35",
+     "ticker": "CB",
+     "side": "buy",
+     "shares": 4,
+     "price": 247.8,
+     "value": 991.22,
+     "sleeve": "ai",
+     "reason": "New pick"
+    },
+    {
+     "date": "2026-09-25",
+     "time": "15:35",
+     "ticker": "AXP",
+     "side": "buy",
+     "shares": 4,
+     "price": 249.94,
+     "value": 999.78,
+     "sleeve": "ai",
+     "reason": "New pick"
+    },
+    {
+     "date": "2026-09-25",
+     "time": "15:35",
+     "ticker": "PGR",
+     "side": "sell",
+     "shares": 5,
+     "price": 185.48,
+     "value": 927.39,
+     "sleeve": "ai",
+     "reason": "Rotated out: no longer a top pick"
+    },
+    {
+     "date": "2026-09-25",
+     "time": "15:35",
+     "ticker": "C",
+     "side": "sell",
+     "shares": 1,
+     "price": 564.62,
+     "value": 564.62,
+     "sleeve": "ai",
+     "reason": "Rotated out: no longer a top pick"
+    },
+    {
+     "date": "2026-09-24",
+     "time": "15:35",
+     "ticker": "PGR",
+     "side": "buy",
+     "shares": 5,
+     "price": 189.55,
+     "value": 947.77,
      "sleeve": "ai",
      "reason": "New pick"
     },
     {
      "date": "2026-09-24",
+     "time": "15:35",
+     "ticker": "PNC",
+     "side": "buy",
+     "shares": 4,
+     "price": 698.94,
+     "value": 2795.76,
+     "sleeve": "momentum",
+     "reason": "New pick"
+    },
+    {
+     "date": "2026-09-24",
+     "time": "15:35",
      "ticker": "CB",
      "side": "sell",
      "shares": 4,
@@ -2928,7 +3494,151 @@
      "reason": "Rotated out: no longer a top pick"
     },
     {
+     "date": "2026-09-24",
+     "time": "15:35",
+     "ticker": "MA",
+     "side": "sell",
+     "shares": 8,
+     "price": 334.32,
+     "value": 2674.58,
+     "sleeve": "momentum",
+     "reason": "Rotated out: no longer a top pick"
+    },
+    {
+     "date": "2026-09-23",
+     "time": "15:35",
+     "ticker": "CB",
+     "side": "buy",
+     "shares": 4,
+     "price": 251.82,
+     "value": 1007.26,
+     "sleeve": "ai",
+     "reason": "New pick"
+    },
+    {
+     "date": "2026-09-23",
+     "time": "15:35",
+     "ticker": "C",
+     "side": "buy",
+     "shares": 1,
+     "price": 552.03,
+     "value": 552.03,
+     "sleeve": "ai",
+     "reason": "New pick"
+    },
+    {
+     "date": "2026-09-23",
+     "time": "15:35",
+     "ticker": "V",
+     "side": "buy",
+     "shares": 7,
+     "price": 382.14,
+     "value": 2674.99,
+     "sleeve": "momentum",
+     "reason": "New pick"
+    },
+    {
+     "date": "2026-09-23",
+     "time": "15:35",
+     "ticker": "V",
+     "side": "sell",
+     "shares": 2,
+     "price": 381.76,
+     "value": 763.52,
+     "sleeve": "ai",
+     "reason": "Rotated out: no longer a top pick"
+    },
+    {
+     "date": "2026-09-23",
+     "time": "15:35",
+     "ticker": "PNC",
+     "side": "sell",
+     "shares": 4,
+     "price": 686.44,
+     "value": 2745.75,
+     "sleeve": "momentum",
+     "reason": "Rotated out: no longer a top pick"
+    },
+    {
+     "date": "2026-09-22",
+     "time": "15:35",
+     "ticker": "V",
+     "side": "buy",
+     "shares": 2,
+     "price": 384.68,
+     "value": 769.36,
+     "sleeve": "ai",
+     "reason": "New pick"
+    },
+    {
+     "date": "2026-09-22",
+     "time": "15:35",
+     "ticker": "AXP",
+     "side": "sell",
+     "shares": 4,
+     "price": 248.13,
+     "value": 992.5,
+     "sleeve": "ai",
+     "reason": "Rotated out: no longer a top pick"
+    },
+    {
+     "date": "2026-09-22",
+     "time": "15:35",
+     "ticker": "CB",
+     "side": "sell",
+     "shares": 4,
+     "price": 254.13,
+     "value": 1016.53,
+     "sleeve": "ai",
+     "reason": "Rotated out: no longer a top pick"
+    },
+    {
+     "date": "2026-09-21",
+     "time": "15:35",
+     "ticker": "AXP",
+     "side": "buy",
+     "shares": 4,
+     "price": 255.05,
+     "value": 1020.19,
+     "sleeve": "ai",
+     "reason": "New pick"
+    },
+    {
+     "date": "2026-09-21",
+     "time": "15:35",
+     "ticker": "MA",
+     "side": "buy",
+     "shares": 8,
+     "price": 343.51,
+     "value": 2748.09,
+     "sleeve": "momentum",
+     "reason": "New pick"
+    },
+    {
+     "date": "2026-09-21",
+     "time": "15:35",
+     "ticker": "V",
+     "side": "sell",
+     "shares": 7,
+     "price": 378.72,
+     "value": 2651.04,
+     "sleeve": "momentum",
+     "reason": "Rotated out: no longer a top pick"
+    },
+    {
      "date": "2026-09-17",
+     "time": "15:35",
+     "ticker": "CB",
+     "side": "buy",
+     "shares": 4,
+     "price": 244.55,
+     "value": 978.21,
+     "sleeve": "ai",
+     "reason": "New pick"
+    },
+    {
+     "date": "2026-09-17",
+     "time": "15:35",
      "ticker": "AXP",
      "side": "sell",
      "shares": 4,
@@ -2939,156 +3649,394 @@
     },
     {
      "date": "2026-09-17",
-     "ticker": "V",
+     "time": "15:35",
+     "ticker": "C",
      "side": "sell",
      "shares": 1,
-     "price": 390.92,
-     "value": 390.92,
-     "sleeve": "momentum",
-     "reason": "Trimmed back to target size"
+     "price": 555.68,
+     "value": 555.68,
+     "sleeve": "ai",
+     "reason": "Rotated out: no longer a top pick"
     },
     {
-     "date": "2026-09-03",
+     "date": "2026-09-16",
+     "time": "15:35",
+     "ticker": "V",
+     "side": "buy",
+     "shares": 7,
+     "price": 387.1,
+     "value": 2709.72,
+     "sleeve": "momentum",
+     "reason": "New pick"
+    },
+    {
+     "date": "2026-09-16",
+     "time": "15:35",
+     "ticker": "CB",
+     "side": "sell",
+     "shares": 10,
+     "price": 245.76,
+     "value": 2457.57,
+     "sleeve": "momentum",
+     "reason": "Rotated out: no longer a top pick"
+    },
+    {
+     "date": "2026-09-14",
+     "time": "15:35",
      "ticker": "AXP",
      "side": "buy",
      "shares": 4,
-     "price": 250.09,
-     "value": 1000.34,
+     "price": 246.49,
+     "value": 985.97,
      "sleeve": "ai",
      "reason": "New pick"
     },
     {
-     "date": "2026-08-27",
+     "date": "2026-09-14",
+     "time": "15:35",
+     "ticker": "C",
+     "side": "sell",
+     "shares": 1,
+     "price": 536.78,
+     "value": 536.78,
+     "sleeve": "ai",
+     "reason": "Trimmed back to target size"
+    },
+    {
+     "date": "2026-09-11",
+     "time": "15:35",
+     "ticker": "C",
+     "side": "buy",
+     "shares": 2,
+     "price": 529.4,
+     "value": 1058.81,
+     "sleeve": "ai",
+     "reason": "New pick"
+    },
+    {
+     "date": "2026-09-11",
+     "time": "15:35",
+     "ticker": "AXP",
+     "side": "sell",
+     "shares": 4,
+     "price": 247.48,
+     "value": 989.9,
+     "sleeve": "ai",
+     "reason": "Rotated out: no longer a top pick"
+    },
+    {
+     "date": "2026-09-07",
+     "time": "15:35",
+     "ticker": "AXP",
+     "side": "buy",
+     "shares": 4,
+     "price": 240.79,
+     "value": 963.16,
+     "sleeve": "ai",
+     "reason": "New pick"
+    },
+    {
+     "date": "2026-09-07",
+     "time": "15:35",
+     "ticker": "USB",
+     "side": "sell",
+     "shares": 2,
+     "price": 461.83,
+     "value": 923.66,
+     "sleeve": "ai",
+     "reason": "Rotated out: no longer a top pick"
+    },
+    {
+     "date": "2026-09-04",
+     "time": "15:35",
+     "ticker": "USB",
+     "side": "buy",
+     "shares": 2,
+     "price": 479.93,
+     "value": 959.86,
+     "sleeve": "ai",
+     "reason": "New pick"
+    },
+    {
+     "date": "2026-09-04",
+     "time": "15:35",
+     "ticker": "V",
+     "side": "sell",
+     "shares": 3,
+     "price": 360.11,
+     "value": 1080.33,
+     "sleeve": "ai",
+     "reason": "Rotated out: no longer a top pick"
+    },
+    {
+     "date": "2026-09-03",
+     "time": "15:35",
+     "ticker": "V",
+     "side": "buy",
+     "shares": 3,
+     "price": 356.73,
+     "value": 1070.18,
+     "sleeve": "ai",
+     "reason": "New pick"
+    },
+    {
+     "date": "2026-09-03",
+     "time": "15:35",
+     "ticker": "USB",
+     "side": "sell",
+     "shares": 2,
+     "price": 473.74,
+     "value": 947.49,
+     "sleeve": "ai",
+     "reason": "Rotated out: no longer a top pick"
+    },
+    {
+     "date": "2026-09-03",
+     "time": "15:35",
+     "ticker": "AXP",
+     "side": "sell",
+     "shares": 4,
+     "price": 249.84,
+     "value": 999.34,
+     "sleeve": "ai",
+     "reason": "Rotated out: no longer a top pick"
+    },
+    {
+     "date": "2026-09-01",
+     "time": "15:35",
+     "ticker": "USB",
+     "side": "buy",
+     "shares": 2,
+     "price": 481.5,
+     "value": 963.0,
+     "sleeve": "ai",
+     "reason": "New pick"
+    },
+    {
+     "date": "2026-09-01",
+     "time": "15:35",
+     "ticker": "PNC",
+     "side": "buy",
+     "shares": 4,
+     "price": 717.93,
+     "value": 2871.72,
+     "sleeve": "momentum",
+     "reason": "New pick"
+    },
+    {
+     "date": "2026-08-31",
+     "time": "15:35",
+     "ticker": "PNC",
+     "side": "sell",
+     "shares": 4,
+     "price": 716.37,
+     "value": 2865.49,
+     "sleeve": "momentum",
+     "reason": "Trailing stop: down 7.4% from its high of $774.22",
+     "protective": true
+    },
+    {
+     "date": "2026-08-28",
+     "time": "15:35",
      "ticker": "PNC",
      "side": "buy",
      "shares": 1,
-     "price": 730.7,
-     "value": 730.7,
+     "price": 724.85,
+     "value": 724.85,
      "sleeve": "momentum",
      "reason": "Topped up to target size"
     },
     {
-     "date": "2026-08-27",
-     "ticker": "AXP",
-     "side": "sell",
-     "shares": 4,
-     "price": 247.97,
-     "value": 991.86,
-     "sleeve": "ai",
-     "reason": "Rotated out: no longer a top pick"
-    },
-    {
-     "date": "2026-08-27",
-     "ticker": "MS",
-     "side": "sell",
-     "shares": 2,
-     "price": 281.43,
-     "value": 562.86,
-     "sleeve": "momentum",
-     "reason": "Trimmed back to target size"
-    },
-    {
-     "date": "2026-08-20",
-     "ticker": "AXP",
-     "side": "buy",
-     "shares": 4,
-     "price": 235.46,
-     "value": 941.83,
-     "sleeve": "ai",
-     "reason": "New pick"
-    },
-    {
-     "date": "2026-08-20",
-     "ticker": "CB",
-     "side": "buy",
-     "shares": 4,
-     "price": 261.25,
-     "value": 1045.0,
-     "sleeve": "ai",
-     "reason": "New pick"
-    },
-    {
-     "date": "2026-08-20",
-     "ticker": "MA",
-     "side": "sell",
-     "shares": 3,
-     "price": 267.19,
-     "value": 801.56,
-     "sleeve": "ai",
-     "reason": "Rotated out: no longer a top pick"
-    },
-    {
-     "date": "2026-08-20",
+     "date": "2026-08-28",
+     "time": "15:35",
      "ticker": "USB",
      "side": "sell",
      "shares": 2,
-     "price": 466.26,
-     "value": 932.51,
+     "price": 486.65,
+     "value": 973.29,
      "sleeve": "ai",
      "reason": "Rotated out: no longer a top pick"
     },
     {
+     "date": "2026-08-27",
+     "time": "15:35",
+     "ticker": "USB",
+     "side": "buy",
+     "shares": 2,
+     "price": 476.05,
+     "value": 952.1,
+     "sleeve": "ai",
+     "reason": "New pick"
+    },
+    {
+     "date": "2026-08-27",
+     "time": "15:35",
+     "ticker": "JPM",
+     "side": "sell",
+     "shares": 6,
+     "price": 175.52,
+     "value": 1053.13,
+     "sleeve": "ai",
+     "reason": "Rotated out: no longer a top pick"
+    },
+    {
+     "date": "2026-08-21",
+     "time": "15:35",
+     "ticker": "JPM",
+     "side": "buy",
+     "shares": 6,
+     "price": 180.72,
+     "value": 1084.32,
+     "sleeve": "ai",
+     "reason": "New pick"
+    },
+    {
      "date": "2026-08-20",
+     "time": "15:35",
+     "ticker": "JPM",
+     "side": "sell",
+     "shares": 5,
+     "price": 181.8,
+     "value": 909.0,
+     "sleeve": "ai",
+     "reason": "Trailing stop: down 7.9% from its high of $197.45",
+     "protective": true
+    },
+    {
+     "date": "2026-08-17",
+     "time": "15:35",
      "ticker": "PNC",
      "side": "sell",
      "shares": 1,
-     "price": 773.83,
-     "value": 773.83,
+     "price": 745.0,
+     "value": 745.0,
      "sleeve": "momentum",
      "reason": "Trimmed back to target size"
     },
     {
-     "date": "2026-08-13",
+     "date": "2026-08-14",
+     "time": "15:35",
+     "ticker": "JPM",
+     "side": "buy",
+     "shares": 5,
+     "price": 196.93,
+     "value": 984.64,
+     "sleeve": "ai",
+     "reason": "New pick"
+    },
+    {
+     "date": "2026-08-14",
+     "time": "15:35",
+     "ticker": "AXP",
+     "side": "buy",
+     "shares": 4,
+     "price": 244.67,
+     "value": 978.69,
+     "sleeve": "ai",
+     "reason": "New pick"
+    },
+    {
+     "date": "2026-08-14",
+     "time": "15:35",
+     "ticker": "MA",
+     "side": "sell",
+     "shares": 3,
+     "price": 278.72,
+     "value": 836.16,
+     "sleeve": "ai",
+     "reason": "Rotated out: no longer a top pick"
+    },
+    {
+     "date": "2026-08-14",
+     "time": "15:35",
+     "ticker": "USB",
+     "side": "sell",
+     "shares": 2,
+     "price": 458.43,
+     "value": 916.86,
+     "sleeve": "ai",
+     "reason": "Rotated out: no longer a top pick"
+    },
+    {
+     "date": "2026-08-11",
+     "time": "15:35",
      "ticker": "MA",
      "side": "buy",
      "shares": 3,
-     "price": 281.48,
-     "value": 844.44,
+     "price": 294.33,
+     "value": 882.98,
      "sleeve": "ai",
      "reason": "New pick"
     },
     {
-     "date": "2026-08-13",
-     "ticker": "V",
+     "date": "2026-08-11",
+     "time": "15:35",
+     "ticker": "JPM",
+     "side": "sell",
+     "shares": 5,
+     "price": 200.15,
+     "value": 1000.75,
+     "sleeve": "ai",
+     "reason": "Rotated out: no longer a top pick"
+    },
+    {
+     "date": "2026-08-10",
+     "time": "15:35",
+     "ticker": "JPM",
      "side": "buy",
-     "shares": 8,
-     "price": 364.77,
-     "value": 2918.18,
-     "sleeve": "momentum",
+     "shares": 5,
+     "price": 199.13,
+     "value": 995.65,
+     "sleeve": "ai",
      "reason": "New pick"
     },
     {
-     "date": "2026-08-13",
-     "ticker": "V",
+     "date": "2026-08-10",
+     "time": "15:35",
+     "ticker": "MA",
      "side": "sell",
      "shares": 3,
-     "price": 364.41,
-     "value": 1093.22,
+     "price": 301.79,
+     "value": 905.37,
      "sleeve": "ai",
      "reason": "Rotated out: no longer a top pick"
     },
     {
-     "date": "2026-08-13",
-     "ticker": "CB",
-     "side": "sell",
-     "shares": 10,
-     "price": 267.5,
-     "value": 2674.96,
-     "sleeve": "momentum",
-     "reason": "Rotated out: no longer a top pick"
-    },
-    {
-     "date": "2026-08-06",
+     "date": "2026-08-07",
+     "time": "15:35",
      "ticker": "USB",
      "side": "buy",
      "shares": 2,
-     "price": 487.43,
-     "value": 974.87,
+     "price": 454.43,
+     "value": 908.85,
      "sleeve": "ai",
      "reason": "New pick"
     },
     {
+     "date": "2026-08-07",
+     "time": "15:35",
+     "ticker": "MA",
+     "side": "buy",
+     "shares": 3,
+     "price": 301.25,
+     "value": 903.75,
+     "sleeve": "ai",
+     "reason": "New pick"
+    },
+    {
+     "date": "2026-08-07",
+     "time": "15:35",
+     "ticker": "V",
+     "side": "sell",
+     "shares": 3,
+     "price": 341.62,
+     "value": 1024.86,
+     "sleeve": "ai",
+     "reason": "Rotated out: no longer a top pick"
+    },
+    {
      "date": "2026-08-06",
+     "time": "15:35",
      "ticker": "CB",
      "side": "buy",
      "shares": 10,
@@ -3099,432 +4047,90 @@
     },
     {
      "date": "2026-08-06",
-     "ticker": "CB",
+     "time": "15:35",
+     "ticker": "USB",
+     "side": "sell",
+     "shares": 5,
+     "price": 486.95,
+     "value": 2434.73,
+     "sleeve": "momentum",
+     "reason": "Rotated out: no longer a top pick"
+    },
+    {
+     "date": "2026-08-04",
+     "time": "15:35",
+     "ticker": "V",
+     "side": "buy",
+     "shares": 3,
+     "price": 328.1,
+     "value": 984.31,
+     "sleeve": "ai",
+     "reason": "New pick"
+    },
+    {
+     "date": "2026-08-04",
+     "time": "15:35",
+     "ticker": "MA",
+     "side": "sell",
+     "shares": 3,
+     "price": 306.75,
+     "value": 920.24,
+     "sleeve": "ai",
+     "reason": "Rotated out: no longer a top pick"
+    },
+    {
+     "date": "2026-08-04",
+     "time": "15:35",
+     "ticker": "WFC",
      "side": "sell",
      "shares": 4,
-     "price": 268.3,
-     "value": 1073.18,
+     "price": 217.14,
+     "value": 868.57,
      "sleeve": "ai",
+     "reason": "Rotated out: no longer a top pick"
+    },
+    {
+     "date": "2026-08-03",
+     "time": "15:35",
+     "ticker": "MA",
+     "side": "buy",
+     "shares": 3,
+     "price": 300.03,
+     "value": 900.09,
+     "sleeve": "ai",
+     "reason": "New pick"
+    },
+    {
+     "date": "2026-08-03",
+     "time": "15:35",
+     "ticker": "USB",
+     "side": "buy",
+     "shares": 5,
+     "price": 501.39,
+     "value": 2506.95,
+     "sleeve": "momentum",
+     "reason": "New pick"
+    },
+    {
+     "date": "2026-08-03",
+     "time": "15:35",
+     "ticker": "V",
+     "side": "sell",
+     "shares": 8,
+     "price": 331.61,
+     "value": 2652.91,
+     "sleeve": "momentum",
      "reason": "Rotated out: no longer a top pick"
     },
     {
      "date": "2026-07-31",
-     "ticker": "USB",
-     "side": "sell",
-     "shares": 5,
-     "price": 494.95,
-     "value": 2474.76,
-     "sleeve": "momentum",
-     "reason": "Stop loss: down 10.0%"
-    },
-    {
-     "date": "2026-07-30",
-     "ticker": "CB",
+     "time": "15:35",
+     "ticker": "WFC",
      "side": "buy",
      "shares": 4,
-     "price": 244.63,
-     "value": 978.53,
+     "price": 229.05,
+     "value": 916.22,
      "sleeve": "ai",
-     "reason": "New pick"
-    },
-    {
-     "date": "2026-07-30",
-     "ticker": "MA",
-     "side": "sell",
-     "shares": 3,
-     "price": 301.42,
-     "value": 904.26,
-     "sleeve": "ai",
-     "reason": "Rotated out: no longer a top pick"
-    },
-    {
-     "date": "2026-07-23",
-     "ticker": "V",
-     "side": "buy",
-     "shares": 3,
-     "price": 344.17,
-     "value": 1032.52,
-     "sleeve": "ai",
-     "reason": "New pick"
-    },
-    {
-     "date": "2026-07-23",
-     "ticker": "MA",
-     "side": "buy",
-     "shares": 3,
-     "price": 276.14,
-     "value": 828.41,
-     "sleeve": "ai",
-     "reason": "New pick"
-    },
-    {
-     "date": "2026-07-23",
-     "ticker": "SPGI",
-     "side": "sell",
-     "shares": 3,
-     "price": 284.81,
-     "value": 854.42,
-     "sleeve": "ai",
-     "reason": "Rotated out: no longer a top pick"
-    },
-    {
-     "date": "2026-07-23",
-     "ticker": "CB",
-     "side": "sell",
-     "shares": 4,
-     "price": 231.02,
-     "value": 924.1,
-     "sleeve": "ai",
-     "reason": "Rotated out: no longer a top pick"
-    },
-    {
-     "date": "2026-07-16",
-     "ticker": "SPGI",
-     "side": "buy",
-     "shares": 3,
-     "price": 273.67,
-     "value": 821.0,
-     "sleeve": "ai",
-     "reason": "New pick"
-    },
-    {
-     "date": "2026-07-16",
-     "ticker": "USB",
-     "side": "buy",
-     "shares": 5,
-     "price": 550.48,
-     "value": 2752.38,
-     "sleeve": "momentum",
-     "reason": "New pick"
-    },
-    {
-     "date": "2026-07-16",
-     "ticker": "MA",
-     "side": "sell",
-     "shares": 3,
-     "price": 279.39,
-     "value": 838.17,
-     "sleeve": "ai",
-     "reason": "Rotated out: no longer a top pick"
-    },
-    {
-     "date": "2026-07-16",
-     "ticker": "V",
-     "side": "sell",
-     "shares": 7,
-     "price": 347.03,
-     "value": 2429.18,
-     "sleeve": "momentum",
-     "reason": "Rotated out: no longer a top pick"
-    },
-    {
-     "date": "2026-07-09",
-     "ticker": "CB",
-     "side": "buy",
-     "shares": 4,
-     "price": 221.31,
-     "value": 885.24,
-     "sleeve": "ai",
-     "reason": "New pick"
-    },
-    {
-     "date": "2026-07-09",
-     "ticker": "MA",
-     "side": "buy",
-     "shares": 3,
-     "price": 264.23,
-     "value": 792.7,
-     "sleeve": "ai",
-     "reason": "New pick"
-    },
-    {
-     "date": "2026-07-09",
-     "ticker": "MS",
-     "side": "buy",
-     "shares": 12,
-     "price": 216.64,
-     "value": 2599.66,
-     "sleeve": "momentum",
-     "reason": "New pick"
-    },
-    {
-     "date": "2026-07-09",
-     "ticker": "BAC",
-     "side": "sell",
-     "shares": 1,
-     "price": 948.22,
-     "value": 948.22,
-     "sleeve": "ai",
-     "reason": "Rotated out: no longer a top pick"
-    },
-    {
-     "date": "2026-07-09",
-     "ticker": "MS",
-     "side": "sell",
-     "shares": 5,
-     "price": 216.42,
-     "value": 1082.11,
-     "sleeve": "ai",
-     "reason": "Rotated out: no longer a top pick"
-    },
-    {
-     "date": "2026-07-09",
-     "ticker": "V",
-     "side": "sell",
-     "shares": 1,
-     "price": 342.32,
-     "value": 342.32,
-     "sleeve": "momentum",
-     "reason": "Trimmed back to target size"
-    },
-    {
-     "date": "2026-07-09",
-     "ticker": "SPGI",
-     "side": "sell",
-     "shares": 8,
-     "price": 310.47,
-     "value": 2483.8,
-     "sleeve": "momentum",
-     "reason": "Rotated out: no longer a top pick"
-    },
-    {
-     "date": "2026-07-02",
-     "ticker": "BAC",
-     "side": "buy",
-     "shares": 1,
-     "price": 1022.15,
-     "value": 1022.15,
-     "sleeve": "ai",
-     "reason": "New pick"
-    },
-    {
-     "date": "2026-07-02",
-     "ticker": "MS",
-     "side": "buy",
-     "shares": 5,
-     "price": 207.04,
-     "value": 1035.22,
-     "sleeve": "ai",
-     "reason": "New pick"
-    },
-    {
-     "date": "2026-07-02",
-     "ticker": "CB",
-     "side": "sell",
-     "shares": 4,
-     "price": 222.67,
-     "value": 890.67,
-     "sleeve": "ai",
-     "reason": "Rotated out: no longer a top pick"
-    },
-    {
-     "date": "2026-06-25",
-     "ticker": "CB",
-     "side": "buy",
-     "shares": 4,
-     "price": 206.55,
-     "value": 826.21,
-     "sleeve": "ai",
-     "reason": "New pick"
-    },
-    {
-     "date": "2026-06-25",
-     "ticker": "V",
-     "side": "buy",
-     "shares": 8,
-     "price": 326.86,
-     "value": 2614.91,
-     "sleeve": "momentum",
-     "reason": "New pick"
-    },
-    {
-     "date": "2026-06-25",
-     "ticker": "SPGI",
-     "side": "buy",
-     "shares": 8,
-     "price": 328.32,
-     "value": 2626.59,
-     "sleeve": "momentum",
-     "reason": "New pick"
-    },
-    {
-     "date": "2026-06-25",
-     "ticker": "SCHW",
-     "side": "sell",
-     "shares": 8,
-     "price": 114.99,
-     "value": 919.94,
-     "sleeve": "ai",
-     "reason": "Rotated out: no longer a top pick"
-    },
-    {
-     "date": "2026-06-25",
-     "ticker": "MA",
-     "side": "sell",
-     "shares": 3,
-     "price": 293.39,
-     "value": 880.18,
-     "sleeve": "ai",
-     "reason": "Rotated out: no longer a top pick"
-    },
-    {
-     "date": "2026-06-25",
-     "ticker": "USB",
-     "side": "sell",
-     "shares": 5,
-     "price": 451.57,
-     "value": 2257.87,
-     "sleeve": "momentum",
-     "reason": "Rotated out: no longer a top pick"
-    },
-    {
-     "date": "2026-06-25",
-     "ticker": "MS",
-     "side": "sell",
-     "shares": 12,
-     "price": 207.12,
-     "value": 2485.4,
-     "sleeve": "momentum",
-     "reason": "Rotated out: no longer a top pick"
-    },
-    {
-     "date": "2026-06-18",
-     "ticker": "SCHW",
-     "side": "buy",
-     "shares": 8,
-     "price": 118.72,
-     "value": 949.75,
-     "sleeve": "ai",
-     "reason": "New pick"
-    },
-    {
-     "date": "2026-06-18",
-     "ticker": "MA",
-     "side": "buy",
-     "shares": 3,
-     "price": 291.42,
-     "value": 874.25,
-     "sleeve": "ai",
-     "reason": "New pick"
-    },
-    {
-     "date": "2026-06-18",
-     "ticker": "USB",
-     "side": "buy",
-     "shares": 5,
-     "price": 496.85,
-     "value": 2484.24,
-     "sleeve": "momentum",
-     "reason": "New pick"
-    },
-    {
-     "date": "2026-06-18",
-     "ticker": "AXP",
-     "side": "sell",
-     "shares": 4,
-     "price": 213.62,
-     "value": 854.49,
-     "sleeve": "ai",
-     "reason": "Rotated out: no longer a top pick"
-    },
-    {
-     "date": "2026-06-18",
-     "ticker": "C",
-     "side": "sell",
-     "shares": 1,
-     "price": 499.71,
-     "value": 499.71,
-     "sleeve": "ai",
-     "reason": "Rotated out: no longer a top pick"
-    },
-    {
-     "date": "2026-06-18",
-     "ticker": "SPGI",
-     "side": "sell",
-     "shares": 8,
-     "price": 308.99,
-     "value": 2471.88,
-     "sleeve": "momentum",
-     "reason": "Rotated out: no longer a top pick"
-    },
-    {
-     "date": "2026-06-11",
-     "ticker": "AXP",
-     "side": "buy",
-     "shares": 4,
-     "price": 206.2,
-     "value": 824.81,
-     "sleeve": "ai",
-     "reason": "New pick"
-    },
-    {
-     "date": "2026-06-11",
-     "ticker": "V",
-     "side": "sell",
-     "shares": 3,
-     "price": 300.81,
-     "value": 902.43,
-     "sleeve": "ai",
-     "reason": "Rotated out: no longer a top pick"
-    },
-    {
-     "date": "2026-06-11",
-     "ticker": "SPGI",
-     "side": "sell",
-     "shares": 1,
-     "price": 302.21,
-     "value": 302.21,
-     "sleeve": "momentum",
-     "reason": "Trimmed back to target size"
-    },
-    {
-     "date": "2026-06-04",
-     "ticker": "C",
-     "side": "buy",
-     "shares": 1,
-     "price": 522.95,
-     "value": 522.95,
-     "sleeve": "ai",
-     "reason": "New pick"
-    },
-    {
-     "date": "2026-06-04",
-     "ticker": "V",
-     "side": "buy",
-     "shares": 3,
-     "price": 300.69,
-     "value": 902.07,
-     "sleeve": "ai",
-     "reason": "New pick"
-    },
-    {
-     "date": "2026-06-04",
-     "ticker": "PNC",
-     "side": "buy",
-     "shares": 4,
-     "price": 546.93,
-     "value": 2187.73,
-     "sleeve": "momentum",
-     "reason": "New pick"
-    },
-    {
-     "date": "2026-06-04",
-     "ticker": "SPGI",
-     "side": "buy",
-     "shares": 9,
-     "price": 290.85,
-     "value": 2617.61,
-     "sleeve": "momentum",
-     "reason": "New pick"
-    },
-    {
-     "date": "2026-06-04",
-     "ticker": "MS",
-     "side": "buy",
-     "shares": 12,
-     "price": 206.23,
-     "value": 2474.8,
-     "sleeve": "momentum",
      "reason": "New pick"
     }
    ],
@@ -3535,494 +4141,526 @@
     },
     {
      "date": "2026-06-05",
-     "equity": 10153.49
+     "equity": 10152.4
     },
     {
      "date": "2026-06-08",
-     "equity": 10154.0
+     "equity": 10155.9
     },
     {
      "date": "2026-06-09",
-     "equity": 10170.91
+     "equity": 10169.78
     },
     {
      "date": "2026-06-10",
-     "equity": 10293.24
+     "equity": 10278.76
     },
     {
      "date": "2026-06-11",
-     "equity": 10178.93
+     "equity": 10194.1
     },
     {
      "date": "2026-06-12",
-     "equity": 10296.83
+     "equity": 10310.87
     },
     {
      "date": "2026-06-15",
-     "equity": 10463.1
+     "equity": 10462.85
     },
     {
      "date": "2026-06-16",
-     "equity": 10332.21
+     "equity": 10336.79
     },
     {
      "date": "2026-06-17",
-     "equity": 10295.78
+     "equity": 10289.91
     },
     {
      "date": "2026-06-18",
-     "equity": 10304.8
+     "equity": 10304.58
     },
     {
      "date": "2026-06-19",
-     "equity": 10256.29
+     "equity": 10354.78
     },
     {
      "date": "2026-06-22",
-     "equity": 10320.71
+     "equity": 10444.85
     },
     {
      "date": "2026-06-23",
-     "equity": 10180.46
+     "equity": 10293.13
     },
     {
      "date": "2026-06-24",
-     "equity": 10015.08
+     "equity": 10262.21
     },
     {
      "date": "2026-06-25",
-     "equity": 9974.86
+     "equity": 10304.4
     },
     {
      "date": "2026-06-26",
-     "equity": 9992.66
+     "equity": 10294.56
     },
     {
      "date": "2026-06-29",
-     "equity": 10044.74
+     "equity": 10283.07
     },
     {
      "date": "2026-06-30",
-     "equity": 10168.86
+     "equity": 10414.36
     },
     {
      "date": "2026-07-01",
-     "equity": 10303.06
+     "equity": 10587.93
     },
     {
      "date": "2026-07-02",
-     "equity": 10431.19
+     "equity": 10694.67
     },
     {
      "date": "2026-07-03",
-     "equity": 10301.12
+     "equity": 10563.66
     },
     {
      "date": "2026-07-06",
-     "equity": 10413.86
+     "equity": 10640.18
     },
     {
      "date": "2026-07-07",
-     "equity": 10202.77
+     "equity": 10462.4
     },
     {
      "date": "2026-07-08",
-     "equity": 10281.81
+     "equity": 10393.82
     },
     {
      "date": "2026-07-09",
-     "equity": 10187.9
+     "equity": 10272.06
     },
     {
      "date": "2026-07-10",
-     "equity": 10201.56
+     "equity": 10322.73
     },
     {
      "date": "2026-07-13",
-     "equity": 10350.41
+     "equity": 10563.22
     },
     {
      "date": "2026-07-14",
-     "equity": 10351.77
+     "equity": 10606.31
     },
     {
      "date": "2026-07-15",
-     "equity": 10374.81
+     "equity": 10589.18
     },
     {
      "date": "2026-07-16",
-     "equity": 10431.38
+     "equity": 10653.64
     },
     {
      "date": "2026-07-17",
-     "equity": 10388.79
+     "equity": 10575.23
     },
     {
      "date": "2026-07-20",
-     "equity": 10544.45
+     "equity": 10742.01
     },
     {
      "date": "2026-07-21",
-     "equity": 10527.21
+     "equity": 10640.81
     },
     {
      "date": "2026-07-22",
-     "equity": 10600.57
+     "equity": 10647.93
     },
     {
      "date": "2026-07-23",
-     "equity": 10629.18
+     "equity": 10590.23
     },
     {
      "date": "2026-07-24",
-     "equity": 10676.0
+     "equity": 10588.55
     },
     {
      "date": "2026-07-27",
-     "equity": 10597.78
+     "equity": 10552.03
     },
     {
      "date": "2026-07-28",
-     "equity": 10605.5
+     "equity": 10614.0
     },
     {
      "date": "2026-07-29",
-     "equity": 10750.54
+     "equity": 10723.88
     },
     {
      "date": "2026-07-30",
-     "equity": 10722.08
+     "equity": 10693.07
     },
     {
      "date": "2026-07-31",
-     "equity": 10637.92
+     "equity": 10626.75
     },
     {
      "date": "2026-08-03",
-     "equity": 10738.01
+     "equity": 10668.65
     },
     {
      "date": "2026-08-04",
-     "equity": 10807.93
+     "equity": 10711.24
     },
     {
      "date": "2026-08-05",
-     "equity": 10893.99
+     "equity": 10726.11
     },
     {
      "date": "2026-08-06",
-     "equity": 10973.32
+     "equity": 10704.25
     },
     {
      "date": "2026-08-07",
-     "equity": 10930.06
+     "equity": 10726.93
     },
     {
      "date": "2026-08-10",
-     "equity": 10924.55
+     "equity": 10718.74
     },
     {
      "date": "2026-08-11",
-     "equity": 11002.53
+     "equity": 10777.18
     },
     {
      "date": "2026-08-12",
-     "equity": 11071.34
+     "equity": 10799.44
     },
     {
      "date": "2026-08-13",
-     "equity": 11101.09
+     "equity": 10805.85
     },
     {
      "date": "2026-08-14",
-     "equity": 11152.41
+     "equity": 10885.63
     },
     {
      "date": "2026-08-17",
-     "equity": 11377.19
+     "equity": 11031.87
     },
     {
      "date": "2026-08-18",
-     "equity": 11330.82
+     "equity": 11038.24
     },
     {
      "date": "2026-08-19",
-     "equity": 11444.59
+     "equity": 11085.26
     },
     {
      "date": "2026-08-20",
-     "equity": 11514.92
+     "equity": 11048.17
     },
     {
      "date": "2026-08-21",
-     "equity": 11461.8
+     "equity": 10942.23
     },
     {
      "date": "2026-08-24",
-     "equity": 11419.98
+     "equity": 10928.86
     },
     {
      "date": "2026-08-25",
-     "equity": 11317.13
+     "equity": 10757.02
     },
     {
      "date": "2026-08-26",
-     "equity": 11480.82
+     "equity": 10860.15
     },
     {
      "date": "2026-08-27",
-     "equity": 11503.91
+     "equity": 10848.34
     },
     {
      "date": "2026-08-28",
-     "equity": 11635.95
+     "equity": 11003.76
     },
     {
      "date": "2026-08-31",
-     "equity": 11479.91
+     "equity": 10875.58
     },
     {
      "date": "2026-09-01",
-     "equity": 11562.99
+     "equity": 10937.09
     },
     {
      "date": "2026-09-02",
-     "equity": 11509.39
+     "equity": 10929.39
     },
     {
      "date": "2026-09-03",
-     "equity": 11442.49
+     "equity": 10961.58
     },
     {
      "date": "2026-09-04",
-     "equity": 11343.97
+     "equity": 10827.94
     },
     {
      "date": "2026-09-07",
-     "equity": 11315.67
+     "equity": 10858.8
     },
     {
      "date": "2026-09-08",
-     "equity": 11222.39
+     "equity": 10767.16
     },
     {
      "date": "2026-09-09",
-     "equity": 11286.99
+     "equity": 10728.8
     },
     {
      "date": "2026-09-10",
-     "equity": 11396.05
+     "equity": 10781.21
     },
     {
      "date": "2026-09-11",
-     "equity": 11461.93
+     "equity": 10706.83
     },
     {
      "date": "2026-09-14",
-     "equity": 11415.51
+     "equity": 10714.12
     },
     {
      "date": "2026-09-15",
-     "equity": 11443.47
+     "equity": 10722.19
     },
     {
      "date": "2026-09-16",
-     "equity": 11626.21
+     "equity": 10878.34
     },
     {
      "date": "2026-09-17",
-     "equity": 11641.94
+     "equity": 10897.65
     },
     {
      "date": "2026-09-18",
-     "equity": 11626.99
+     "equity": 10882.36
     },
     {
      "date": "2026-09-21",
-     "equity": 11559.47
+     "equity": 10809.63
     },
     {
      "date": "2026-09-22",
-     "equity": 11553.57
+     "equity": 10717.08
     },
     {
      "date": "2026-09-23",
-     "equity": 11457.43
+     "equity": 10609.41
     },
     {
      "date": "2026-09-24",
-     "equity": 11517.29
+     "equity": 10599.16
     },
     {
      "date": "2026-09-25",
-     "equity": 11587.83
+     "equity": 10669.09
     },
     {
      "date": "2026-09-28",
-     "equity": 11607.92
+     "equity": 10717.64
     },
     {
      "date": "2026-09-29",
-     "equity": 11642.58
+     "equity": 10725.97
     },
     {
      "date": "2026-09-30",
-     "equity": 11611.42
+     "equity": 10724.71
     },
     {
      "date": "2026-10-01",
-     "equity": 11643.53
+     "equity": 10854.05
     },
     {
      "date": "2026-10-02",
-     "equity": 11506.34
+     "equity": 10740.78
     },
     {
      "date": "2026-10-05",
-     "equity": 11619.12
+     "equity": 10879.57
     },
     {
      "date": "2026-10-06",
-     "equity": 11556.08
+     "equity": 10856.09
     },
     {
      "date": "2026-10-07",
-     "equity": 11641.64
+     "equity": 10938.61
     }
    ],
    "ranking": [
     {
      "ticker": "MS",
      "price": 294.27,
-     "score": 0.4988,
+     "score": 0.3543,
      "ret_long": 0.6333,
      "ret_short": 0.3643,
+     "ret_fast": 0.0652,
      "above_trend": true,
      "qualifies": true
     },
     {
      "ticker": "PNC",
      "price": 734.49,
-     "score": 0.3896,
+     "score": 0.266,
      "ret_long": 0.572,
      "ret_short": 0.2072,
+     "ret_fast": 0.0189,
      "above_trend": true,
      "qualifies": true
     },
     {
      "ticker": "MA",
      "price": 336.16,
-     "score": 0.276,
+     "score": 0.1922,
      "ret_long": 0.2948,
      "ret_short": 0.2572,
+     "ret_fast": 0.0245,
      "above_trend": true,
      "qualifies": true
     },
     {
      "ticker": "V",
      "price": 398.14,
-     "score": 0.2209,
+     "score": 0.1454,
      "ret_long": 0.285,
      "ret_short": 0.1568,
+     "ret_fast": -0.0054,
      "above_trend": true,
      "qualifies": true
     },
     {
      "ticker": "AXP",
      "price": 251.18,
-     "score": 0.1694,
+     "score": 0.1139,
      "ret_long": 0.2018,
      "ret_short": 0.137,
+     "ret_fast": 0.003,
      "above_trend": true,
      "qualifies": true
     },
     {
      "ticker": "C",
      "price": 534.22,
-     "score": 0.0788,
+     "score": 0.0414,
      "ret_long": 0.0201,
      "ret_short": 0.1376,
+     "ret_fast": -0.0335,
+     "above_trend": true,
+     "qualifies": true
+    },
+    {
+     "ticker": "JPM",
+     "price": 190.87,
+     "score": 0.0047,
+     "ret_long": -0.0196,
+     "ret_short": 0.0204,
+     "ret_fast": 0.0132,
      "above_trend": true,
      "qualifies": true
     },
     {
      "ticker": "CB",
      "price": 216.1,
-     "score": 0.0089,
+     "score": -0.0205,
      "ret_long": 0.0439,
      "ret_short": -0.0262,
+     "ret_fast": -0.0792,
      "above_trend": false,
      "qualifies": false
     },
     {
-     "ticker": "JPM",
-     "price": 190.87,
-     "score": 0.0004,
-     "ret_long": -0.0196,
-     "ret_short": 0.0204,
-     "above_trend": true,
-     "qualifies": true
-    },
-    {
      "ticker": "SCHW",
      "price": 99.45,
-     "score": -0.1057,
+     "score": -0.0633,
      "ret_long": -0.1796,
      "ret_short": -0.0317,
+     "ret_fast": 0.0215,
      "above_trend": true,
      "qualifies": false
     },
     {
      "ticker": "BAC",
      "price": 843.37,
-     "score": -0.1101,
+     "score": -0.0728,
      "ret_long": -0.1357,
      "ret_short": -0.0846,
+     "ret_fast": 0.002,
      "above_trend": false,
      "qualifies": false
     },
     {
-     "ticker": "GS",
-     "price": 162.27,
-     "score": -0.1394,
-     "ret_long": -0.1334,
-     "ret_short": -0.1454,
+     "ticker": "WFC",
+     "price": 182.75,
+     "score": -0.1012,
+     "ret_long": -0.1844,
+     "ret_short": -0.1548,
+     "ret_fast": 0.0356,
      "above_trend": false,
      "qualifies": false
     },
     {
      "ticker": "SPGI",
      "price": 230.53,
-     "score": -0.1525,
+     "score": -0.1096,
      "ret_long": -0.0936,
      "ret_short": -0.2114,
+     "ret_fast": -0.0238,
      "above_trend": false,
      "qualifies": false
     }
    ],
    "ai": {
     "status": "ok",
-    "date": "2026-10-01",
+    "date": "2026-10-07 15:35",
     "model": "simulated",
     "market_view": "Simulated AI picks (no Claude API key in this run).",
     "picks": [
      {
       "ticker": "C",
       "confidence": 0.5,
-      "reason": "+15% over 3 months, -2.8% this week."
-     },
-     {
-      "ticker": "PGR",
-      "confidence": 0.5,
-      "reason": "+2% over 3 months, -11.1% this week."
+      "reason": "+14% over 3 months, -3.4% this week."
      }
     ],
     "rejected": []
    },
    "blocked_in_universe": [],
-   "notes": [],
-   "last_momentum": "2026-10-01",
-   "last_ai": "2026-10-01"
+   "notes": [
+    {
+     "date": "2026-08-31",
+     "text": "PNC: not buying back today after a stop"
+    },
+    {
+     "date": "2026-08-20",
+     "text": "JPM: not buying back today after a stop"
+    },
+    {
+     "date": "2026-07-27",
+     "text": "USB: not buying back today after a stop"
+    },
+    {
+     "date": "2026-07-16",
+     "text": "SPGI: not buying back today after a stop"
+    },
+    {
+     "date": "2026-07-07",
+     "text": "SPGI: not buying back today after a stop"
+    },
+    {
+     "date": "2026-06-24",
+     "text": "USB: not buying back today after a stop"
+    }
+   ],
+   "last_momentum": "2026-10-07T15:35:00",
+   "last_ai": "2026-10-07T15:35:00"
   },
   {
    "id": "consumer",
@@ -4031,20 +4669,26 @@
    "color": "#f472b6",
    "enabled": true,
    "settings": {
+    "market": "us_stocks",
     "enabled": true,
     "starting_cash": 10000.0,
     "ai_share": 0.2,
+    "check_every_minutes": 3,
+    "min_hold_minutes": 30,
+    "max_trades_per_day": 20,
     "momentum": {
      "top_n": 3,
      "lookback_days": 126,
      "short_lookback_days": 63,
      "trend_sma_days": 50,
-     "rebalance_days": 7,
-     "stop_loss_pct": 0.1
+     "fast_lookback_days": 5,
+     "stop_loss_pct": 0.1,
+     "trailing_stop_pct": 0.07,
+     "rank_buffer": 2
     },
     "ai": {
      "max_picks": 2,
-     "rebalance_days": 7
+     "review_every_minutes": 120
     },
     "universe": [
      "AMZN",
@@ -4070,183 +4714,469 @@
     "sector": "Consumer",
     "color": "#f472b6"
    },
-   "cash": 542.43,
-   "equity": 10518.37,
+   "cash": 3279.4,
+   "equity": 10224.79,
    "contributed": 10000.0,
-   "pnl": 518.37,
-   "pnl_pct": 0.0518,
-   "day_change": -40.28,
+   "pnl": 224.79,
+   "pnl_pct": 0.0225,
+   "day_change": -39.32,
    "day_change_pct": -0.0038,
    "positions": [
-    {
-     "ticker": "WMT",
-     "sleeve": "momentum",
-     "shares": 14,
-     "avg_cost": 194.5072,
-     "opened": "2026-09-24",
-     "price": 192.41,
-     "value": 2693.74,
-     "pnl_pct": -0.0108,
-     "weight": 0.2561
-    },
     {
      "ticker": "TJX",
      "sleeve": "momentum",
      "shares": 8,
-     "avg_cost": 254.4016,
-     "opened": "2026-06-04",
+     "avg_cost": 301.3406,
+     "opened": "2026-09-10",
+     "opened_at": "2026-09-10T15:35:00",
+     "high": 335.11,
      "price": 335.11,
      "value": 2680.88,
-     "pnl_pct": 0.3172,
-     "weight": 0.2549
+     "pnl_pct": 0.1121,
+     "weight": 0.2622
     },
     {
-     "ticker": "BKNG",
+     "ticker": "WMT",
      "sleeve": "momentum",
-     "shares": 15,
-     "avg_cost": 179.8599,
-     "opened": "2026-09-17",
-     "price": 177.68,
-     "value": 2665.2,
-     "pnl_pct": -0.0121,
-     "weight": 0.2534
-    },
-    {
-     "ticker": "LULU",
-     "sleeve": "ai",
-     "shares": 6,
-     "avg_cost": 166.2531,
-     "opened": "2026-10-01",
-     "price": 172.94,
-     "value": 1037.64,
-     "pnl_pct": 0.0402,
-     "weight": 0.0987
+     "shares": 13,
+     "avg_cost": 200.9404,
+     "opened": "2026-10-02",
+     "opened_at": "2026-10-02T15:35:00",
+     "high": 200.9404,
+     "price": 192.41,
+     "value": 2501.33,
+     "pnl_pct": -0.0425,
+     "weight": 0.2446
     },
     {
      "ticker": "LOW",
      "sleeve": "ai",
      "shares": 4,
-     "avg_cost": 216.7983,
-     "opened": "2026-09-24",
+     "avg_cost": 222.5012,
+     "opened": "2026-10-01",
+     "opened_at": "2026-10-01T15:35:00",
+     "high": 224.62,
      "price": 224.62,
      "value": 898.48,
-     "pnl_pct": 0.0361,
-     "weight": 0.0854
+     "pnl_pct": 0.0095,
+     "weight": 0.0879
+    },
+    {
+     "ticker": "LULU",
+     "sleeve": "ai",
+     "shares": 5,
+     "avg_cost": 173.0265,
+     "opened": "2026-10-07",
+     "opened_at": "2026-10-07T15:35:00",
+     "high": 173.0265,
+     "price": 172.94,
+     "value": 864.7,
+     "pnl_pct": -0.0005,
+     "weight": 0.0846
     }
    ],
    "trades": [
     {
-     "date": "2026-10-01",
+     "date": "2026-10-07",
+     "time": "15:35",
      "ticker": "LULU",
      "side": "buy",
-     "shares": 6,
-     "price": 166.25,
-     "value": 997.52,
+     "shares": 5,
+     "price": 173.03,
+     "value": 865.13,
      "sleeve": "ai",
      "reason": "New pick"
     },
     {
-     "date": "2026-10-01",
+     "date": "2026-10-07",
+     "time": "15:35",
+     "ticker": "BKNG",
+     "side": "sell",
+     "shares": 14,
+     "price": 177.59,
+     "value": 2486.28,
+     "sleeve": "momentum",
+     "reason": "Trailing stop: down 7.1% from its high of $191.27",
+     "protective": true
+    },
+    {
+     "date": "2026-10-06",
+     "time": "15:35",
+     "ticker": "LULU",
+     "side": "sell",
+     "shares": 6,
+     "price": 172.53,
+     "value": 1035.2,
+     "sleeve": "ai",
+     "reason": "Rotated out: no longer a top pick"
+    },
+    {
+     "date": "2026-10-05",
+     "time": "15:35",
+     "ticker": "LULU",
+     "side": "buy",
+     "shares": 6,
+     "price": 167.97,
+     "value": 1007.84,
+     "sleeve": "ai",
+     "reason": "New pick"
+    },
+    {
+     "date": "2026-10-05",
+     "time": "15:35",
      "ticker": "CMG",
      "side": "sell",
      "shares": 4,
-     "price": 213.41,
-     "value": 853.65,
+     "price": 222.26,
+     "value": 889.04,
      "sleeve": "ai",
      "reason": "Rotated out: no longer a top pick"
     },
     {
-     "date": "2026-09-24",
+     "date": "2026-10-02",
+     "time": "15:35",
+     "ticker": "CMG",
+     "side": "buy",
+     "shares": 4,
+     "price": 215.63,
+     "value": 862.51,
+     "sleeve": "ai",
+     "reason": "New pick"
+    },
+    {
+     "date": "2026-10-02",
+     "time": "15:35",
+     "ticker": "WMT",
+     "side": "buy",
+     "shares": 13,
+     "price": 200.94,
+     "value": 2612.23,
+     "sleeve": "momentum",
+     "reason": "New pick"
+    },
+    {
+     "date": "2026-10-02",
+     "time": "15:35",
+     "ticker": "TSLA",
+     "side": "sell",
+     "shares": 2,
+     "price": 378.92,
+     "value": 757.84,
+     "sleeve": "ai",
+     "reason": "Rotated out: no longer a top pick"
+    },
+    {
+     "date": "2026-10-02",
+     "time": "15:35",
+     "ticker": "LULU",
+     "side": "sell",
+     "shares": 16,
+     "price": 162.18,
+     "value": 2594.86,
+     "sleeve": "momentum",
+     "reason": "Rotated out: no longer a top pick"
+    },
+    {
+     "date": "2026-10-01",
+     "time": "15:35",
+     "ticker": "TSLA",
+     "side": "buy",
+     "shares": 2,
+     "price": 383.3,
+     "value": 766.6,
+     "sleeve": "ai",
+     "reason": "New pick"
+    },
+    {
+     "date": "2026-10-01",
+     "time": "15:35",
      "ticker": "LOW",
      "side": "buy",
      "shares": 4,
-     "price": 216.8,
-     "value": 867.19,
+     "price": 222.5,
+     "value": 890.0,
      "sleeve": "ai",
      "reason": "New pick"
     },
     {
-     "date": "2026-09-24",
-     "ticker": "WMT",
-     "side": "buy",
-     "shares": 14,
-     "price": 194.51,
-     "value": 2723.1,
-     "sleeve": "momentum",
-     "reason": "New pick"
-    },
-    {
-     "date": "2026-09-24",
-     "ticker": "LULU",
+     "date": "2026-10-01",
+     "time": "15:35",
+     "ticker": "AMZN",
      "side": "sell",
-     "shares": 17,
-     "price": 159.38,
-     "value": 2709.47,
-     "sleeve": "momentum",
+     "shares": 7,
+     "price": 148.44,
+     "value": 1039.05,
+     "sleeve": "ai",
      "reason": "Rotated out: no longer a top pick"
     },
     {
-     "date": "2026-09-17",
-     "ticker": "LULU",
+     "date": "2026-09-30",
+     "time": "15:35",
+     "ticker": "LOW",
+     "side": "sell",
+     "shares": 4,
+     "price": 221.41,
+     "value": 885.64,
+     "sleeve": "ai",
+     "reason": "Rotated out: no longer a top pick"
+    },
+    {
+     "date": "2026-09-28",
+     "time": "15:35",
+     "ticker": "AMZN",
      "side": "buy",
-     "shares": 17,
-     "price": 162.31,
-     "value": 2759.29,
-     "sleeve": "momentum",
+     "shares": 7,
+     "price": 145.76,
+     "value": 1020.34,
+     "sleeve": "ai",
      "reason": "New pick"
     },
     {
-     "date": "2026-09-17",
-     "ticker": "BKNG",
-     "side": "buy",
-     "shares": 15,
-     "price": 179.86,
-     "value": 2697.9,
-     "sleeve": "momentum",
-     "reason": "New pick"
-    },
-    {
-     "date": "2026-09-17",
-     "ticker": "LULU",
+     "date": "2026-09-28",
+     "time": "15:35",
+     "ticker": "PG",
      "side": "sell",
      "shares": 6,
-     "price": 162.15,
-     "value": 972.89,
+     "price": 153.46,
+     "value": 920.78,
      "sleeve": "ai",
      "reason": "Rotated out: no longer a top pick"
     },
     {
-     "date": "2026-09-17",
-     "ticker": "TJX",
+     "date": "2026-09-25",
+     "time": "15:35",
+     "ticker": "PG",
+     "side": "buy",
+     "shares": 6,
+     "price": 153.68,
+     "value": 922.06,
+     "sleeve": "ai",
+     "reason": "New pick"
+    },
+    {
+     "date": "2026-09-25",
+     "time": "15:35",
+     "ticker": "CMG",
      "side": "sell",
-     "shares": 1,
-     "price": 314.37,
-     "value": 314.37,
+     "shares": 4,
+     "price": 229.69,
+     "value": 918.74,
+     "sleeve": "ai",
+     "reason": "Rotated out: no longer a top pick"
+    },
+    {
+     "date": "2026-09-24",
+     "time": "15:35",
+     "ticker": "CMG",
+     "side": "buy",
+     "shares": 4,
+     "price": 229.18,
+     "value": 916.74,
+     "sleeve": "ai",
+     "reason": "New pick"
+    },
+    {
+     "date": "2026-09-24",
+     "time": "15:35",
+     "ticker": "PEP",
+     "side": "sell",
+     "shares": 2,
+     "price": 391.63,
+     "value": 783.27,
+     "sleeve": "ai",
+     "reason": "Rotated out: no longer a top pick"
+    },
+    {
+     "date": "2026-09-22",
+     "time": "15:35",
+     "ticker": "PEP",
+     "side": "buy",
+     "shares": 2,
+     "price": 403.22,
+     "value": 806.44,
+     "sleeve": "ai",
+     "reason": "New pick"
+    },
+    {
+     "date": "2026-09-22",
+     "time": "15:35",
+     "ticker": "LOW",
+     "side": "buy",
+     "shares": 4,
+     "price": 215.32,
+     "value": 861.27,
+     "sleeve": "ai",
+     "reason": "New pick"
+    },
+    {
+     "date": "2026-09-22",
+     "time": "15:35",
+     "ticker": "WMT",
+     "side": "sell",
+     "shares": 5,
+     "price": 189.49,
+     "value": 947.43,
+     "sleeve": "ai",
+     "reason": "Rotated out: no longer a top pick"
+    },
+    {
+     "date": "2026-09-21",
+     "time": "15:35",
+     "ticker": "CMG",
+     "side": "sell",
+     "shares": 4,
+     "price": 225.94,
+     "value": 903.75,
+     "sleeve": "ai",
+     "reason": "Rotated out: no longer a top pick"
+    },
+    {
+     "date": "2026-09-18",
+     "time": "15:35",
+     "ticker": "WMT",
+     "side": "buy",
+     "shares": 5,
+     "price": 185.59,
+     "value": 927.96,
+     "sleeve": "ai",
+     "reason": "New pick"
+    },
+    {
+     "date": "2026-09-18",
+     "time": "15:35",
+     "ticker": "PEP",
+     "side": "sell",
+     "shares": 2,
+     "price": 414.19,
+     "value": 828.39,
+     "sleeve": "ai",
+     "reason": "Rotated out: no longer a top pick"
+    },
+    {
+     "date": "2026-09-18",
+     "time": "15:35",
+     "ticker": "BKNG",
+     "side": "sell",
+     "shares": 2,
+     "price": 184.64,
+     "value": 369.28,
      "sleeve": "momentum",
      "reason": "Trimmed back to target size"
     },
     {
      "date": "2026-09-17",
-     "ticker": "PEP",
-     "side": "sell",
-     "shares": 6,
-     "price": 412.46,
-     "value": 2474.78,
-     "sleeve": "momentum",
-     "reason": "Rotated out: no longer a top pick"
+     "time": "15:35",
+     "ticker": "CMG",
+     "side": "buy",
+     "shares": 4,
+     "price": 236.23,
+     "value": 944.91,
+     "sleeve": "ai",
+     "reason": "New pick"
     },
     {
      "date": "2026-09-17",
+     "time": "15:35",
+     "ticker": "LULU",
+     "side": "buy",
+     "shares": 16,
+     "price": 162.31,
+     "value": 2596.98,
+     "sleeve": "momentum",
+     "reason": "New pick"
+    },
+    {
+     "date": "2026-09-17",
+     "time": "15:35",
      "ticker": "WMT",
      "side": "sell",
-     "shares": 15,
+     "shares": 13,
      "price": 185.88,
-     "value": 2788.16,
+     "value": 2416.4,
      "sleeve": "momentum",
      "reason": "Rotated out: no longer a top pick"
     },
     {
+     "date": "2026-09-16",
+     "time": "15:35",
+     "ticker": "PEP",
+     "side": "buy",
+     "shares": 2,
+     "price": 430.2,
+     "value": 860.41,
+     "sleeve": "ai",
+     "reason": "New pick"
+    },
+    {
+     "date": "2026-09-16",
+     "time": "15:35",
+     "ticker": "LOW",
+     "side": "sell",
+     "shares": 4,
+     "price": 207.74,
+     "value": 830.94,
+     "sleeve": "ai",
+     "reason": "Rotated out: no longer a top pick"
+    },
+    {
+     "date": "2026-09-16",
+     "time": "15:35",
+     "ticker": "CMG",
+     "side": "sell",
+     "shares": 4,
+     "price": 242.33,
+     "value": 969.32,
+     "sleeve": "ai",
+     "reason": "Rotated out: no longer a top pick"
+    },
+    {
+     "date": "2026-09-15",
+     "time": "15:35",
+     "ticker": "LOW",
+     "side": "buy",
+     "shares": 4,
+     "price": 208.05,
+     "value": 832.22,
+     "sleeve": "ai",
+     "reason": "New pick"
+    },
+    {
+     "date": "2026-09-15",
+     "time": "15:35",
+     "ticker": "LULU",
+     "side": "sell",
+     "shares": 6,
+     "price": 161.73,
+     "value": 970.37,
+     "sleeve": "ai",
+     "reason": "Rotated out: no longer a top pick"
+    },
+    {
+     "date": "2026-09-14",
+     "time": "15:35",
+     "ticker": "WMT",
+     "side": "buy",
+     "shares": 13,
+     "price": 196.56,
+     "value": 2555.26,
+     "sleeve": "momentum",
+     "reason": "New pick"
+    },
+    {
+     "date": "2026-09-11",
+     "time": "15:35",
+     "ticker": "WMT",
+     "side": "sell",
+     "shares": 14,
+     "price": 186.31,
+     "value": 2608.3,
+     "sleeve": "momentum",
+     "reason": "Trailing stop: down 7.4% from its high of $201.26",
+     "protective": true
+    },
+    {
      "date": "2026-09-10",
+     "time": "15:35",
      "ticker": "CMG",
      "side": "buy",
      "shares": 4,
@@ -4257,76 +5187,173 @@
     },
     {
      "date": "2026-09-10",
-     "ticker": "PEP",
+     "time": "15:35",
+     "ticker": "TJX",
      "side": "buy",
-     "shares": 6,
-     "price": 451.17,
-     "value": 2706.99,
+     "shares": 8,
+     "price": 301.34,
+     "value": 2410.72,
      "sleeve": "momentum",
      "reason": "New pick"
     },
     {
      "date": "2026-09-10",
-     "ticker": "TJX",
-     "side": "buy",
-     "shares": 1,
-     "price": 301.34,
-     "value": 301.34,
-     "sleeve": "momentum",
-     "reason": "Topped up to target size"
-    },
-    {
-     "date": "2026-09-10",
-     "ticker": "LULU",
+     "time": "15:35",
+     "ticker": "PG",
      "side": "sell",
-     "shares": 1,
-     "price": 161.91,
-     "value": 161.91,
-     "sleeve": "ai",
-     "reason": "Trimmed back to target size"
-    },
-    {
-     "date": "2026-09-10",
-     "ticker": "PEP",
-     "side": "sell",
-     "shares": 2,
-     "price": 450.71,
-     "value": 901.43,
+     "shares": 6,
+     "price": 156.74,
+     "value": 940.45,
      "sleeve": "ai",
      "reason": "Rotated out: no longer a top pick"
     },
     {
-     "date": "2026-09-10",
-     "ticker": "BKNG",
+     "date": "2026-09-09",
+     "time": "15:35",
+     "ticker": "TJX",
+     "side": "sell",
+     "shares": 8,
+     "price": 302.55,
+     "value": 2420.39,
+     "sleeve": "momentum",
+     "reason": "Trailing stop: down 9.0% from its high of $332.73",
+     "protective": true
+    },
+    {
+     "date": "2026-09-07",
+     "time": "15:35",
+     "ticker": "PG",
+     "side": "buy",
+     "shares": 6,
+     "price": 157.44,
+     "value": 944.63,
+     "sleeve": "ai",
+     "reason": "New pick"
+    },
+    {
+     "date": "2026-09-07",
+     "time": "15:35",
+     "ticker": "CMG",
+     "side": "sell",
+     "shares": 4,
+     "price": 237.34,
+     "value": 949.37,
+     "sleeve": "ai",
+     "reason": "Rotated out: no longer a top pick"
+    },
+    {
+     "date": "2026-09-04",
+     "time": "15:35",
+     "ticker": "CMG",
+     "side": "buy",
+     "shares": 4,
+     "price": 234.95,
+     "value": 939.79,
+     "sleeve": "ai",
+     "reason": "New pick"
+    },
+    {
+     "date": "2026-09-04",
+     "time": "15:35",
+     "ticker": "WMT",
+     "side": "buy",
+     "shares": 14,
+     "price": 188.09,
+     "value": 2633.32,
+     "sleeve": "momentum",
+     "reason": "New pick"
+    },
+    {
+     "date": "2026-09-04",
+     "time": "15:35",
+     "ticker": "PEP",
+     "side": "sell",
+     "shares": 2,
+     "price": 419.98,
+     "value": 839.96,
+     "sleeve": "ai",
+     "reason": "Rotated out: no longer a top pick"
+    },
+    {
+     "date": "2026-09-04",
+     "time": "15:35",
+     "ticker": "AMZN",
      "side": "sell",
      "shares": 17,
-     "price": 170.46,
-     "value": 2897.9,
+     "price": 148.1,
+     "value": 2517.63,
      "sleeve": "momentum",
      "reason": "Rotated out: no longer a top pick"
     },
     {
      "date": "2026-09-03",
+     "time": "15:35",
      "ticker": "LULU",
      "side": "buy",
-     "shares": 7,
+     "shares": 6,
      "price": 152.01,
-     "value": 1064.04,
+     "value": 912.04,
      "sleeve": "ai",
      "reason": "New pick"
     },
     {
-     "date": "2026-09-02",
+     "date": "2026-09-01",
+     "time": "15:35",
      "ticker": "SBUX",
      "side": "sell",
      "shares": 1,
-     "price": 731.01,
-     "value": 731.01,
+     "price": 736.18,
+     "value": 736.18,
      "sleeve": "ai",
-     "reason": "Stop loss: down 10.2%"
+     "reason": "Rotated out: no longer a top pick"
+    },
+    {
+     "date": "2026-08-31",
+     "time": "15:35",
+     "ticker": "AMZN",
+     "side": "buy",
+     "shares": 17,
+     "price": 148.38,
+     "value": 2522.53,
+     "sleeve": "momentum",
+     "reason": "New pick"
+    },
+    {
+     "date": "2026-08-31",
+     "time": "15:35",
+     "ticker": "WMT",
+     "side": "sell",
+     "shares": 14,
+     "price": 181.05,
+     "value": 2534.69,
+     "sleeve": "momentum",
+     "reason": "Rotated out: no longer a top pick"
+    },
+    {
+     "date": "2026-08-28",
+     "time": "15:35",
+     "ticker": "BKNG",
+     "side": "buy",
+     "shares": 16,
+     "price": 158.3,
+     "value": 2532.79,
+     "sleeve": "momentum",
+     "reason": "New pick"
+    },
+    {
+     "date": "2026-08-28",
+     "time": "15:35",
+     "ticker": "AMZN",
+     "side": "sell",
+     "shares": 17,
+     "price": 145.72,
+     "value": 2477.19,
+     "sleeve": "momentum",
+     "reason": "Rotated out: no longer a top pick"
     },
     {
      "date": "2026-08-27",
+     "time": "15:35",
      "ticker": "PEP",
      "side": "buy",
      "shares": 2,
@@ -4337,36 +5364,62 @@
     },
     {
      "date": "2026-08-27",
-     "ticker": "BKNG",
+     "time": "15:35",
+     "ticker": "LULU",
+     "side": "sell",
+     "shares": 7,
+     "price": 145.96,
+     "value": 1021.7,
+     "sleeve": "ai",
+     "reason": "Rotated out: no longer a top pick"
+    },
+    {
+     "date": "2026-08-26",
+     "time": "15:35",
+     "ticker": "LULU",
      "side": "buy",
-     "shares": 17,
-     "price": 158.71,
-     "value": 2698.06,
-     "sleeve": "momentum",
+     "shares": 7,
+     "price": 144.27,
+     "value": 1009.9,
+     "sleeve": "ai",
      "reason": "New pick"
     },
     {
-     "date": "2026-08-27",
-     "ticker": "TJX",
+     "date": "2026-08-26",
+     "time": "15:35",
+     "ticker": "BKNG",
      "side": "sell",
-     "shares": 1,
-     "price": 332.56,
-     "value": 332.56,
-     "sleeve": "momentum",
-     "reason": "Trimmed back to target size"
+     "shares": 6,
+     "price": 154.44,
+     "value": 926.66,
+     "sleeve": "ai",
+     "reason": "Rotated out: no longer a top pick"
     },
     {
-     "date": "2026-08-27",
-     "ticker": "AMZN",
+     "date": "2026-08-25",
+     "time": "15:35",
+     "ticker": "BKNG",
+     "side": "buy",
+     "shares": 6,
+     "price": 154.05,
+     "value": 924.28,
+     "sleeve": "ai",
+     "reason": "New pick"
+    },
+    {
+     "date": "2026-08-25",
+     "time": "15:35",
+     "ticker": "PEP",
      "side": "sell",
-     "shares": 18,
-     "price": 146.67,
-     "value": 2640.0,
-     "sleeve": "momentum",
+     "shares": 2,
+     "price": 391.81,
+     "value": 783.63,
+     "sleeve": "ai",
      "reason": "Rotated out: no longer a top pick"
     },
     {
      "date": "2026-08-20",
+     "time": "15:35",
      "ticker": "SBUX",
      "side": "buy",
      "shares": 1,
@@ -4377,16 +5430,7 @@
     },
     {
      "date": "2026-08-20",
-     "ticker": "AMZN",
-     "side": "buy",
-     "shares": 18,
-     "price": 152.46,
-     "value": 2744.21,
-     "sleeve": "momentum",
-     "reason": "New pick"
-    },
-    {
-     "date": "2026-08-20",
+     "time": "15:35",
      "ticker": "LULU",
      "side": "sell",
      "shares": 6,
@@ -4397,106 +5441,40 @@
     },
     {
      "date": "2026-08-20",
-     "ticker": "PEP",
-     "side": "sell",
-     "shares": 6,
-     "price": 406.51,
-     "value": 2439.04,
-     "sleeve": "momentum",
-     "reason": "Rotated out: no longer a top pick"
-    },
-    {
-     "date": "2026-08-13",
-     "ticker": "LULU",
-     "side": "buy",
-     "shares": 6,
-     "price": 149.11,
-     "value": 894.69,
-     "sleeve": "ai",
-     "reason": "New pick"
-    },
-    {
-     "date": "2026-08-13",
-     "ticker": "BKNG",
-     "side": "sell",
-     "shares": 6,
-     "price": 151.45,
-     "value": 908.73,
-     "sleeve": "ai",
-     "reason": "Rotated out: no longer a top pick"
-    },
-    {
-     "date": "2026-08-06",
-     "ticker": "PEP",
-     "side": "buy",
-     "shares": 6,
-     "price": 427.86,
-     "value": 2567.18,
-     "sleeve": "momentum",
-     "reason": "New pick"
-    },
-    {
-     "date": "2026-08-06",
-     "ticker": "BKNG",
-     "side": "sell",
-     "shares": 1,
-     "price": 148.65,
-     "value": 148.65,
-     "sleeve": "ai",
-     "reason": "Trimmed back to target size"
-    },
-    {
-     "date": "2026-08-06",
-     "ticker": "PEP",
-     "side": "sell",
-     "shares": 2,
-     "price": 427.44,
-     "value": 854.87,
-     "sleeve": "ai",
-     "reason": "Rotated out: no longer a top pick"
-    },
-    {
-     "date": "2026-08-06",
+     "time": "15:35",
      "ticker": "TJX",
      "side": "sell",
      "shares": 1,
-     "price": 284.41,
-     "value": 284.41,
+     "price": 298.41,
+     "value": 298.41,
      "sleeve": "momentum",
      "reason": "Trimmed back to target size"
     },
     {
-     "date": "2026-08-06",
-     "ticker": "SBUX",
-     "side": "sell",
-     "shares": 3,
-     "price": 775.97,
-     "value": 2327.92,
-     "sleeve": "momentum",
-     "reason": "Rotated out: no longer a top pick"
-    },
-    {
-     "date": "2026-07-30",
-     "ticker": "BKNG",
-     "side": "buy",
-     "shares": 1,
-     "price": 149.67,
-     "value": 149.67,
-     "sleeve": "ai",
-     "reason": "Topped up to target size"
-    },
-    {
-     "date": "2026-07-23",
-     "ticker": "BKNG",
+     "date": "2026-08-19",
+     "time": "15:35",
+     "ticker": "LULU",
      "side": "buy",
      "shares": 6,
-     "price": 153.8,
-     "value": 922.78,
+     "price": 145.34,
+     "value": 872.06,
      "sleeve": "ai",
      "reason": "New pick"
     },
     {
-     "date": "2026-07-23",
+     "date": "2026-08-18",
+     "time": "15:35",
+     "ticker": "TJX",
+     "side": "buy",
+     "shares": 1,
+     "price": 282.48,
+     "value": 282.48,
+     "sleeve": "momentum",
+     "reason": "Topped up to target size"
+    },
+    {
+     "date": "2026-08-17",
+     "time": "15:35",
      "ticker": "PEP",
      "side": "buy",
      "shares": 2,
@@ -4506,294 +5484,182 @@
      "reason": "New pick"
     },
     {
-     "date": "2026-07-23",
-     "ticker": "TGT",
-     "side": "sell",
-     "shares": 2,
-     "price": 497.55,
-     "value": 995.1,
-     "sleeve": "ai",
-     "reason": "Rotated out: no longer a top pick"
-    },
-    {
-     "date": "2026-07-22",
-     "ticker": "MCD",
-     "side": "sell",
-     "shares": 38,
-     "price": 23.61,
-     "value": 897.11,
-     "sleeve": "ai",
-     "reason": "Stop loss: down 11.6%"
-    },
-    {
-     "date": "2026-07-16",
-     "ticker": "MCD",
-     "side": "buy",
-     "shares": 38,
-     "price": 26.72,
-     "value": 1015.49,
-     "sleeve": "ai",
-     "reason": "New pick"
-    },
-    {
-     "date": "2026-07-16",
-     "ticker": "TGT",
-     "side": "buy",
-     "shares": 1,
-     "price": 488.45,
-     "value": 488.45,
-     "sleeve": "ai",
-     "reason": "Topped up to target size"
-    },
-    {
-     "date": "2026-07-16",
-     "ticker": "BKNG",
+     "date": "2026-08-17",
+     "time": "15:35",
+     "ticker": "LULU",
      "side": "sell",
      "shares": 6,
-     "price": 159.61,
-     "value": 957.66,
+     "price": 148.48,
+     "value": 890.85,
      "sleeve": "ai",
      "reason": "Rotated out: no longer a top pick"
     },
     {
-     "date": "2026-07-09",
-     "ticker": "BKNG",
-     "side": "buy",
-     "shares": 6,
-     "price": 157.74,
-     "value": 946.43,
-     "sleeve": "ai",
-     "reason": "New pick"
-    },
-    {
-     "date": "2026-07-09",
-     "ticker": "MCD",
-     "side": "sell",
-     "shares": 35,
-     "price": 29.12,
-     "value": 1019.04,
-     "sleeve": "ai",
-     "reason": "Rotated out: no longer a top pick"
-    },
-    {
-     "date": "2026-07-02",
-     "ticker": "MCD",
-     "side": "buy",
-     "shares": 35,
-     "price": 28.48,
-     "value": 996.95,
-     "sleeve": "ai",
-     "reason": "New pick"
-    },
-    {
-     "date": "2026-07-02",
-     "ticker": "TGT",
-     "side": "buy",
-     "shares": 1,
-     "price": 530.56,
-     "value": 530.56,
-     "sleeve": "ai",
-     "reason": "New pick"
-    },
-    {
-     "date": "2026-07-02",
-     "ticker": "AMZN",
-     "side": "sell",
-     "shares": 6,
-     "price": 150.28,
-     "value": 901.71,
-     "sleeve": "ai",
-     "reason": "Rotated out: no longer a top pick"
-    },
-    {
-     "date": "2026-07-02",
-     "ticker": "LOW",
-     "side": "sell",
-     "shares": 5,
-     "price": 186.72,
-     "value": 933.58,
-     "sleeve": "ai",
-     "reason": "Rotated out: no longer a top pick"
-    },
-    {
-     "date": "2026-06-25",
-     "ticker": "LOW",
-     "side": "buy",
-     "shares": 1,
-     "price": 196.03,
-     "value": 196.03,
-     "sleeve": "ai",
-     "reason": "Topped up to target size"
-    },
-    {
-     "date": "2026-06-25",
-     "ticker": "AMZN",
-     "side": "buy",
-     "shares": 6,
-     "price": 149.2,
-     "value": 895.23,
-     "sleeve": "ai",
-     "reason": "New pick"
-    },
-    {
-     "date": "2026-06-25",
-     "ticker": "WMT",
-     "side": "buy",
-     "shares": 15,
-     "price": 175.14,
-     "value": 2627.06,
-     "sleeve": "momentum",
-     "reason": "New pick"
-    },
-    {
-     "date": "2026-06-25",
-     "ticker": "TGT",
-     "side": "sell",
-     "shares": 1,
-     "price": 531.51,
-     "value": 531.51,
-     "sleeve": "ai",
-     "reason": "Rotated out: no longer a top pick"
-    },
-    {
-     "date": "2026-06-25",
-     "ticker": "PEP",
-     "side": "sell",
-     "shares": 6,
-     "price": 410.45,
-     "value": 2462.73,
-     "sleeve": "momentum",
-     "reason": "Rotated out: no longer a top pick"
-    },
-    {
-     "date": "2026-06-18",
-     "ticker": "TGT",
-     "side": "buy",
-     "shares": 1,
-     "price": 531.46,
-     "value": 531.46,
-     "sleeve": "ai",
-     "reason": "New pick"
-    },
-    {
-     "date": "2026-06-18",
-     "ticker": "PEP",
-     "side": "buy",
-     "shares": 6,
-     "price": 409.92,
-     "value": 2459.55,
-     "sleeve": "momentum",
-     "reason": "New pick"
-    },
-    {
-     "date": "2026-06-18",
-     "ticker": "WMT",
-     "side": "sell",
-     "shares": 17,
-     "price": 162.95,
-     "value": 2770.12,
-     "sleeve": "momentum",
-     "reason": "Rotated out: no longer a top pick"
-    },
-    {
-     "date": "2026-06-11",
-     "ticker": "LOW",
-     "side": "buy",
-     "shares": 4,
-     "price": 208.15,
-     "value": 832.62,
-     "sleeve": "ai",
-     "reason": "New pick"
-    },
-    {
-     "date": "2026-06-11",
-     "ticker": "WMT",
-     "side": "buy",
-     "shares": 17,
-     "price": 157.93,
-     "value": 2684.79,
-     "sleeve": "momentum",
-     "reason": "New pick"
-    },
-    {
-     "date": "2026-06-11",
-     "ticker": "AMZN",
-     "side": "sell",
-     "shares": 6,
-     "price": 155.02,
-     "value": 930.13,
-     "sleeve": "ai",
-     "reason": "Rotated out: no longer a top pick"
-    },
-    {
-     "date": "2026-06-11",
-     "ticker": "PEP",
-     "side": "sell",
-     "shares": 2,
-     "price": 395.02,
-     "value": 790.04,
-     "sleeve": "ai",
-     "reason": "Rotated out: no longer a top pick"
-    },
-    {
-     "date": "2026-06-11",
-     "ticker": "TGT",
-     "side": "sell",
-     "shares": 4,
-     "price": 548.15,
-     "value": 2192.58,
-     "sleeve": "momentum",
-     "reason": "Rotated out: no longer a top pick"
-    },
-    {
-     "date": "2026-06-04",
-     "ticker": "AMZN",
-     "side": "buy",
-     "shares": 6,
-     "price": 143.2,
-     "value": 859.21,
-     "sleeve": "ai",
-     "reason": "New pick"
-    },
-    {
-     "date": "2026-06-04",
-     "ticker": "PEP",
-     "side": "buy",
-     "shares": 2,
-     "price": 377.23,
-     "value": 754.46,
-     "sleeve": "ai",
-     "reason": "New pick"
-    },
-    {
-     "date": "2026-06-04",
-     "ticker": "TGT",
-     "side": "buy",
-     "shares": 4,
-     "price": 591.92,
-     "value": 2367.66,
-     "sleeve": "momentum",
-     "reason": "New pick"
-    },
-    {
-     "date": "2026-06-04",
+     "date": "2026-08-17",
+     "time": "15:35",
      "ticker": "TJX",
+     "side": "sell",
+     "shares": 1,
+     "price": 300.26,
+     "value": 300.26,
+     "sleeve": "momentum",
+     "reason": "Trimmed back to target size"
+    },
+    {
+     "date": "2026-08-14",
+     "time": "15:35",
+     "ticker": "AMZN",
      "side": "buy",
-     "shares": 10,
-     "price": 248.53,
-     "value": 2485.34,
+     "shares": 17,
+     "price": 150.72,
+     "value": 2562.16,
      "sleeve": "momentum",
      "reason": "New pick"
     },
     {
-     "date": "2026-06-04",
+     "date": "2026-08-14",
+     "time": "15:35",
+     "ticker": "PEP",
+     "side": "sell",
+     "shares": 6,
+     "price": 408.0,
+     "value": 2447.98,
+     "sleeve": "momentum",
+     "reason": "Trailing stop: down 8.6% from its high of $446.43",
+     "protective": true
+    },
+    {
+     "date": "2026-08-13",
+     "time": "15:35",
+     "ticker": "BKNG",
+     "side": "sell",
+     "shares": 6,
+     "price": 151.45,
+     "value": 908.73,
+     "sleeve": "ai",
+     "reason": "Rotated out: no longer a top pick"
+    },
+    {
+     "date": "2026-08-12",
+     "time": "15:35",
+     "ticker": "LULU",
+     "side": "buy",
+     "shares": 6,
+     "price": 150.12,
+     "value": 900.69,
+     "sleeve": "ai",
+     "reason": "New pick"
+    },
+    {
+     "date": "2026-08-12",
+     "time": "15:35",
+     "ticker": "SBUX",
+     "side": "sell",
+     "shares": 1,
+     "price": 813.46,
+     "value": 813.46,
+     "sleeve": "ai",
+     "reason": "Rotated out: no longer a top pick"
+    },
+    {
+     "date": "2026-08-06",
+     "time": "15:35",
+     "ticker": "BKNG",
+     "side": "buy",
+     "shares": 6,
+     "price": 148.79,
+     "value": 892.77,
+     "sleeve": "ai",
+     "reason": "New pick"
+    },
+    {
+     "date": "2026-08-06",
+     "time": "15:35",
      "ticker": "SBUX",
      "side": "buy",
-     "shares": 3,
-     "price": 768.78,
-     "value": 2306.35,
+     "shares": 1,
+     "price": 776.75,
+     "value": 776.75,
+     "sleeve": "ai",
+     "reason": "New pick"
+    },
+    {
+     "date": "2026-08-06",
+     "time": "15:35",
+     "ticker": "PEP",
+     "side": "buy",
+     "shares": 1,
+     "price": 427.86,
+     "value": 427.86,
+     "sleeve": "momentum",
+     "reason": "Topped up to target size"
+    },
+    {
+     "date": "2026-08-05",
+     "time": "15:35",
+     "ticker": "PEP",
+     "side": "buy",
+     "shares": 5,
+     "price": 446.43,
+     "value": 2232.17,
      "sleeve": "momentum",
      "reason": "New pick"
+    },
+    {
+     "date": "2026-08-05",
+     "time": "15:35",
+     "ticker": "PEP",
+     "side": "sell",
+     "shares": 2,
+     "price": 445.99,
+     "value": 891.97,
+     "sleeve": "ai",
+     "reason": "Rotated out: no longer a top pick"
+    },
+    {
+     "date": "2026-08-05",
+     "time": "15:35",
+     "ticker": "BKNG",
+     "side": "sell",
+     "shares": 6,
+     "price": 154.42,
+     "value": 926.54,
+     "sleeve": "ai",
+     "reason": "Rotated out: no longer a top pick"
+    },
+    {
+     "date": "2026-08-05",
+     "time": "15:35",
+     "ticker": "SBUX",
+     "side": "sell",
+     "shares": 3,
+     "price": 781.25,
+     "value": 2343.75,
+     "sleeve": "momentum",
+     "reason": "Trailing stop: down 11.4% from its high of $881.87",
+     "protective": true
+    },
+    {
+     "date": "2026-08-03",
+     "time": "15:35",
+     "ticker": "PEP",
+     "side": "buy",
+     "shares": 2,
+     "price": 411.68,
+     "value": 823.35,
+     "sleeve": "ai",
+     "reason": "New pick"
+    },
+    {
+     "date": "2026-07-31",
+     "time": "15:35",
+     "ticker": "PEP",
+     "side": "sell",
+     "shares": 2,
+     "price": 403.91,
+     "value": 807.82,
+     "sleeve": "ai",
+     "reason": "Rotated out: no longer a top pick"
     }
    ],
    "history": [
@@ -4803,494 +5669,543 @@
     },
     {
      "date": "2026-06-05",
-     "equity": 10136.92
+     "equity": 10136.06
     },
     {
      "date": "2026-06-08",
-     "equity": 10084.69
+     "equity": 10047.67
     },
     {
      "date": "2026-06-09",
-     "equity": 10205.07
+     "equity": 10162.78
     },
     {
      "date": "2026-06-10",
-     "equity": 10229.65
+     "equity": 10163.82
     },
     {
      "date": "2026-06-11",
-     "equity": 10134.69
+     "equity": 10055.72
     },
     {
      "date": "2026-06-12",
-     "equity": 10053.97
+     "equity": 9976.14
     },
     {
      "date": "2026-06-15",
-     "equity": 10134.99
+     "equity": 10054.68
     },
     {
      "date": "2026-06-16",
-     "equity": 10199.87
+     "equity": 10120.89
     },
     {
      "date": "2026-06-17",
-     "equity": 10248.88
+     "equity": 10175.37
     },
     {
      "date": "2026-06-18",
-     "equity": 10116.08
+     "equity": 10052.93
     },
     {
      "date": "2026-06-19",
-     "equity": 10039.14
+     "equity": 10023.97
     },
     {
      "date": "2026-06-22",
-     "equity": 10088.4
+     "equity": 10012.29
     },
     {
      "date": "2026-06-23",
-     "equity": 10156.16
+     "equity": 10174.2
     },
     {
      "date": "2026-06-24",
-     "equity": 10209.97
+     "equity": 10163.84
     },
     {
      "date": "2026-06-25",
-     "equity": 10321.14
+     "equity": 10330.74
     },
     {
      "date": "2026-06-26",
-     "equity": 10273.38
+     "equity": 10283.74
     },
     {
      "date": "2026-06-29",
-     "equity": 10268.93
+     "equity": 10276.01
     },
     {
      "date": "2026-06-30",
-     "equity": 10244.46
+     "equity": 10270.61
     },
     {
      "date": "2026-07-01",
-     "equity": 10098.18
+     "equity": 10115.67
     },
     {
      "date": "2026-07-02",
-     "equity": 10028.67
+     "equity": 10044.61
     },
     {
      "date": "2026-07-03",
-     "equity": 10170.35
+     "equity": 10130.66
     },
     {
      "date": "2026-07-06",
-     "equity": 10167.51
+     "equity": 10141.39
     },
     {
      "date": "2026-07-07",
-     "equity": 10249.15
+     "equity": 10186.69
     },
     {
      "date": "2026-07-08",
-     "equity": 10142.07
+     "equity": 10018.56
     },
     {
      "date": "2026-07-09",
-     "equity": 10222.72
+     "equity": 10110.72
     },
     {
      "date": "2026-07-10",
-     "equity": 10159.33
+     "equity": 10049.02
     },
     {
      "date": "2026-07-13",
-     "equity": 10191.63
+     "equity": 10119.89
     },
     {
      "date": "2026-07-14",
-     "equity": 10459.23
+     "equity": 10362.11
     },
     {
      "date": "2026-07-15",
-     "equity": 10439.15
+     "equity": 10325.17
     },
     {
      "date": "2026-07-16",
-     "equity": 10299.98
+     "equity": 10185.09
     },
     {
      "date": "2026-07-17",
-     "equity": 10506.75
+     "equity": 10157.14
     },
     {
      "date": "2026-07-20",
-     "equity": 10297.06
+     "equity": 9968.53
     },
     {
      "date": "2026-07-21",
-     "equity": 10230.51
+     "equity": 10009.67
     },
     {
      "date": "2026-07-22",
-     "equity": 10210.93
+     "equity": 10053.89
     },
     {
      "date": "2026-07-23",
-     "equity": 10321.61
+     "equity": 10014.87
     },
     {
      "date": "2026-07-24",
-     "equity": 10295.01
+     "equity": 9989.16
     },
     {
      "date": "2026-07-27",
-     "equity": 10348.22
+     "equity": 10022.29
     },
     {
      "date": "2026-07-28",
-     "equity": 10438.11
+     "equity": 10018.78
     },
     {
      "date": "2026-07-29",
-     "equity": 10505.84
+     "equity": 10090.28
     },
     {
      "date": "2026-07-30",
-     "equity": 10502.99
+     "equity": 10090.59
     },
     {
      "date": "2026-07-31",
-     "equity": 10689.78
+     "equity": 10259.83
     },
     {
      "date": "2026-08-03",
-     "equity": 10737.13
+     "equity": 10289.18
     },
     {
      "date": "2026-08-04",
-     "equity": 10642.78
+     "equity": 10194.12
     },
     {
      "date": "2026-08-05",
-     "equity": 10404.31
+     "equity": 9962.26
     },
     {
      "date": "2026-08-06",
-     "equity": 10355.14
+     "equity": 9910.4
     },
     {
      "date": "2026-08-07",
-     "equity": 10440.85
+     "equity": 10015.01
     },
     {
      "date": "2026-08-10",
-     "equity": 10337.68
+     "equity": 9908.28
     },
     {
      "date": "2026-08-11",
-     "equity": 10311.82
+     "equity": 9905.08
     },
     {
      "date": "2026-08-12",
-     "equity": 10435.09
+     "equity": 10021.54
     },
     {
      "date": "2026-08-13",
-     "equity": 10415.89
+     "equity": 9999.12
     },
     {
      "date": "2026-08-14",
-     "equity": 10356.97
+     "equity": 9936.69
     },
     {
      "date": "2026-08-17",
-     "equity": 10383.91
+     "equity": 9971.45
     },
     {
      "date": "2026-08-18",
-     "equity": 10245.79
+     "equity": 9876.21
     },
     {
      "date": "2026-08-19",
-     "equity": 10203.64
+     "equity": 9863.15
     },
     {
      "date": "2026-08-20",
-     "equity": 10340.16
+     "equity": 9992.78
     },
     {
      "date": "2026-08-21",
-     "equity": 10484.87
+     "equity": 10117.82
     },
     {
      "date": "2026-08-24",
-     "equity": 10703.41
+     "equity": 10301.43
     },
     {
      "date": "2026-08-25",
-     "equity": 10676.7
+     "equity": 10262.92
     },
     {
      "date": "2026-08-26",
-     "equity": 10552.54
+     "equity": 10146.31
     },
     {
      "date": "2026-08-27",
-     "equity": 10575.06
+     "equity": 10181.67
     },
     {
      "date": "2026-08-28",
-     "equity": 10449.96
+     "equity": 10047.69
     },
     {
      "date": "2026-08-31",
-     "equity": 10284.68
+     "equity": 9885.49
     },
     {
      "date": "2026-09-01",
-     "equity": 10416.71
+     "equity": 9960.0
     },
     {
      "date": "2026-09-02",
-     "equity": 10607.28
+     "equity": 10052.25
     },
     {
      "date": "2026-09-03",
-     "equity": 10736.96
+     "equity": 10113.32
     },
     {
      "date": "2026-09-04",
-     "equity": 10703.17
+     "equity": 10187.07
     },
     {
      "date": "2026-09-07",
-     "equity": 10655.37
+     "equity": 10126.79
     },
     {
      "date": "2026-09-08",
-     "equity": 10828.4
+     "equity": 10278.49
     },
     {
      "date": "2026-09-09",
-     "equity": 10822.83
+     "equity": 10242.6
     },
     {
      "date": "2026-09-10",
-     "equity": 10701.34
+     "equity": 10129.75
     },
     {
      "date": "2026-09-11",
-     "equity": 10517.37
+     "equity": 10035.04
     },
     {
      "date": "2026-09-14",
-     "equity": 10653.33
+     "equity": 9997.09
     },
     {
      "date": "2026-09-15",
-     "equity": 10712.26
+     "equity": 10053.66
     },
     {
      "date": "2026-09-16",
-     "equity": 10627.63
+     "equity": 10093.48
     },
     {
      "date": "2026-09-17",
-     "equity": 10482.27
+     "equity": 10137.02
     },
     {
      "date": "2026-09-18",
-     "equity": 10526.68
+     "equity": 10186.78
     },
     {
      "date": "2026-09-21",
-     "equity": 10401.89
+     "equity": 10072.86
     },
     {
      "date": "2026-09-22",
-     "equity": 10531.18
+     "equity": 10202.64
     },
     {
      "date": "2026-09-23",
-     "equity": 10542.64
+     "equity": 10179.92
     },
     {
      "date": "2026-09-24",
-     "equity": 10466.65
+     "equity": 10126.87
     },
     {
      "date": "2026-09-25",
-     "equity": 10507.07
+     "equity": 10273.87
     },
     {
      "date": "2026-09-28",
-     "equity": 10562.81
+     "equity": 10318.62
     },
     {
      "date": "2026-09-29",
-     "equity": 10563.09
+     "equity": 10436.2
     },
     {
      "date": "2026-09-30",
-     "equity": 10450.61
+     "equity": 10302.6
     },
     {
      "date": "2026-10-01",
-     "equity": 10419.13
+     "equity": 10277.35
     },
     {
      "date": "2026-10-02",
-     "equity": 10489.64
+     "equity": 10198.36
     },
     {
      "date": "2026-10-05",
-     "equity": 10519.06
+     "equity": 10223.18
     },
     {
      "date": "2026-10-06",
-     "equity": 10558.65
+     "equity": 10264.11
     },
     {
      "date": "2026-10-07",
-     "equity": 10518.37
+     "equity": 10224.79
     }
    ],
    "ranking": [
     {
      "ticker": "TJX",
      "price": 335.11,
-     "score": 0.6459,
+     "score": 0.4519,
      "ret_long": 0.9319,
      "ret_short": 0.3599,
+     "ret_fast": 0.0639,
      "above_trend": true,
      "qualifies": true
     },
     {
      "ticker": "BKNG",
      "price": 177.68,
-     "score": 0.2535,
+     "score": 0.1501,
      "ret_long": 0.3653,
      "ret_short": 0.1418,
+     "ret_fast": -0.0568,
      "above_trend": true,
      "qualifies": true
     },
     {
      "ticker": "WMT",
      "price": 192.41,
-     "score": 0.199,
+     "score": 0.1366,
      "ret_long": 0.2744,
      "ret_short": 0.1236,
+     "ret_fast": 0.0117,
      "above_trend": true,
      "qualifies": true
     },
     {
      "ticker": "LOW",
      "price": 224.62,
-     "score": 0.1966,
+     "score": 0.1357,
      "ret_long": 0.1978,
      "ret_short": 0.1954,
+     "ret_fast": 0.014,
      "above_trend": true,
      "qualifies": true
     },
     {
      "ticker": "LULU",
      "price": 172.94,
-     "score": 0.1712,
+     "score": 0.1308,
      "ret_long": 0.1424,
      "ret_short": 0.2,
+     "ret_fast": 0.05,
      "above_trend": true,
      "qualifies": true
     },
     {
      "ticker": "AMZN",
      "price": 148.69,
-     "score": 0.1285,
+     "score": 0.0895,
      "ret_long": 0.1837,
      "ret_short": 0.0733,
+     "ret_fast": 0.0116,
      "above_trend": false,
      "qualifies": false
     },
     {
      "ticker": "SBUX",
      "price": 802.16,
-     "score": 0.0994,
+     "score": 0.0744,
      "ret_long": 0.2779,
      "ret_short": -0.0791,
+     "ret_fast": 0.0244,
      "above_trend": true,
      "qualifies": true
     },
     {
      "ticker": "CMG",
      "price": 227.02,
-     "score": 0.0251,
+     "score": 0.0312,
      "ret_long": 0.0554,
      "ret_short": -0.0053,
+     "ret_fast": 0.0434,
      "above_trend": true,
      "qualifies": true
     },
     {
      "ticker": "TGT",
      "price": 453.26,
-     "score": -0.0679,
+     "score": -0.0326,
      "ret_long": -0.0047,
      "ret_short": -0.1311,
+     "ret_fast": 0.038,
      "above_trend": true,
      "qualifies": false
     },
     {
      "ticker": "PEP",
      "price": 341.88,
-     "score": -0.1032,
+     "score": -0.0954,
      "ret_long": -0.0267,
      "ret_short": -0.1796,
+     "ret_fast": -0.08,
      "above_trend": false,
      "qualifies": false
     },
     {
      "ticker": "PG",
      "price": 151.01,
-     "score": -0.1494,
+     "score": -0.1068,
      "ret_long": -0.2466,
      "ret_short": -0.0522,
+     "ret_fast": -0.0218,
      "above_trend": false,
      "qualifies": false
     },
     {
      "ticker": "COST",
      "price": 309.38,
-     "score": -0.1897,
+     "score": -0.1361,
      "ret_long": -0.2825,
      "ret_short": -0.097,
+     "ret_fast": -0.0289,
      "above_trend": true,
      "qualifies": false
     }
    ],
    "ai": {
     "status": "ok",
-    "date": "2026-10-01",
+    "date": "2026-10-07 15:35",
     "model": "simulated",
     "market_view": "Simulated AI picks (no Claude API key in this run).",
     "picks": [
      {
       "ticker": "LOW",
       "confidence": 0.5,
-      "reason": "+19% over 3 months, +2.6% this week."
+      "reason": "+20% over 3 months, +1.4% this week."
      },
      {
       "ticker": "LULU",
       "confidence": 0.5,
-      "reason": "+14% over 3 months, +4.2% this week."
+      "reason": "+20% over 3 months, +5.0% this week."
      }
     ],
     "rejected": []
    },
    "blocked_in_universe": [],
-   "notes": [],
-   "last_momentum": "2026-10-01",
-   "last_ai": "2026-10-01"
+   "notes": [
+    {
+     "date": "2026-10-07",
+     "text": "BKNG: not buying back today after a stop"
+    },
+    {
+     "date": "2026-09-11",
+     "text": "WMT: not buying back today after a stop"
+    },
+    {
+     "date": "2026-09-09",
+     "text": "TJX: not buying back today after a stop"
+    },
+    {
+     "date": "2026-08-14",
+     "text": "PEP: not buying back today after a stop"
+    },
+    {
+     "date": "2026-08-05",
+     "text": "SBUX: not buying back today after a stop"
+    },
+    {
+     "date": "2026-07-15",
+     "text": "TGT: not buying back today after a stop"
+    },
+    {
+     "date": "2026-07-02",
+     "text": "SBUX: not buying back today after a stop"
+    },
+    {
+     "date": "2026-06-19",
+     "text": "TJX: not buying back today after a stop"
+    },
+    {
+     "date": "2026-06-11",
+     "text": "TGT: not buying back today after a stop"
+    }
+   ],
+   "last_momentum": "2026-10-07T15:35:00",
+   "last_ai": "2026-10-07T15:35:00"
   }
  ],
  "config": {
@@ -5298,20 +6213,26 @@
   "live_trading_confirmed": false,
   "bots": [
    {
+    "market": "us_stocks",
     "enabled": true,
     "starting_cash": 10000.0,
     "ai_share": 0.2,
+    "check_every_minutes": 3,
+    "min_hold_minutes": 30,
+    "max_trades_per_day": 20,
     "momentum": {
      "top_n": 3,
      "lookback_days": 126,
      "short_lookback_days": 63,
      "trend_sma_days": 50,
-     "rebalance_days": 7,
-     "stop_loss_pct": 0.1
+     "fast_lookback_days": 5,
+     "stop_loss_pct": 0.1,
+     "trailing_stop_pct": 0.07,
+     "rank_buffer": 2
     },
     "ai": {
      "max_picks": 2,
-     "rebalance_days": 7
+     "review_every_minutes": 120
     },
     "universe": [
      "AAPL",
@@ -5339,20 +6260,26 @@
     "color": "#38bdf8"
    },
    {
+    "market": "us_stocks",
     "enabled": true,
     "starting_cash": 10000.0,
     "ai_share": 0.2,
+    "check_every_minutes": 3,
+    "min_hold_minutes": 30,
+    "max_trades_per_day": 20,
     "momentum": {
      "top_n": 3,
      "lookback_days": 126,
      "short_lookback_days": 63,
      "trend_sma_days": 50,
-     "rebalance_days": 7,
-     "stop_loss_pct": 0.1
+     "fast_lookback_days": 5,
+     "stop_loss_pct": 0.1,
+     "trailing_stop_pct": 0.07,
+     "rank_buffer": 2
     },
     "ai": {
      "max_picks": 2,
-     "rebalance_days": 7
+     "review_every_minutes": 120
     },
     "universe": [
      "XOM",
@@ -5379,20 +6306,26 @@
     "color": "#f59e0b"
    },
    {
+    "market": "us_stocks",
     "enabled": true,
     "starting_cash": 10000.0,
     "ai_share": 0.2,
+    "check_every_minutes": 3,
+    "min_hold_minutes": 30,
+    "max_trades_per_day": 20,
     "momentum": {
      "top_n": 3,
      "lookback_days": 126,
      "short_lookback_days": 63,
      "trend_sma_days": 50,
-     "rebalance_days": 7,
-     "stop_loss_pct": 0.1
+     "fast_lookback_days": 5,
+     "stop_loss_pct": 0.1,
+     "trailing_stop_pct": 0.07,
+     "rank_buffer": 2
     },
     "ai": {
      "max_picks": 2,
-     "rebalance_days": 7
+     "review_every_minutes": 120
     },
     "universe": [
      "JPM",
@@ -5418,20 +6351,26 @@
     "color": "#34d399"
    },
    {
+    "market": "us_stocks",
     "enabled": true,
     "starting_cash": 10000.0,
     "ai_share": 0.2,
+    "check_every_minutes": 3,
+    "min_hold_minutes": 30,
+    "max_trades_per_day": 20,
     "momentum": {
      "top_n": 3,
      "lookback_days": 126,
      "short_lookback_days": 63,
      "trend_sma_days": 50,
-     "rebalance_days": 7,
-     "stop_loss_pct": 0.1
+     "fast_lookback_days": 5,
+     "stop_loss_pct": 0.1,
+     "trailing_stop_pct": 0.07,
+     "rank_buffer": 2
     },
     "ai": {
      "max_picks": 2,
-     "rebalance_days": 7
+     "review_every_minutes": 120
     },
     "universe": [
      "AMZN",

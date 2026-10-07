@@ -13,10 +13,18 @@ City Hall in the middle shows the whole city's value.
 
 ## How each bot trades
 
-Each building splits its money **80% momentum / 20% AI picks** (adjustable per building).
+Each building splits its money **80% momentum / 20% AI picks** (adjustable per building) and checks for trades **every 3 minutes** while the market is open (9:45am–3:55pm New York time; adjustable from 2 minutes to once a day).
 
-- **Momentum (80%)**: once a week it ranks its stocks by their 6-month and 3-month returns, keeps only the ones above their 50-day average, and holds the top 3 in equal amounts. Anything that drops 10% below what the bot paid is sold the same day (stop loss).
-- **AI picks (20%)**: once a week Claude looks at the same stocks' numbers (returns, volatility, distance from highs) and picks up to 2, with a short reason for each. If Claude isn't set up or fails, that 20% simply waits in cash.
+- **Momentum (80%)**: ranks its stocks by a blend of 6-month, 3-month and 1-week returns (the 1-week part uses the live price), keeps only the ones above their 50-day average, and holds the top 3 in equal amounts.
+- **AI picks (20%)**: every 2 hours Claude looks at the same stocks' numbers (returns, volatility, distance from highs) and picks up to 2, with a short reason for each. If Claude isn't set up or fails, that 20% simply waits in cash.
+
+**Guardrails against overtrading** (all adjustable per building):
+
+- **Hold at least 30 minutes** before a stock can be rotated out (stops are exempt).
+- **At most 20 trades a day** per building. Stops still fire after the cap.
+- **Rank buffer of 2**: a holding stays while it's still in the top 3 + 2, so it isn't swapped for a stock that edged past it.
+- **10% size tolerance**: a holding isn't trimmed or topped up over small price moves.
+- **Stop loss 10%** below cost and **trailing stop 7%** below a winner's high, checked on every trade check. A stopped-out stock isn't bought back the same day.
 
 **Do-not-buy list** (`config/exclusions.json`): no healthcare and no private prisons (GEO Group, CoreCivic, and the prison food contractor Aramark), plus a name/industry keyword check. Every buy is checked against it, including AI picks and any ticker you add yourself. The city also refuses to add a blocked ticker from the settings screen.
 
@@ -26,9 +34,9 @@ Bots only buy whole shares (Schwab's API can't trade fractions), so each buildin
 
 One small server runs 24/7 ([Railway](https://railway.com), about $5/month). It:
 
-- shows the city website, with prices refreshed every 2 minutes while the market is open (every 15 minutes otherwise),
-- checks stop losses and the do-not-buy list every 5 minutes during market hours,
-- runs each building's full trading day at 3:35pm New York time on market days,
+- shows the city website, updating itself every 15 seconds,
+- refreshes prices every minute while the market is open (every 15 minutes otherwise),
+- runs each building's trade check every 3 minutes during market hours,
 - lets you change settings and press **Run now** from the website, protected by a password.
 
 The server is a standard Docker container (`Dockerfile`), so it also runs on Fly.io, a Hetzner/DigitalOcean server, or your own computer.

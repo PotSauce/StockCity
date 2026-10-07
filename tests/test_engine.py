@@ -142,3 +142,45 @@ def test_schwab_needs_explicit_confirmation():
 def test_shipped_config_has_no_blocked_tickers():
     for bot in load_config()["bots"]:
         assert not [t for t in bot["universe"] if EXCL.is_blocked(t)], bot["id"]
+
+
+def test_rank_buffer_keeps_holding_that_slipped_slightly():
+    ranking = [{"ticker": t, "qualifies": True, "score": s} for t, s in [("A", 5), ("B", 4), ("C", 3), ("D", 2), ("E", 1)]]
+    assert momentum.picks_with_buffer(ranking, 2, held=["C"], buffer=1) == ["C", "A"]
+    assert momentum.picks_with_buffer(ranking, 2, held=["E"], buffer=1) == ["A", "B"]
+
+
+def test_min_hold_blocks_quick_rotation():
+    bot = copy.deepcopy(BOT)
+    bot["universe"] = ["UP1", "UP2"]
+    bot["momentum"]["top_n"] = 1
+    bot["momentum"]["rank_buffer"] = 0
+    bot["ai_share"] = 0
+    led = new_ledger(10000)
+    led["positions"]["momentum:UP1"] = {"ticker": "UP1", "sleeve": "momentum", "shares": 50, "avg_cost": 50, "opened": "2026-10-07", "opened_at": "2026-10-07T10:00:00", "high": 50}
+    closes = frame(["UP1", "UP2"], slopes={"UP1": 0.0005, "UP2": 0.004})
+    BotDay(bot, led, closes, "2026-10-07", PaperBroker(), EXCL, picker_returning(), now="2026-10-07T10:20:00").run()
+    assert "momentum:UP1" in led["positions"]  # held 20 min < 30 min
+    BotDay(bot, led, closes, "2026-10-07", PaperBroker(), EXCL, picker_returning(), now="2026-10-07T10:45:00").run()
+    assert "momentum:UP1" not in led["positions"] and "momentum:UP2" in led["positions"]
+
+
+def test_trailing_stop_sells_winner_that_drops_from_high():
+    closes = frame(["UP1"])
+    price = float(closes["UP1"].iloc[-1])
+    led = new_ledger(10000)
+    led["positions"]["momentum:UP1"] = {"ticker": "UP1", "sleeve": "momentum", "shares": 5, "avg_cost": price * 0.8, "opened": "x", "high": price * 1.2}
+    bot = copy.deepcopy(BOT)
+    bot["universe"] = ["UP1"]
+    day = BotDay(bot, led, closes, "2026-10-07", PaperBroker(), EXCL, picker_returning())
+    day.stop_losses()
+    assert "momentum:UP1" not in led["positions"]
+    assert led["trades"][-1]["reason"].startswith("Trailing stop")
+
+
+def test_daily_trade_cap():
+    bot = copy.deepcopy(BOT)
+    bot["max_trades_per_day"] = 2
+    led = new_ledger(10000)
+    BotDay(bot, led, frame(bot["universe"]), "2026-10-07", PaperBroker(), EXCL, picker_returning("UP4")).run()
+    assert len([t for t in led["trades"] if t["date"] == "2026-10-07"]) == 2
