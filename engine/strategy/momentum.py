@@ -5,11 +5,13 @@ import pandas as pd
 def rank(closes: pd.DataFrame, settings: dict) -> list[dict]:
     """Score every ticker with enough history. Higher score = stronger momentum.
 
-    score = average of the long and short lookback returns.
+    score = average of the long, short and fast (about a week) lookback returns. The fast part uses
+    the live price, so the ranking moves during the day.
     A ticker only qualifies when it's above its trend average and its score is positive.
     """
     long_n = settings["lookback_days"]
     short_n = settings["short_lookback_days"]
+    fast_n = settings.get("fast_lookback_days", 5)
     sma_n = settings["trend_sma_days"]
     rows = []
     for t in closes.columns:
@@ -19,8 +21,9 @@ def rank(closes: pd.DataFrame, settings: dict) -> list[dict]:
         price = float(s.iloc[-1])
         r_long = price / float(s.iloc[-1 - long_n]) - 1
         r_short = price / float(s.iloc[-1 - short_n]) - 1
+        r_fast = price / float(s.iloc[-1 - fast_n]) - 1
         sma = float(s.tail(sma_n).mean())
-        score = (r_long + r_short) / 2
+        score = (r_long + r_short + r_fast) / 3
         rows.append(
             {
                 "ticker": t,
@@ -28,6 +31,7 @@ def rank(closes: pd.DataFrame, settings: dict) -> list[dict]:
                 "score": round(score, 4),
                 "ret_long": round(r_long, 4),
                 "ret_short": round(r_short, 4),
+                "ret_fast": round(r_fast, 4),
                 "above_trend": price > sma,
                 "qualifies": price > sma and score > 0,
             }
@@ -38,3 +42,12 @@ def rank(closes: pd.DataFrame, settings: dict) -> list[dict]:
 
 def picks(ranking: list[dict], top_n: int) -> list[str]:
     return [r["ticker"] for r in ranking if r["qualifies"]][:top_n]
+
+
+def picks_with_buffer(ranking: list[dict], top_n: int, held: list[str], buffer: int) -> list[str]:
+    """Like picks(), but a stock already held keeps its place while it still qualifies and ranks
+    within top_n + buffer. Stops the bot from swapping holdings over tiny rank changes."""
+    qualified = [r["ticker"] for r in ranking if r["qualifies"]]
+    keep = [t for t in qualified[: top_n + buffer] if t in held][:top_n]
+    fill = [t for t in qualified if t not in keep][: top_n - len(keep)]
+    return keep + fill

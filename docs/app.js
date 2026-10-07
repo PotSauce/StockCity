@@ -16,12 +16,39 @@ let STATE = null;
 const money = (x, dp = 0) =>
   (x < 0 ? "−$" : "$") + Math.abs(x).toLocaleString("en-US", { minimumFractionDigits: dp, maximumFractionDigits: dp });
 const signedMoney = (x) => (x >= 0 ? "+" : "−") + money(Math.abs(x));
-const pct = (x, dp = 1) => (x >= 0 ? "+" : "−") + Math.abs(x * 100).toFixed(dp) + "%";
+const pct = (x, dp = 1) => {
+  const v = Math.abs(x * 100).toFixed(dp);
+  return (Number(v) === 0 ? "" : x >= 0 ? "+" : "−") + v + "%";
+};
 const cls = (x) => (x >= 0 ? "up" : "down");
+const num1 = (x) => String(Math.round(x * 100) / 100);
 const esc = (s) => String(s ?? "").replace(/[&<>"']/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" })[c]);
 
+// "server": the always-on server (live prices, password-protected settings)
+// "static": GitHub Pages reading data/state.json; "preview": data baked into the page
+let MODE = "static";
+
 async function loadState() {
-  if (window.__STATE__) return window.__STATE__;
+  if (window.__STATE__) {
+    MODE = "preview";
+    return window.__STATE__;
+  }
+  for (let attempt = 0; attempt < 20; attempt++) {
+    let res;
+    try {
+      res = await fetch("api/state", { cache: "no-store" });
+    } catch {
+      break;
+    }
+    if (res.ok) {
+      MODE = "server";
+      return res.json();
+    }
+    if (res.status !== 503) break;
+    $("banner").textContent = "The city is loading market data…";
+    $("banner").hidden = false;
+    await new Promise((r) => setTimeout(r, 3000));
+  }
   const res = await fetch("data/state.json", { cache: "no-store" });
   if (!res.ok) throw new Error(`Could not load data/state.json (${res.status})`);
   return res.json();
@@ -65,6 +92,24 @@ const gh = {
     return gh.call("/actions/workflows/trade.yml/dispatches", { method: "POST", body: JSON.stringify({ ref: "main", inputs: { force: "true" } }) });
   },
 };
+
+const api = {
+  pass: () => store.get("sc.pass"),
+  unlocked: () => !!store.get("sc.pass"),
+  async call(path, opts = {}) {
+    const res = await fetch(path, {
+      ...opts,
+      headers: { "Content-Type": "application/json", "X-City-Password": api.pass() || "", ...(opts.headers || {}) },
+    });
+    const body = await res.json().catch(() => ({}));
+    if (!res.ok) {
+      if (res.status === 401) store.del("sc.pass");
+      throw new Error(body.detail || `Server said ${res.status}`);
+    }
+    return body;
+  },
+};
+const canSave = () => (MODE === "server" ? api.unlocked() : gh.connected());
 
 function toast(msg, ms = 4200) {
   const t = $("toast");
@@ -595,12 +640,28 @@ function renderHUD() {
   pill.textContent = live ? "Live · Schwab" : "Paper money";
   pill.classList.toggle("live", live);
 
+  const mk = STATE.server?.markets?.[0];
+  const mp = $("market-pill");
+  if (mk) {
+    mp.hidden = false;
+    mp.textContent = mk.open ? "Market open" : "Market closed";
+    mp.className = "pill " + (mk.open ? "on" : "paused");
+    const q = STATE.server.last_quote_at ? new Date(STATE.server.last_quote_at).toLocaleTimeString([], { hour: "numeric", minute: "2-digit" }) : "–";
+    mp.title = `Prices updated ${q}. Bots trade ${STATE.server.trade_window_ny} New York time on market days, each on its own check interval.`;
+  }
+
   const banner = $("banner");
   const ageH = (Date.now() - Date.parse(STATE.generated_at)) / 36e5;
-  if (STATE.price_source === "simulated") {
-    banner.textContent = "Preview with simulated prices. Real prices take over after the first run on GitHub.";
+  if (STATE.server?.last_error) {
+    banner.textContent = `Price feed problem: ${STATE.server.last_error}. Retrying automatically.`;
     banner.hidden = false;
-  } else if (ageH > 80) {
+  } else if (STATE.price_source === "simulated" && MODE === "server") {
+    banner.textContent = "Test mode: the server is using simulated prices (MARKET_DATA=simulated).";
+    banner.hidden = false;
+  } else if (STATE.price_source === "simulated") {
+    banner.textContent = "Preview with simulated prices. Real prices show once the server is running.";
+    banner.hidden = false;
+  } else if (MODE !== "server" && ageH > 80) {
     banner.textContent = `Last update was ${Math.round(ageH / 24)} days ago. Check the Actions tab on GitHub.`;
     banner.hidden = false;
   } else banner.hidden = true;
@@ -614,6 +675,7 @@ function renderHUD() {
     const btn = document.createElement("button");
     btn.type = "button";
     btn.dataset.id = b.id;
+    if (b.id === openId) btn.classList.add("active");
     btn.innerHTML = `<span class="dot" style="color:${esc(b.color)}"></span><span class="bl-name">${esc(b.name)}</span><span class="bl-pnl ${cls(b.pnl)}">${pct(b.pnl_pct)}</span>`;
     btn.addEventListener("click", () => openPanel(b.id));
     list.appendChild(btn);
@@ -627,11 +689,12 @@ function renderHUD() {
     .flatMap((b) => b.trades.slice(0, 8).map((t) => ({ ...t, bot: b.name, color: b.color })))
     .sort((a, b) => (a.date < b.date ? 1 : -1))
     .slice(0, 24);
-  $("tape").innerHTML = trades.length
+  const tapeHTML = trades.length
     ? trades
         .map((t) => `<span><b style="color:${esc(t.color)}">${esc(t.bot)}</b> <span class="${t.side === "buy" ? "up" : "down"}">${t.side.toUpperCase()}</span> ${t.shares} ${esc(t.ticker)} @ ${money(t.price, 2)}</span>`)
         .join("")
     : "<span>No trades yet. The bots trade on their first run.</span>";
+  if ($("tape").innerHTML !== tapeHTML) $("tape").innerHTML = tapeHTML;
 }
 
 /* =========================================================================
@@ -672,10 +735,13 @@ document.querySelectorAll(".tabs button").forEach((btn) =>
   }),
 );
 
+const SLEEVE_TAG = { ai: "AI", momentum: "MOM", intraday: "DAY" };
+const mainName = (s) => (s.style === "intraday" ? "Day trading" : "Momentum");
+
 function renderPanel() {
   const b = bot();
   if (!b) return;
-  $("p-sector").textContent = `${b.sector} · ${Math.round((1 - b.settings.ai_share) * 100)}/${Math.round(b.settings.ai_share * 100)} momentum/AI`;
+  $("p-sector").textContent = `${b.sector} · ${Math.round((1 - b.settings.ai_share) * 100)}/${Math.round(b.settings.ai_share * 100)} ${mainName(b.settings).toLowerCase()}/AI`;
   $("p-name").textContent = b.name;
   const st = $("p-status");
   st.textContent = b.enabled ? "Active" : "Paused";
@@ -715,16 +781,22 @@ function drawSpark(b) {
 }
 
 function holdingsHTML(b) {
-  if (!b.positions.length) return `<p class="empty">No holdings yet. Cash: ${money(b.cash, 2)}.</p>`;
+  if (!b.positions.length) return `<p class="empty">No holdings right now. Cash: ${money(b.cash, 2)}.</p>${settlingHTML(b)}`;
   const rows = b.positions
     .map(
-      (p) => `<tr><td class="tk">${esc(p.ticker)}<span class="sleeve ${p.sleeve}">${p.sleeve === "ai" ? "AI" : "MOM"}</span></td>
+      (p) => `<tr><td class="tk">${esc(p.ticker)}<span class="sleeve ${p.sleeve}">${SLEEVE_TAG[p.sleeve] || "MOM"}</span></td>
       <td>${p.shares}</td><td>${money(p.price, 2)}</td><td>${money(p.value)}</td><td class="${cls(p.pnl_pct)}">${pct(p.pnl_pct)}</td></tr>`,
     )
     .join("");
   return `<table><thead><tr><th>Stock</th><th>Shares</th><th>Price</th><th>Value</th><th>Gain</th></tr></thead>
     <tbody>${rows}<tr><td class="tk">Cash</td><td></td><td></td><td>${money(b.cash)}</td><td></td></tr></tbody></table>
+    ${settlingHTML(b)}
     ${b.notes.length ? `<div class="section-title">Bot notes</div><ul class="notes">${b.notes.slice(0, 6).map((n) => `<li><span class="num">${esc(n.date)}</span> ${esc(n.text)}</li>`).join("")}</ul>` : ""}`;
+}
+
+function settlingHTML(b) {
+  if (!b.settling) return "";
+  return `<p class="blocked">${money(b.settling, 2)} of the cash is from today's sales and can buy again once it settles next trading day. Spendable now: ${money(Math.max(0, b.cash - b.settling), 2)}.</p>`;
 }
 
 function tradesHTML(b) {
@@ -733,8 +805,8 @@ function tradesHTML(b) {
     .slice(0, 60)
     .map(
       (t) => `<div class="trade"><span class="side ${t.side}">${t.side.toUpperCase()}</span>
-      <span class="what">${t.shares} ${esc(t.ticker)} @ ${money(t.price, 2)}<span class="sleeve ${t.sleeve}">${t.sleeve === "ai" ? "AI" : "MOM"}</span></span>
-      <span class="when">${esc(t.date)}</span><span class="why">${esc(t.reason)}</span></div>`,
+      <span class="what">${t.shares} ${esc(t.ticker)} @ ${money(t.price, 2)}<span class="sleeve ${t.sleeve}">${SLEEVE_TAG[t.sleeve] || "MOM"}</span></span>
+      <span class="when">${esc(t.date)}${t.time ? " " + esc(t.time) : ""}</span><span class="why">${esc(t.reason)}</span></div>`,
     )
     .join("");
 }
@@ -744,7 +816,7 @@ function picksHTML(b) {
   let aiPart;
   if (ai.status === "ok") {
     aiPart = `${ai.market_view ? `<p class="view">“${esc(ai.market_view)}”</p>` : ""}
-      ${ai.picks.length ? ai.picks.map((p) => `<div class="pick"><div class="pick-head"><b>${esc(p.ticker)}</b><span class="conf">confidence ${Math.round(p.confidence * 100)}%</span></div><p>${esc(p.reason)}</p></div>`).join("") : `<p class="empty">No picks this week. The AI sleeve is holding cash.</p>`}
+      ${ai.picks.length ? ai.picks.map((p) => `<div class="pick"><div class="pick-head"><b>${esc(p.ticker)}</b><span class="conf">confidence ${Math.round(p.confidence * 100)}%</span></div><p>${esc(p.reason)}</p></div>`).join("") : `<p class="empty">No AI picks right now. That part of the building is holding cash.</p>`}
       ${ai.rejected?.length ? `<p class="blocked">Blocked: ${ai.rejected.map((r) => `${esc(r.ticker)} (${esc(r.reason)})`).join(", ")}</p>` : ""}
       <p class="blocked">Picked ${esc(ai.date)} by ${esc(ai.model)}.</p>`;
   } else if (ai.status === "error") {
@@ -766,42 +838,97 @@ function picksHTML(b) {
     ? `<p class="blocked">Never bought here: ${b.blocked_in_universe.map((x) => `${esc(x.ticker)} (${esc(x.reason)})`).join(", ")}</p>`
     : "";
 
-  return `<div class="section-title">AI picks · ${Math.round(b.settings.ai_share * 100)}% of this building</div>${aiPart}
-    <div class="section-title">Momentum leaderboard · top ${b.settings.momentum.top_n} with ✓ get bought</div>${rank}${blocked}`;
+  const main =
+    b.settings.style === "intraday"
+      ? `<div class="section-title">Moving right now · ✓ = up ${num1(b.settings.intraday.entry_pct * 100)}%+ in ${b.settings.intraday.lookback_minutes} min and above VWAP · re-checked every ${b.settings.check_every_minutes} min</div>${moversHTML(b)}`
+      : `<div class="section-title">Momentum leaderboard · top ${b.settings.momentum.top_n} with ✓ get bought · re-checked every ${b.settings.check_every_minutes} min</div>${rank}`;
+  return `${main}${blocked}<div class="section-title">AI picks · ${Math.round(b.settings.ai_share * 100)}% of this building</div>${aiPart}`;
+}
+
+function moversHTML(b) {
+  const sig = b.intraday_signals || [];
+  if (!sig.length) return `<p class="empty">Movers appear once the market has been open about ${b.settings.intraday.lookback_minutes} minutes.</p>`;
+  const top = Math.max(0.0001, ...sig.map((r) => Math.abs(r.move)));
+  return sig
+    .map(
+      (r) => `<div class="rank-row ${r.qualifies ? "" : "no"}"><span>${esc(r.ticker)}</span>
+        <span class="rank-bar"><i style="width:${Math.max(2, (Math.max(0, r.move) / top) * 100)}%"></i></span>
+        <span class="${cls(r.move)}" style="text-align:right">${pct(r.move, 2)}</span><span class="ok" title="${r.qualifies ? "Running up and above VWAP" : r.above_vwap ? "Not moving enough yet" : "Below VWAP"}">${r.qualifies ? "✓" : ""}</span></div>`,
+    )
+    .join("")
+    + `<p class="blocked">VWAP is today's volume-weighted average price. A stock above it has been trading stronger than average today.</p>`;
 }
 
 /* ---------- settings ---------- */
+const CHECKS = [[2, "2 minutes"], [3, "3 minutes"], [5, "5 minutes"], [15, "15 minutes"], [30, "30 minutes"], [60, "hour"], [390, "day"]];
+const AI_EVERY = [[60, "hour"], [120, "2 hours"], [240, "4 hours"], [390, "day"], [1950, "week"]];
 const LOOKBACKS = [[63, "3 months"], [126, "6 months"], [189, "9 months"], [252, "12 months"]];
+
+const STYLES = [["intraday", "Day trading (in and out within the day)"], ["swing", "Swing (hold days to weeks)"]];
 
 function settingsHTML(b) {
   const d = draft;
   const aiPct = Math.round(d.ai_share * 100);
+  const day = d.intraday;
+  const isDay = d.style === "intraday";
+  const opt = (list, cur) => list.map(([v, l]) => `<option value="${v}" ${v === cur ? "selected" : ""}>${l}</option>`).join("");
+  const dayFields = `
+    <div class="two">
+      <div class="field"><label for="s-entry">Buy when up at least (%)</label><input id="s-entry" type="number" min="0.05" max="5" step="0.05" value="${num1(day.entry_pct * 100)}"></div>
+      <div class="field"><label for="s-lookmin">…over the last (minutes)</label><input id="s-lookmin" type="number" min="2" max="120" step="1" value="${day.lookback_minutes}"></div>
+    </div>
+    <div class="two">
+      <div class="field"><label for="s-tp">Take profit at (%)</label><input id="s-tp" type="number" min="0.1" max="20" step="0.1" value="${num1(day.take_profit_pct * 100)}"></div>
+      <div class="field"><label for="s-dstop">Stop at (%)</label><input id="s-dstop" type="number" min="0.1" max="20" step="0.1" value="${num1(day.stop_pct * 100)}"></div>
+    </div>
+    <div class="two">
+      <div class="field"><label for="s-maxpos">Day trades open at once</label><input id="s-maxpos" type="number" min="1" max="10" value="${day.max_positions}"></div>
+      <div class="field"><label for="s-cool">Wait before re-buying (minutes)</label><input id="s-cool" type="number" min="0" max="390" step="5" value="${day.cooldown_minutes}"></div>
+    </div>
+    <span class="help">Buys a stock that is up this much over the last few minutes and above VWAP. Sells at the take profit, at the stop, when the run fades, and always by ${esc(day.close_out_at)} so nothing is held overnight. No new buys after ${esc(day.no_entries_after)}.</span>`;
+  const swingFields = `
+    <div class="two">
+      <div class="field"><label for="s-topn">Momentum stocks held</label><input id="s-topn" type="number" min="1" max="10" value="${d.momentum.top_n}"></div>
+      <div class="field"><label for="s-look">Momentum looks back</label><select id="s-look">${opt(LOOKBACKS, d.momentum.lookback_days)}</select></div>
+    </div>`;
   return `<form class="settings" id="settings-form">
     <div class="toggle"><input type="checkbox" id="s-enabled" ${d.enabled ? "checked" : ""}><label for="s-enabled">Trading on (untick to pause this building)</label></div>
     <div class="field"><label for="s-cash">Money in this building ($)</label>
       <input id="s-cash" type="number" min="0" step="100" value="${d.starting_cash}">
-      <span class="help">Raising it adds cash on the next run; lowering it takes cash out (only uninvested cash).</span></div>
+      <span class="help">Raising it adds cash on the next check; lowering it takes cash out (only uninvested cash).</span></div>
+    <div class="field"><label for="s-style">Trading style</label><select id="s-style">${opt(STYLES, d.style)}</select></div>
     <div class="field"><span class="flabel">Strategy split</span>
       <div class="split"><span class="m" style="width:${100 - aiPct}%"></span><span class="a" style="width:${aiPct}%"></span></div>
-      <div class="split-legend"><span style="color:var(--neon-2)">Momentum ${100 - aiPct}%</span><span style="color:#f9a8d4">AI picks ${aiPct}%</span></div>
+      <div class="split-legend">${legendHTML(d, aiPct)}</div>
       <input id="s-ai" type="range" min="0" max="100" step="5" value="${aiPct}" aria-label="AI share"></div>
+    ${isDay ? dayFields : swingFields}
     <div class="two">
-      <div class="field"><label for="s-topn">Momentum stocks held</label><input id="s-topn" type="number" min="1" max="10" value="${d.momentum.top_n}"></div>
+      <div class="field"><label for="s-check">Check for trades every</label><select id="s-check">${opt(CHECKS, d.check_every_minutes)}</select></div>
+      <div class="field"><label for="s-cap">Max buys per day</label><input id="s-cap" type="number" min="1" max="500" value="${d.max_buys_per_day}"></div>
+    </div>
+    <span class="help">Selling is never capped, so a stop or close-out always goes through.</span>
+    <div class="section-title">${isDay ? "AI picks (held for days)" : "Risk and AI picks"}</div>
+    <div class="two">
       <div class="field"><label for="s-aipicks">AI stocks held</label><input id="s-aipicks" type="number" min="1" max="5" value="${d.ai.max_picks}"></div>
+      <div class="field"><label for="s-aievery">AI re-picks every</label><select id="s-aievery">${opt(AI_EVERY, d.ai.review_every_minutes)}</select></div>
     </div>
     <div class="two">
-      <div class="field"><label for="s-look">Momentum looks back</label><select id="s-look">${LOOKBACKS.map(([v, l]) => `<option value="${v}" ${v === d.momentum.lookback_days ? "selected" : ""}>${l}</option>`).join("")}</select></div>
-      <div class="field"><label for="s-rebal">Re-check every (days)</label><input id="s-rebal" type="number" min="1" max="90" value="${d.momentum.rebalance_days}"></div>
+      <div class="field"><label for="s-stop">Stop loss (%)</label><input id="s-stop" type="number" min="1" max="90" step="1" value="${Math.round(d.momentum.stop_loss_pct * 100)}"></div>
+      <div class="field"><label for="s-trail">Trailing stop (%)</label><input id="s-trail" type="number" min="1" max="90" step="1" value="${Math.round(d.momentum.trailing_stop_pct * 100)}"></div>
     </div>
-    <div class="field"><label for="s-stop">Stop loss (%)</label><input id="s-stop" type="number" min="1" max="90" step="1" value="${Math.round(d.momentum.stop_loss_pct * 100)}">
-      <span class="help">Sells any holding that falls this far below what the bot paid.</span></div>
+    <div class="field"><label for="s-hold">Hold at least (minutes)</label><input id="s-hold" type="number" min="0" max="10080" step="15" value="${d.min_hold_minutes}">
+      <span class="help">${isDay ? "These three apply to the AI picks." : "These apply to every holding."} Stop loss sells when a stock falls this far below what the bot paid; trailing stop sells a winner that falls this far from its high. Each AI review is one Claude request, roughly 3–5¢.</span></div>
     <div class="field"><span class="flabel">Stocks this building can trade</span>
       <div class="chips" id="s-chips">${d.universe.map((t) => `<span class="chip">${esc(t)}<button type="button" data-rm="${esc(t)}" aria-label="Remove ${esc(t)}">✕</button></span>`).join("")}</div>
       <div class="add-row"><input id="s-add" type="text" placeholder="Add ticker, e.g. IBM" maxlength="8" autocomplete="off"><button type="button" id="s-add-btn">Add</button></div>
       <span class="err" id="s-err"></span></div>
-    <div class="actions"><button type="submit" class="primary" id="s-save">${gh.connected() ? "Save to GitHub" : "Save changes"}</button><button type="button" id="s-reset">Undo changes</button></div>
+    <div class="actions"><button type="submit" class="primary" id="s-save">${MODE === "server" ? (api.unlocked() ? "Save changes" : "Unlock to save") : gh.connected() ? "Save to GitHub" : "Save changes"}</button><button type="button" id="s-reset">Undo changes</button></div>
     <div id="s-out"></div>
   </form>`;
+}
+
+function legendHTML(d, aiPct) {
+  return `<span style="color:var(--neon-2)">${mainName(d)} ${100 - aiPct}%</span><span style="color:#f9a8d4">AI picks ${aiPct}%</span>`;
 }
 
 function blockedReason(t) {
@@ -811,23 +938,44 @@ function blockedReason(t) {
 
 function wireSettings(root, b) {
   const num = (id) => Number(root.querySelector(id).value);
+  const has = (id) => !!root.querySelector(id);
+  const clamp = (v, lo, hi) => Math.min(hi, Math.max(lo, v));
   const sync = () => {
     draft.enabled = root.querySelector("#s-enabled").checked;
     draft.starting_cash = Math.max(0, num("#s-cash"));
+    draft.style = root.querySelector("#s-style").value;
     draft.ai_share = num("#s-ai") / 100;
-    draft.momentum.top_n = Math.min(10, Math.max(1, Math.round(num("#s-topn"))));
-    draft.ai.max_picks = Math.min(5, Math.max(1, Math.round(num("#s-aipicks"))));
-    draft.momentum.lookback_days = num("#s-look");
-    draft.momentum.short_lookback_days = Math.round(num("#s-look") / 2);
-    draft.momentum.rebalance_days = Math.min(90, Math.max(1, Math.round(num("#s-rebal"))));
-    draft.ai.rebalance_days = draft.momentum.rebalance_days;
-    draft.momentum.stop_loss_pct = Math.min(90, Math.max(1, num("#s-stop"))) / 100;
+    draft.ai.max_picks = clamp(Math.round(num("#s-aipicks")), 1, 5);
+    draft.check_every_minutes = num("#s-check");
+    draft.ai.review_every_minutes = num("#s-aievery");
+    draft.min_hold_minutes = clamp(Math.round(num("#s-hold")), 0, 10080);
+    draft.max_buys_per_day = clamp(Math.round(num("#s-cap")), 1, 500);
+    draft.momentum.stop_loss_pct = clamp(num("#s-stop"), 1, 90) / 100;
+    draft.momentum.trailing_stop_pct = clamp(num("#s-trail"), 1, 90) / 100;
+    if (has("#s-topn")) {
+      draft.momentum.top_n = clamp(Math.round(num("#s-topn")), 1, 10);
+      draft.momentum.lookback_days = num("#s-look");
+      draft.momentum.short_lookback_days = Math.round(num("#s-look") / 2);
+    }
+    if (has("#s-entry")) {
+      const day = draft.intraday;
+      day.entry_pct = clamp(num("#s-entry"), 0.05, 5) / 100;
+      day.lookback_minutes = clamp(Math.round(num("#s-lookmin")), 2, 120);
+      day.take_profit_pct = clamp(num("#s-tp"), 0.1, 20) / 100;
+      day.stop_pct = clamp(num("#s-dstop"), 0.1, 20) / 100;
+      day.max_positions = clamp(Math.round(num("#s-maxpos")), 1, 10);
+      day.cooldown_minutes = clamp(Math.round(num("#s-cool")), 0, 390);
+    }
   };
+  root.querySelector("#s-style").addEventListener("change", () => {
+    sync();
+    renderPanel();
+  });
   root.querySelector("#s-ai").addEventListener("input", (e) => {
     const v = Number(e.target.value);
     root.querySelector(".split .m").style.width = `${100 - v}%`;
     root.querySelector(".split .a").style.width = `${v}%`;
-    root.querySelector(".split-legend").innerHTML = `<span style="color:var(--neon-2)">Momentum ${100 - v}%</span><span style="color:#f9a8d4">AI picks ${v}%</span>`;
+    root.querySelector(".split-legend").innerHTML = legendHTML(draft, v);
   });
   root.querySelectorAll("[data-rm]").forEach((btn) =>
     btn.addEventListener("click", () => {
@@ -864,6 +1012,26 @@ function wireSettings(root, b) {
     e.preventDefault();
     sync();
     const out = root.querySelector("#s-out");
+    if (MODE === "server") {
+      if (!api.unlocked()) return openUnlock();
+      const btn = root.querySelector("#s-save");
+      btn.disabled = true;
+      btn.textContent = "Saving…";
+      try {
+        const saved = await api.call(`api/bots/${encodeURIComponent(draft.id)}`, { method: "PUT", body: JSON.stringify(draft) });
+        b.settings = saved;
+        b.enabled = saved.enabled;
+        draft = structuredClone(saved);
+        renderHUD();
+        renderPanel();
+        toast(`Saved. ${saved.name} uses the new settings from its next check.`);
+      } catch (err) {
+        out.innerHTML = `<p class="err">Couldn't save: ${esc(err.message)}</p>`;
+        btn.disabled = false;
+        btn.textContent = "Save changes";
+      }
+      return;
+    }
     if (!gh.connected()) {
       const json = JSON.stringify(draft, null, 2);
       out.innerHTML = `<p class="help">Connect your repo (top right) to save straight from here. Or copy this into <b>config/bots.json</b> on GitHub, replacing the "${esc(b.id)}" building:</p>
@@ -911,7 +1079,35 @@ function openConnect() {
   $("connect-modal").hidden = false;
   $("c-repo").focus();
 }
-$("btn-connect").addEventListener("click", openConnect);
+$("btn-connect").addEventListener("click", () => (MODE === "server" ? openUnlock() : openConnect()));
+
+function openUnlock() {
+  $("u-pass").value = "";
+  $("u-msg").textContent = STATE?.server && !STATE.server.password_set ? "No password is set on the server yet. Add APP_PASSWORD in the server's settings first." : "";
+  $("unlock-modal").hidden = false;
+  $("u-pass").focus();
+}
+$("u-cancel").addEventListener("click", () => ($("unlock-modal").hidden = true));
+$("u-lock").addEventListener("click", () => {
+  store.del("sc.pass");
+  $("u-msg").textContent = "Locked on this browser.";
+  syncConnectButton();
+  if (openId) renderPanel();
+});
+$("unlock-form").addEventListener("submit", async (e) => {
+  e.preventDefault();
+  store.set("sc.pass", $("u-pass").value);
+  try {
+    await api.call("api/login", { method: "POST" });
+    $("unlock-modal").hidden = true;
+    toast("Unlocked. You can change settings and run the bots.");
+  } catch (err) {
+    store.del("sc.pass");
+    $("u-msg").textContent = err.message;
+  }
+  syncConnectButton();
+  if (openId) renderPanel();
+});
 $("c-cancel").addEventListener("click", () => ($("connect-modal").hidden = true));
 $("c-forget").addEventListener("click", () => {
   store.del("sc.repo");
@@ -935,9 +1131,23 @@ $("connect-form").addEventListener("submit", async (e) => {
   }
 });
 function syncConnectButton() {
-  $("btn-connect").textContent = gh.connected() ? "Connected" : "Connect";
+  $("btn-connect").textContent = MODE === "server" ? (api.unlocked() ? "Unlocked" : "Unlock") : gh.connected() ? "Connected" : "Connect";
 }
 $("btn-run").addEventListener("click", async () => {
+  if (MODE === "server") {
+    if (!api.unlocked()) return openUnlock();
+    $("btn-run").disabled = true;
+    toast("Running the bots…", 20000);
+    try {
+      const r = await api.call("api/run", { method: "POST" });
+      await refresh();
+      toast(r.note || "Done.", 6000);
+    } catch (err) {
+      toast(`Couldn't run: ${err.message}`, 7000);
+    }
+    $("btn-run").disabled = false;
+    return;
+  }
   if (!gh.connected()) return openConnect();
   try {
     await gh.runNow();
@@ -963,4 +1173,15 @@ $("btn-run").addEventListener("click", async () => {
   syncConnectButton();
   renderHUD();
   frame();
+  if (MODE === "server") setInterval(refresh, 15000);
 })();
+
+async function refresh() {
+  try {
+    const res = await fetch("api/state", { cache: "no-store" });
+    if (!res.ok) return;
+    STATE = await res.json();
+    renderHUD();
+    if (openId && tab !== "settings") renderPanel();
+  } catch {}
+}

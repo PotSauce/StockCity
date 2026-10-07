@@ -1,4 +1,5 @@
 import copy
+import math
 
 import numpy as np
 import pandas as pd
@@ -17,6 +18,7 @@ BOT = normalize_bot(
         "name": "Test",
         "sector": "Technology",
         "starting_cash": 10000,
+        "style": "swing",
         "universe": ["UP1", "UP2", "UP3", "UP4", "DOWN"],
     }
 )
@@ -142,3 +144,108 @@ def test_schwab_needs_explicit_confirmation():
 def test_shipped_config_has_no_blocked_tickers():
     for bot in load_config()["bots"]:
         assert not [t for t in bot["universe"] if EXCL.is_blocked(t)], bot["id"]
+
+
+def test_rank_buffer_keeps_holding_that_slipped_slightly():
+    ranking = [{"ticker": t, "qualifies": True, "score": s} for t, s in [("A", 5), ("B", 4), ("C", 3), ("D", 2), ("E", 1)]]
+    assert momentum.picks_with_buffer(ranking, 2, held=["C"], buffer=1) == ["C", "A"]
+    assert momentum.picks_with_buffer(ranking, 2, held=["E"], buffer=1) == ["A", "B"]
+
+
+def test_min_hold_blocks_quick_rotation():
+    bot = copy.deepcopy(BOT)
+    bot["universe"] = ["UP1", "UP2"]
+    bot["momentum"]["top_n"] = 1
+    bot["momentum"]["rank_buffer"] = 0
+    bot["ai_share"] = 0
+    led = new_ledger(10000)
+    led["positions"]["momentum:UP1"] = {"ticker": "UP1", "sleeve": "momentum", "shares": 50, "avg_cost": 50, "opened": "2026-10-07", "opened_at": "2026-10-07T10:00:00", "high": 50}
+    closes = frame(["UP1", "UP2"], slopes={"UP1": 0.0005, "UP2": 0.004})
+    BotDay(bot, led, closes, "2026-10-07", PaperBroker(), EXCL, picker_returning(), now="2026-10-07T10:20:00").run()
+    assert "momentum:UP1" in led["positions"]  # held 20 min < 30 min
+    BotDay(bot, led, closes, "2026-10-07", PaperBroker(), EXCL, picker_returning(), now="2026-10-07T10:45:00").run()
+    assert "momentum:UP1" not in led["positions"] and "momentum:UP2" in led["positions"]
+
+
+def test_trailing_stop_sells_winner_that_drops_from_high():
+    closes = frame(["UP1"])
+    price = float(closes["UP1"].iloc[-1])
+    led = new_ledger(10000)
+    led["positions"]["momentum:UP1"] = {"ticker": "UP1", "sleeve": "momentum", "shares": 5, "avg_cost": price * 0.8, "opened": "x", "high": price * 1.2}
+    bot = copy.deepcopy(BOT)
+    bot["universe"] = ["UP1"]
+    day = BotDay(bot, led, closes, "2026-10-07", PaperBroker(), EXCL, picker_returning())
+    day.stop_losses()
+    assert "momentum:UP1" not in led["positions"]
+    assert led["trades"][-1]["reason"].startswith("Trailing stop")
+
+
+def test_daily_buy_cap():
+    bot = copy.deepcopy(BOT)
+    bot["max_buys_per_day"] = 2
+    led = new_ledger(10000)
+    BotDay(bot, led, frame(bot["universe"]), "2026-10-07", PaperBroker(), EXCL, picker_returning("UP4")).run()
+    assert len([t for t in led["trades"] if t["side"] == "buy"]) == 2
+
+
+# ---- intraday style ------------------------------------------------------------------
+
+def minute_bars(paths, start="2026-10-07 09:30"):
+    """paths: {ticker: list of 1-minute closes}"""
+    n = max(len(p) for p in paths.values())
+    idx = pd.date_range(start, periods=n, freq="1min")
+    close = pd.DataFrame({t: p + [p[-1]] * (n - len(p)) for t, p in paths.items()}, index=idx)
+    return close, pd.DataFrame(1000, index=idx, columns=close.columns)
+
+
+def intraday_bot(**over):
+    bot = copy.deepcopy(BOT)
+    bot.update(style="intraday", ai_share=0, starting_cash=1000)
+    bot["universe"] = ["RUN", "FLAT"]
+    bot["intraday"].update(over)
+    return bot
+
+
+def run_at(bot, led, bars, hhmm, settle=False):
+    closes = frame(["RUN", "FLAT"])
+    BotDay(bot, led, closes, "2026-10-07", PaperBroker(), EXCL, picker_returning(), now=f"2026-10-07T{hhmm}:00", minute_bars=bars, settle=settle).run()
+
+
+def test_intraday_buys_a_stock_running_up_and_takes_profit():
+    bot = intraday_bot()
+    led = new_ledger(1000)
+    up = [100 + i * 0.02 for i in range(40)]  # +0.8% over 40 minutes, steady climb
+    run_at(bot, led, minute_bars({"RUN": up, "FLAT": [50.0] * 40}), "10:10")
+    assert [t["ticker"] for t in led["trades"] if t["side"] == "buy"] == ["RUN"]
+    assert led["positions"]["intraday:RUN"]["shares"] == math.floor(1000 / 2 / up[-1])
+    more = up + [up[-1] * (1 + i * 0.001) for i in range(1, 12)]  # +1.1% more
+    run_at(bot, led, minute_bars({"RUN": more, "FLAT": [50.0] * len(more)}), "10:21")
+    assert "intraday:RUN" not in led["positions"]
+    assert led["trades"][-1]["reason"].startswith("Take profit")
+
+
+def test_intraday_closes_everything_before_the_bell():
+    bot = intraday_bot()
+    led = new_ledger(1000)
+    up = [100 + i * 0.02 for i in range(40)]
+    run_at(bot, led, minute_bars({"RUN": up, "FLAT": [50.0] * 40}), "10:10")
+    run_at(bot, led, minute_bars({"RUN": up + [up[-1]] * 2, "FLAT": [50.0] * 42}), "15:51")
+    assert not led["positions"]
+    assert led["trades"][-1]["reason"].startswith("End-of-day close-out")
+
+
+def test_cash_account_cannot_rebuy_with_unsettled_money():
+    bot = intraday_bot(cooldown_minutes=0, max_positions=1)
+    led = new_ledger(1000)
+    up = [100 + i * 0.02 for i in range(40)]
+    run_at(bot, led, minute_bars({"RUN": up, "FLAT": [50.0] * 40}), "10:10", settle=True)
+    assert "intraday:RUN" in led["positions"]
+    spent = 1000 - led["cash"]
+    more = up + [up[-1] * (1 + i * 0.001) for i in range(1, 12)]
+    run_at(bot, led, minute_bars({"RUN": more, "FLAT": [50.0] * len(more)}), "10:21", settle=True)  # take profit
+    assert led["unsettled"] and led["unsettled"][0]["settles"] == "2026-10-08"
+    # still running: it would buy again, but only the never-spent cash is usable
+    again = more + [more[-1] * (1 + i * 0.0005) for i in range(1, 20)]
+    run_at(bot, led, minute_bars({"RUN": again, "FLAT": [50.0] * len(again)}), "10:40", settle=True)
+    bought_again = [t for t in led["trades"] if t["side"] == "buy"][1:]
+    assert sum(t["value"] for t in bought_again) <= 1000 - spent + 0.01

@@ -25,6 +25,7 @@
     <div class="brand">
       <span class="brand-mark">STOCK CITY</span>
       <span class="pill" id="mode-pill">PAPER</span>
+      <span class="pill" id="market-pill" hidden></span>
     </div>
     <div class="hud-stats">
       <div class="stat"><span class="stat-label">City value</span><span class="stat-value" id="t-equity">–</span></div>
@@ -82,6 +83,20 @@
         <button type="button" id="c-cancel">Close</button>
       </div>
       <p class="hint" id="c-msg"></p>
+    </form>
+  </div>
+  <div class="modal" id="unlock-modal" hidden role="dialog" aria-modal="true" aria-labelledby="u-title">
+    <form class="modal-card" id="unlock-form">
+      <h2 id="u-title">Unlock settings</h2>
+      <p>Enter the city password (the APP_PASSWORD you set on the server) to change settings or run the bots. It stays in this browser only.</p>
+      <label for="u-pass">Password</label>
+      <input id="u-pass" type="password" autocomplete="current-password" required>
+      <div class="row">
+        <button type="submit" class="primary">Unlock</button>
+        <button type="button" id="u-lock">Lock</button>
+        <button type="button" id="u-cancel">Close</button>
+      </div>
+      <p class="hint" id="u-msg"></p>
     </form>
   </div>
   <div class="toast" id="toast" role="status" hidden></div>
