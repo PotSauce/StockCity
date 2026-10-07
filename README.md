@@ -2,12 +2,12 @@
 
 A neon 3D city where every building is a trading bot for one sector. Click a building to see what it holds, what it traded and why, and to change its settings.
 
-| Building | Sector | Trades |
+| Building | Sector | Trades (125 heavily traded stocks each, 500 in all) |
 |---|---|---|
-| Tech Tower | Technology | AAPL, MSFT, NVDA, GOOGL, META, AVGO, AMD, … |
-| Energy Works | Energy | XOM, CVX, COP, EOG, SLB, NEE, FSLR, … |
-| Finance Bank | Financials | JPM, BAC, GS, MS, V, MA, SCHW, … |
-| Consumer Mall | Consumer | AMZN, TSLA, HD, MCD, COST, WMT, KO, … |
+| Tech Tower | Technology, internet, telecom | AAPL, NVDA, AMD, INTC, PLTR, fast movers like SOUN and IONQ, … |
+| Energy Works | Oil and gas, utilities, clean energy, uranium | XOM, CVX, OXY, RIG, PLUG, CCJ, NEE, … |
+| Finance Bank | Banks, brokers, fintech, insurance | JPM, BAC, SOFI, HOOD, COIN, NU, V, … |
+| Consumer Mall | Retail, autos, travel, food and drink | AMZN, TSLA, F, NIO, CCL, KO, WMT, … |
 
 City Hall in the middle shows the whole city's value.
 
@@ -28,7 +28,9 @@ Each building can switch to **Swing** style on its settings tab instead: it hold
 
 What that means for a $1,000–2,000 cash account: each dollar can be spent once a day, so expect about 3–4 buys per building per day (without the rule, 13–30). More positions at once (smaller trades) means more trades from the same money. Margin accounts under $25,000 are limited to 3 day trades per 5 days by the pattern day trader rule, which is why a cash account is the right fit here.
 
-**Do-not-buy list** (`config/exclusions.json`): no healthcare and no private prisons (GEO Group, CoreCivic, and the prison food contractor Aramark), plus a name/industry keyword check. Every buy is checked against it, including AI picks and any ticker you add yourself. The city also refuses to add a blocked ticker from the settings screen.
+**Do-not-buy list** (`config/exclusions.json`): no healthcare and no private prisons (GEO Group, CoreCivic, and the prison food contractor Aramark), plus a name/industry keyword check. Every buy is checked against it, including AI picks and any ticker you add yourself. The city also refuses to add a blocked ticker from the settings screen. Each stock's sector is looked up once in the background and saved; a stock isn't bought until that check has run.
+
+**Stock lists**: each building can trade the stocks listed on its settings tab, where you can add or remove any. When the lists in `config/bots.json` grow (its `universe_version` goes up), a running city adds the new stocks to each building on its next restart and keeps the ones you added. Claude reviews the strongest 40 of a building's affordable stocks each time it picks.
 
 Bots only buy whole shares (Schwab's API can't trade fractions), so a stock is skipped when one share costs more than its slot. Each building starts with $500 ($2,000 for the city), which puts slots near $200 for day trades and $100 for the AI pick; pricier stocks such as MSFT or META are skipped until a building has more money.
 
@@ -37,9 +39,9 @@ Bots only buy whole shares (Schwab's API can't trade fractions), so a stock is s
 One small server runs 24/7 ([Railway](https://railway.com), about $5/month). It:
 
 - shows the city website, updating itself every 15 seconds,
-- refreshes prices every minute while the market is open (every 15 minutes otherwise),
+- refreshes prices every minute while the market is open (every 15 minutes otherwise). It asks Yahoo for one snapshot of all 500 stocks at a time (about 100 per request, so 5 requests a minute) and builds each stock's minute-by-minute prices from those snapshots. Asking for each stock's chart separately would be 500 requests a minute, which Yahoo blocks.
 - runs each building's trade check every 3 minutes during market hours, buying and selling on minute-by-minute prices,
-- lets you change settings and press **Run now** from the website, protected by a password.
+- lets you change settings and press **Run now** from the website, protected by a password. Run now makes every building check immediately; while the market is closed it only refreshes the rankings and never trades.
 
 The server is a standard Docker container (`Dockerfile`), so it also runs on Fly.io, a Hetzner/DigitalOcean server, or your own computer.
 
