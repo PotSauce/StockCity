@@ -1,14 +1,14 @@
 {
- "generated_at": "2026-10-07T21:03:40+00:00",
+ "generated_at": "2026-10-07T21:11:12+00:00",
  "price_source": "simulated",
  "broker": "paper",
  "run_note": "Simulated 10 trading days with fake prices, checking every 3 minutes",
  "totals": {
-  "equity": 1939.16,
+  "equity": 1987.35,
   "contributed": 2000.0,
-  "pnl": -60.84,
-  "pnl_pct": -0.0304,
-  "day_change": -7.36
+  "pnl": -12.65,
+  "pnl_pct": -0.0063,
+  "day_change": 1.21
  },
  "bots": [
   {
@@ -76,13 +76,14 @@
     "sector": "Technology",
     "color": "#38bdf8"
    },
-   "cash": 415.94,
-   "equity": 480.78,
+   "cash": 425.54,
+   "settling": 414.03,
+   "equity": 490.38,
    "contributed": 500.0,
-   "pnl": -19.22,
-   "pnl_pct": -0.0384,
-   "day_change": -0.95,
-   "day_change_pct": -0.002,
+   "pnl": -9.62,
+   "pnl_pct": -0.0192,
+   "day_change": 1.76,
+   "day_change_pct": 0.0036,
    "positions": [
     {
      "ticker": "AVGO",
@@ -95,329 +96,18 @@
      "price": 64.84,
      "value": 64.84,
      "pnl_pct": 0.0595,
-     "weight": 0.1349
+     "weight": 0.1322
     }
    ],
    "trades": [
     {
      "date": "2026-10-07",
-     "time": "15:24",
-     "ticker": "NVDA",
-     "side": "sell",
-     "shares": 1,
-     "price": 164.15,
-     "value": 164.15,
-     "sleeve": "intraday",
-     "reason": "Run faded: 15-min move turned -0.18%"
-    },
-    {
-     "date": "2026-10-07",
-     "time": "15:24",
-     "ticker": "AVGO",
-     "side": "sell",
-     "shares": 2,
-     "price": 64.99,
-     "value": 129.97,
-     "sleeve": "intraday",
-     "reason": "Run faded: 15-min move turned -0.03%"
-    },
-    {
-     "date": "2026-10-07",
-     "time": "15:12",
-     "ticker": "NVDA",
-     "side": "buy",
-     "shares": 1,
-     "price": 164.51,
-     "value": 164.51,
-     "sleeve": "intraday",
-     "reason": "Running up +0.25% in 15 min, above VWAP"
-    },
-    {
-     "date": "2026-10-07",
-     "time": "15:09",
-     "ticker": "AVGO",
-     "side": "buy",
-     "shares": 2,
-     "price": 65.07,
-     "value": 130.15,
-     "sleeve": "intraday",
-     "reason": "Running up +0.32% in 15 min, above VWAP"
-    },
-    {
-     "date": "2026-10-07",
-     "time": "14:51",
-     "ticker": "NVDA",
-     "side": "sell",
-     "shares": 1,
-     "price": 163.83,
-     "value": 163.83,
-     "sleeve": "intraday",
-     "reason": "Run faded: fell below VWAP"
-    },
-    {
-     "date": "2026-10-07",
-     "time": "14:48",
-     "ticker": "NVDA",
-     "side": "buy",
-     "shares": 1,
-     "price": 164.03,
-     "value": 164.03,
-     "sleeve": "intraday",
-     "reason": "Running up +0.23% in 15 min, above VWAP"
-    },
-    {
-     "date": "2026-10-07",
-     "time": "14:48",
-     "ticker": "AVGO",
-     "side": "sell",
-     "shares": 2,
-     "price": 64.64,
-     "value": 129.28,
-     "sleeve": "intraday",
-     "reason": "Run faded: fell below VWAP"
-    },
-    {
-     "date": "2026-10-07",
-     "time": "14:45",
-     "ticker": "AVGO",
-     "side": "buy",
-     "shares": 2,
-     "price": 64.91,
-     "value": 129.82,
-     "sleeve": "intraday",
-     "reason": "Running up +0.25% in 15 min, above VWAP"
-    },
-    {
-     "date": "2026-10-07",
-     "time": "14:36",
-     "ticker": "TXN",
-     "side": "sell",
-     "shares": 1,
-     "price": 135.76,
-     "value": 135.76,
-     "sleeve": "intraday",
-     "reason": "Take profit: up 0.95%",
-     "protective": true
-    },
-    {
-     "date": "2026-10-07",
-     "time": "14:06",
-     "ticker": "AVGO",
-     "side": "sell",
-     "shares": 2,
-     "price": 65.03,
-     "value": 130.06,
-     "sleeve": "intraday",
-     "reason": "Run faded: 15-min move turned -0.03%"
-    },
-    {
-     "date": "2026-10-07",
-     "time": "14:00",
-     "ticker": "AVGO",
-     "side": "buy",
-     "shares": 2,
-     "price": 65.28,
-     "value": 130.57,
-     "sleeve": "intraday",
-     "reason": "Running up +0.35% in 15 min, above VWAP"
-    },
-    {
-     "date": "2026-10-07",
-     "time": "13:54",
-     "ticker": "TXN",
-     "side": "buy",
-     "shares": 1,
-     "price": 134.56,
-     "value": 134.56,
-     "sleeve": "intraday",
-     "reason": "Running up +0.66% in 15 min, above VWAP"
-    },
-    {
-     "date": "2026-10-07",
-     "time": "13:39",
-     "ticker": "MU",
-     "side": "sell",
-     "shares": 1,
-     "price": 182.68,
-     "value": 182.68,
-     "sleeve": "intraday",
-     "reason": "Run faded: fell below VWAP"
-    },
-    {
-     "date": "2026-10-07",
-     "time": "13:39",
-     "ticker": "NVDA",
-     "side": "sell",
-     "shares": 1,
-     "price": 164.84,
-     "value": 164.84,
-     "sleeve": "intraday",
-     "reason": "Run faded: 15-min move turned -0.02%"
-    },
-    {
-     "date": "2026-10-07",
-     "time": "13:33",
-     "ticker": "MU",
-     "side": "buy",
-     "shares": 1,
-     "price": 183.65,
-     "value": 183.65,
-     "sleeve": "intraday",
-     "reason": "Running up +0.63% in 15 min, above VWAP"
-    },
-    {
-     "date": "2026-10-07",
-     "time": "13:33",
-     "ticker": "TXN",
-     "side": "sell",
-     "shares": 1,
-     "price": 132.94,
-     "value": 132.94,
-     "sleeve": "intraday",
-     "reason": "Run faded: fell below VWAP"
-    },
-    {
-     "date": "2026-10-07",
-     "time": "13:24",
-     "ticker": "NVDA",
-     "side": "buy",
-     "shares": 1,
-     "price": 165.03,
-     "value": 165.03,
-     "sleeve": "intraday",
-     "reason": "Running up +0.29% in 15 min, above VWAP"
-    },
-    {
-     "date": "2026-10-07",
-     "time": "13:18",
-     "ticker": "TXN",
-     "side": "buy",
-     "shares": 1,
-     "price": 133.43,
-     "value": 133.43,
-     "sleeve": "intraday",
-     "reason": "Running up +0.46% in 15 min, above VWAP"
-    },
-    {
-     "date": "2026-10-07",
-     "time": "13:09",
-     "ticker": "AVGO",
-     "side": "sell",
-     "shares": 2,
-     "price": 65.31,
-     "value": 130.61,
-     "sleeve": "intraday",
-     "reason": "Run faded: 15-min move turned -0.03%"
-    },
-    {
-     "date": "2026-10-07",
-     "time": "12:57",
-     "ticker": "AVGO",
-     "side": "buy",
-     "shares": 2,
-     "price": 65.47,
-     "value": 130.95,
-     "sleeve": "intraday",
-     "reason": "Running up +0.38% in 15 min, above VWAP"
-    },
-    {
-     "date": "2026-10-07",
-     "time": "12:30",
-     "ticker": "NVDA",
-     "side": "sell",
-     "shares": 1,
-     "price": 165.45,
-     "value": 165.45,
-     "sleeve": "intraday",
-     "reason": "Take profit: up 0.88%",
-     "protective": true
-    },
-    {
-     "date": "2026-10-07",
-     "time": "12:27",
-     "ticker": "AVGO",
-     "side": "sell",
-     "shares": 2,
-     "price": 65.17,
-     "value": 130.33,
-     "sleeve": "intraday",
-     "reason": "Take profit: up 0.80%",
-     "protective": true
-    },
-    {
-     "date": "2026-10-07",
-     "time": "12:09",
-     "ticker": "AVGO",
-     "side": "buy",
-     "shares": 2,
-     "price": 64.68,
-     "value": 129.36,
-     "sleeve": "intraday",
-     "reason": "Running up +0.70% in 15 min, above VWAP"
-    },
-    {
-     "date": "2026-10-07",
-     "time": "12:09",
-     "ticker": "NVDA",
-     "side": "buy",
-     "shares": 1,
-     "price": 164.08,
-     "value": 164.08,
-     "sleeve": "intraday",
-     "reason": "Running up +0.71% in 15 min, above VWAP"
-    },
-    {
-     "date": "2026-10-07",
-     "time": "11:48",
-     "ticker": "NVDA",
-     "side": "sell",
-     "shares": 1,
-     "price": 162.87,
-     "value": 162.87,
-     "sleeve": "intraday",
-     "reason": "Run faded: fell below VWAP"
-    },
-    {
-     "date": "2026-10-07",
-     "time": "11:33",
-     "ticker": "NVDA",
-     "side": "buy",
-     "shares": 1,
-     "price": 163.5,
-     "value": 163.5,
-     "sleeve": "intraday",
-     "reason": "Running up +0.57% in 15 min, above VWAP"
-    },
-    {
-     "date": "2026-10-07",
-     "time": "10:51",
-     "ticker": "ADBE",
-     "side": "sell",
-     "shares": 1,
-     "price": 172.79,
-     "value": 172.79,
-     "sleeve": "intraday",
-     "reason": "Run faded: fell below VWAP"
-    },
-    {
-     "date": "2026-10-07",
-     "time": "10:48",
-     "ticker": "ADBE",
-     "side": "buy",
-     "shares": 1,
-     "price": 173.49,
-     "value": 173.49,
-     "sleeve": "intraday",
-     "reason": "Running up +0.39% in 15 min, above VWAP"
-    },
-    {
-     "date": "2026-10-07",
      "time": "10:48",
      "ticker": "AVGO",
      "side": "sell",
-     "shares": 2,
+     "shares": 1,
      "price": 64.62,
-     "value": 129.24,
+     "value": 64.62,
      "sleeve": "intraday",
      "reason": "Run faded: fell below VWAP"
     },
@@ -426,55 +116,11 @@
      "time": "10:42",
      "ticker": "AVGO",
      "side": "buy",
-     "shares": 2,
+     "shares": 1,
      "price": 64.74,
-     "value": 129.48,
+     "value": 64.74,
      "sleeve": "intraday",
      "reason": "Running up +0.81% in 15 min, above VWAP"
-    },
-    {
-     "date": "2026-10-07",
-     "time": "10:39",
-     "ticker": "NVDA",
-     "side": "sell",
-     "shares": 1,
-     "price": 163.56,
-     "value": 163.56,
-     "sleeve": "intraday",
-     "reason": "Run faded: 15-min move turned -0.13%"
-    },
-    {
-     "date": "2026-10-07",
-     "time": "10:36",
-     "ticker": "NVDA",
-     "side": "buy",
-     "shares": 1,
-     "price": 164.19,
-     "value": 164.19,
-     "sleeve": "intraday",
-     "reason": "Running up +0.20% in 15 min, above VWAP"
-    },
-    {
-     "date": "2026-10-07",
-     "time": "10:27",
-     "ticker": "TXN",
-     "side": "sell",
-     "shares": 1,
-     "price": 133.96,
-     "value": 133.96,
-     "sleeve": "intraday",
-     "reason": "Run faded: fell below VWAP"
-    },
-    {
-     "date": "2026-10-07",
-     "time": "10:18",
-     "ticker": "TXN",
-     "side": "buy",
-     "shares": 1,
-     "price": 134.36,
-     "value": 134.36,
-     "sleeve": "intraday",
-     "reason": "Running up +0.20% in 15 min, above VWAP"
     },
     {
      "date": "2026-10-07",
@@ -522,255 +168,12 @@
     },
     {
      "date": "2026-10-06",
-     "time": "14:45",
-     "ticker": "ADBE",
-     "side": "sell",
-     "shares": 1,
-     "price": 165.19,
-     "value": 165.19,
-     "sleeve": "intraday",
-     "reason": "Run faded: 15-min move turned -0.03%"
-    },
-    {
-     "date": "2026-10-06",
-     "time": "14:27",
-     "ticker": "ADBE",
-     "side": "buy",
-     "shares": 1,
-     "price": 165.08,
-     "value": 165.08,
-     "sleeve": "intraday",
-     "reason": "Running up +0.62% in 15 min, above VWAP"
-    },
-    {
-     "date": "2026-10-06",
-     "time": "14:21",
-     "ticker": "TXN",
-     "side": "sell",
-     "shares": 1,
-     "price": 132.69,
-     "value": 132.69,
-     "sleeve": "intraday",
-     "reason": "Run faded: fell below VWAP"
-    },
-    {
-     "date": "2026-10-06",
-     "time": "14:09",
-     "ticker": "TXN",
-     "side": "buy",
-     "shares": 1,
-     "price": 133.06,
-     "value": 133.06,
-     "sleeve": "intraday",
-     "reason": "Running up +0.25% in 15 min, above VWAP"
-    },
-    {
-     "date": "2026-10-06",
-     "time": "13:51",
-     "ticker": "ADBE",
-     "side": "sell",
-     "shares": 1,
-     "price": 163.95,
-     "value": 163.95,
-     "sleeve": "intraday",
-     "reason": "Take profit: up 0.86%",
-     "protective": true
-    },
-    {
-     "date": "2026-10-06",
-     "time": "13:18",
-     "ticker": "ADBE",
-     "side": "buy",
-     "shares": 1,
-     "price": 162.63,
-     "value": 162.63,
-     "sleeve": "intraday",
-     "reason": "Running up +0.26% in 15 min, above VWAP"
-    },
-    {
-     "date": "2026-10-06",
-     "time": "12:48",
-     "ticker": "ADBE",
-     "side": "sell",
-     "shares": 1,
-     "price": 161.59,
-     "value": 161.59,
-     "sleeve": "intraday",
-     "reason": "Run faded: fell below VWAP"
-    },
-    {
-     "date": "2026-10-06",
-     "time": "12:45",
-     "ticker": "ADBE",
-     "side": "buy",
-     "shares": 1,
-     "price": 161.91,
-     "value": 161.91,
-     "sleeve": "intraday",
-     "reason": "Running up +0.32% in 15 min, above VWAP"
-    },
-    {
-     "date": "2026-10-06",
-     "time": "12:42",
-     "ticker": "AVGO",
-     "side": "sell",
-     "shares": 3,
-     "price": 63.82,
-     "value": 191.45,
-     "sleeve": "intraday",
-     "reason": "Run faded: 15-min move turned -0.14%"
-    },
-    {
-     "date": "2026-10-06",
-     "time": "12:39",
-     "ticker": "MU",
-     "side": "sell",
-     "shares": 1,
-     "price": 183.67,
-     "value": 183.67,
-     "sleeve": "intraday",
-     "reason": "Run faded: 15-min move turned -0.18%"
-    },
-    {
-     "date": "2026-10-06",
-     "time": "12:30",
-     "ticker": "AVGO",
-     "side": "buy",
-     "shares": 3,
-     "price": 64.02,
-     "value": 192.07,
-     "sleeve": "intraday",
-     "reason": "Running up +0.27% in 15 min, above VWAP"
-    },
-    {
-     "date": "2026-10-06",
-     "time": "12:24",
-     "ticker": "MU",
-     "side": "buy",
-     "shares": 1,
-     "price": 184.18,
-     "value": 184.18,
-     "sleeve": "intraday",
-     "reason": "Running up +0.22% in 15 min, above VWAP"
-    },
-    {
-     "date": "2026-10-06",
-     "time": "12:15",
-     "ticker": "ADBE",
-     "side": "sell",
-     "shares": 1,
-     "price": 161.64,
-     "value": 161.64,
-     "sleeve": "intraday",
-     "reason": "Run faded: fell below VWAP"
-    },
-    {
-     "date": "2026-10-06",
-     "time": "12:06",
-     "ticker": "AVGO",
-     "side": "sell",
-     "shares": 3,
-     "price": 63.95,
-     "value": 191.84,
-     "sleeve": "intraday",
-     "reason": "Run faded: 15-min move turned -0.03%"
-    },
-    {
-     "date": "2026-10-06",
-     "time": "12:03",
-     "ticker": "ADBE",
-     "side": "buy",
-     "shares": 1,
-     "price": 162.21,
-     "value": 162.21,
-     "sleeve": "intraday",
-     "reason": "Running up +0.58% in 15 min, above VWAP"
-    },
-    {
-     "date": "2026-10-06",
-     "time": "12:03",
-     "ticker": "MU",
-     "side": "sell",
-     "shares": 1,
-     "price": 183.55,
-     "value": 183.55,
-     "sleeve": "intraday",
-     "reason": "Run faded: 15-min move turned -0.13%"
-    },
-    {
-     "date": "2026-10-06",
-     "time": "11:51",
-     "ticker": "MU",
-     "side": "buy",
-     "shares": 1,
-     "price": 183.23,
-     "value": 183.23,
-     "sleeve": "intraday",
-     "reason": "Running up +0.34% in 15 min, above VWAP"
-    },
-    {
-     "date": "2026-10-06",
-     "time": "11:39",
-     "ticker": "ADBE",
-     "side": "sell",
-     "shares": 1,
-     "price": 161.6,
-     "value": 161.6,
-     "sleeve": "intraday",
-     "reason": "Run faded: fell below VWAP"
-    },
-    {
-     "date": "2026-10-06",
-     "time": "11:33",
-     "ticker": "ADBE",
-     "side": "buy",
-     "shares": 1,
-     "price": 162.49,
-     "value": 162.49,
-     "sleeve": "intraday",
-     "reason": "Running up +0.49% in 15 min, above VWAP"
-    },
-    {
-     "date": "2026-10-06",
-     "time": "11:30",
-     "ticker": "AVGO",
-     "side": "buy",
-     "shares": 3,
-     "price": 63.92,
-     "value": 191.77,
-     "sleeve": "intraday",
-     "reason": "Running up +0.52% in 15 min, above VWAP"
-    },
-    {
-     "date": "2026-10-06",
-     "time": "11:30",
-     "ticker": "MU",
-     "side": "sell",
-     "shares": 1,
-     "price": 182.21,
-     "value": 182.21,
-     "sleeve": "intraday",
-     "reason": "Run faded: fell below VWAP"
-    },
-    {
-     "date": "2026-10-06",
-     "time": "11:27",
-     "ticker": "MU",
-     "side": "buy",
-     "shares": 1,
-     "price": 182.53,
-     "value": 182.53,
-     "sleeve": "intraday",
-     "reason": "Running up +0.40% in 15 min, above VWAP"
-    },
-    {
-     "date": "2026-10-06",
      "time": "11:06",
      "ticker": "AVGO",
      "side": "sell",
-     "shares": 3,
+     "shares": 2,
      "price": 63.79,
-     "value": 191.36,
+     "value": 127.58,
      "sleeve": "intraday",
      "reason": "Run faded: 15-min move turned -0.05%"
     },
@@ -779,33 +182,11 @@
      "time": "10:48",
      "ticker": "AVGO",
      "side": "buy",
-     "shares": 3,
+     "shares": 2,
      "price": 63.86,
-     "value": 191.59,
+     "value": 127.72,
      "sleeve": "intraday",
      "reason": "Running up +0.31% in 15 min, above VWAP"
-    },
-    {
-     "date": "2026-10-06",
-     "time": "10:42",
-     "ticker": "TXN",
-     "side": "sell",
-     "shares": 1,
-     "price": 133.41,
-     "value": 133.41,
-     "sleeve": "intraday",
-     "reason": "Run faded: fell below VWAP"
-    },
-    {
-     "date": "2026-10-06",
-     "time": "10:39",
-     "ticker": "TXN",
-     "side": "buy",
-     "shares": 1,
-     "price": 134.14,
-     "value": 134.14,
-     "sleeve": "intraday",
-     "reason": "Running up +0.28% in 15 min, above VWAP"
     },
     {
      "date": "2026-10-06",
@@ -853,177 +234,586 @@
     },
     {
      "date": "2026-10-05",
-     "time": "14:51",
-     "ticker": "TXN",
+     "time": "10:06",
+     "ticker": "AVGO",
      "side": "sell",
      "shares": 1,
-     "price": 132.17,
-     "value": 132.17,
-     "sleeve": "intraday",
-     "reason": "Run faded: 15-min move turned -0.01%"
-    },
-    {
-     "date": "2026-10-05",
-     "time": "14:45",
-     "ticker": "MU",
-     "side": "sell",
-     "shares": 1,
-     "price": 186.22,
-     "value": 186.22,
+     "price": 63.6,
+     "value": 63.6,
      "sleeve": "intraday",
      "reason": "Run faded: fell below VWAP"
     },
     {
      "date": "2026-10-05",
-     "time": "14:36",
-     "ticker": "TXN",
+     "time": "09:54",
+     "ticker": "AVGO",
      "side": "buy",
      "shares": 1,
-     "price": 132.32,
-     "value": 132.32,
+     "price": 63.79,
+     "value": 63.79,
      "sleeve": "intraday",
-     "reason": "Running up +0.31% in 15 min, above VWAP"
+     "reason": "Running up +0.38% in 15 min, above VWAP"
     },
     {
      "date": "2026-10-05",
-     "time": "14:27",
+     "time": "09:51",
+     "ticker": "MU",
+     "side": "sell",
+     "shares": 1,
+     "price": 186.16,
+     "value": 186.16,
+     "sleeve": "intraday",
+     "reason": "Stop: down 0.51%",
+     "protective": true
+    },
+    {
+     "date": "2026-10-05",
+     "time": "09:48",
      "ticker": "MU",
      "side": "buy",
      "shares": 1,
-     "price": 186.84,
-     "value": 186.84,
+     "price": 187.21,
+     "value": 187.21,
+     "sleeve": "intraday",
+     "reason": "Running up +0.30% in 15 min, above VWAP"
+    },
+    {
+     "date": "2026-10-05",
+     "time": "09:48",
+     "ticker": "NVDA",
+     "side": "sell",
+     "shares": 1,
+     "price": 163.96,
+     "value": 163.96,
+     "sleeve": "intraday",
+     "reason": "Run faded: fell below VWAP"
+    },
+    {
+     "date": "2026-10-05",
+     "time": "09:45",
+     "ticker": "NVDA",
+     "side": "buy",
+     "shares": 1,
+     "price": 164.27,
+     "value": 164.27,
+     "sleeve": "intraday",
+     "reason": "Running up +0.41% in 15 min, above VWAP"
+    },
+    {
+     "date": "2026-10-02",
+     "time": "10:57",
+     "ticker": "AVGO",
+     "side": "sell",
+     "shares": 2,
+     "price": 63.65,
+     "value": 127.3,
+     "sleeve": "intraday",
+     "reason": "Run faded: fell below VWAP"
+    },
+    {
+     "date": "2026-10-02",
+     "time": "10:54",
+     "ticker": "AVGO",
+     "side": "buy",
+     "shares": 2,
+     "price": 63.8,
+     "value": 127.6,
+     "sleeve": "intraday",
+     "reason": "Running up +0.35% in 15 min, above VWAP"
+    },
+    {
+     "date": "2026-10-02",
+     "time": "09:51",
+     "ticker": "TXN",
+     "side": "sell",
+     "shares": 1,
+     "price": 132.73,
+     "value": 132.73,
+     "sleeve": "intraday",
+     "reason": "Run faded: fell below VWAP"
+    },
+    {
+     "date": "2026-10-02",
+     "time": "09:51",
+     "ticker": "ADBE",
+     "side": "sell",
+     "shares": 1,
+     "price": 162.96,
+     "value": 162.96,
+     "sleeve": "intraday",
+     "reason": "Run faded: fell below VWAP"
+    },
+    {
+     "date": "2026-10-02",
+     "time": "09:45",
+     "ticker": "TXN",
+     "side": "buy",
+     "shares": 1,
+     "price": 133.22,
+     "value": 133.22,
+     "sleeve": "intraday",
+     "reason": "Running up +0.28% in 15 min, above VWAP"
+    },
+    {
+     "date": "2026-10-02",
+     "time": "09:45",
+     "ticker": "ADBE",
+     "side": "buy",
+     "shares": 1,
+     "price": 163.71,
+     "value": 163.71,
+     "sleeve": "intraday",
+     "reason": "Running up +0.58% in 15 min, above VWAP"
+    },
+    {
+     "date": "2026-10-01",
+     "time": "10:51",
+     "ticker": "MU",
+     "side": "sell",
+     "shares": 1,
+     "price": 187.86,
+     "value": 187.86,
+     "sleeve": "intraday",
+     "reason": "Run faded: 15-min move turned -0.20%"
+    },
+    {
+     "date": "2026-10-01",
+     "time": "10:36",
+     "ticker": "MU",
+     "side": "buy",
+     "shares": 1,
+     "price": 188.42,
+     "value": 188.42,
+     "sleeve": "intraday",
+     "reason": "Running up +0.21% in 15 min, above VWAP"
+    },
+    {
+     "date": "2026-10-01",
+     "time": "09:57",
+     "ticker": "MU",
+     "side": "sell",
+     "shares": 1,
+     "price": 186.97,
+     "value": 186.97,
+     "sleeve": "intraday",
+     "reason": "Run faded: 15-min move turned -0.04%"
+    },
+    {
+     "date": "2026-10-01",
+     "time": "09:54",
+     "ticker": "MU",
+     "side": "buy",
+     "shares": 1,
+     "price": 187.26,
+     "value": 187.26,
+     "sleeve": "intraday",
+     "reason": "Running up +0.20% in 15 min, above VWAP"
+    },
+    {
+     "date": "2026-09-30",
+     "time": "10:24",
+     "ticker": "AVGO",
+     "side": "sell",
+     "shares": 1,
+     "price": 61.05,
+     "value": 61.05,
+     "sleeve": "intraday",
+     "reason": "Run faded: fell below VWAP"
+    },
+    {
+     "date": "2026-09-30",
+     "time": "10:18",
+     "ticker": "AVGO",
+     "side": "buy",
+     "shares": 1,
+     "price": 61.28,
+     "value": 61.28,
+     "sleeve": "intraday",
+     "reason": "Running up +0.26% in 15 min, above VWAP"
+    },
+    {
+     "date": "2026-09-30",
+     "time": "10:06",
+     "ticker": "TXN",
+     "side": "sell",
+     "shares": 1,
+     "price": 135.72,
+     "value": 135.72,
+     "sleeve": "intraday",
+     "reason": "Run faded: 15-min move turned -0.01%"
+    },
+    {
+     "date": "2026-09-30",
+     "time": "09:57",
+     "ticker": "AVGO",
+     "side": "sell",
+     "shares": 3,
+     "price": 60.94,
+     "value": 182.82,
+     "sleeve": "intraday",
+     "reason": "Run faded: fell below VWAP"
+    },
+    {
+     "date": "2026-09-30",
+     "time": "09:45",
+     "ticker": "AVGO",
+     "side": "buy",
+     "shares": 1,
+     "price": 61.2,
+     "value": 61.2,
+     "sleeve": "ai",
+     "reason": "New pick"
+    },
+    {
+     "date": "2026-09-30",
+     "time": "09:45",
+     "ticker": "AVGO",
+     "side": "buy",
+     "shares": 3,
+     "price": 61.2,
+     "value": 183.6,
      "sleeve": "intraday",
      "reason": "Running up +0.54% in 15 min, above VWAP"
     },
     {
-     "date": "2026-10-05",
-     "time": "14:15",
+     "date": "2026-09-30",
+     "time": "09:45",
      "ticker": "TXN",
+     "side": "buy",
+     "shares": 1,
+     "price": 135.3,
+     "value": 135.3,
+     "sleeve": "intraday",
+     "reason": "Running up +0.55% in 15 min, above VWAP"
+    },
+    {
+     "date": "2026-09-29",
+     "time": "10:03",
+     "ticker": "AVGO",
      "side": "sell",
      "shares": 1,
-     "price": 131.66,
-     "value": 131.66,
+     "price": 60.64,
+     "value": 60.64,
      "sleeve": "intraday",
      "reason": "Run faded: fell below VWAP"
     },
     {
-     "date": "2026-10-05",
-     "time": "14:06",
-     "ticker": "TXN",
-     "side": "buy",
+     "date": "2026-09-29",
+     "time": "10:00",
+     "ticker": "AMD",
+     "side": "sell",
      "shares": 1,
-     "price": 132.04,
-     "value": 132.04,
+     "price": 194.65,
+     "value": 194.65,
      "sleeve": "intraday",
-     "reason": "Running up +0.64% in 15 min, above VWAP"
+     "reason": "Run faded: 15-min move turned -0.18%"
     },
     {
-     "date": "2026-10-05",
-     "time": "13:39",
+     "date": "2026-09-29",
+     "time": "09:57",
+     "ticker": "AVGO",
+     "side": "buy",
+     "shares": 1,
+     "price": 60.91,
+     "value": 60.91,
+     "sleeve": "intraday",
+     "reason": "Running up +0.21% in 15 min, above VWAP"
+    },
+    {
+     "date": "2026-09-29",
+     "time": "09:57",
      "ticker": "NVDA",
      "side": "sell",
      "shares": 1,
-     "price": 168.56,
-     "value": 168.56,
+     "price": 164.6,
+     "value": 164.6,
+     "sleeve": "intraday",
+     "reason": "Run faded: 15-min move turned -0.12%"
+    },
+    {
+     "date": "2026-09-29",
+     "time": "09:51",
+     "ticker": "NVDA",
+     "side": "buy",
+     "shares": 1,
+     "price": 164.97,
+     "value": 164.97,
+     "sleeve": "intraday",
+     "reason": "Running up +0.23% in 15 min, above VWAP"
+    },
+    {
+     "date": "2026-09-29",
+     "time": "09:45",
+     "ticker": "AMD",
+     "side": "buy",
+     "shares": 1,
+     "price": 195.21,
+     "value": 195.21,
+     "sleeve": "intraday",
+     "reason": "Running up +0.93% in 15 min, above VWAP"
+    },
+    {
+     "date": "2026-09-29",
+     "time": "09:45",
+     "ticker": "AVGO",
+     "side": "sell",
+     "shares": 1,
+     "price": 60.73,
+     "value": 60.73,
+     "sleeve": "ai",
+     "reason": "Trailing stop: down 9.5% from its high of $67.14",
+     "protective": true
+    },
+    {
+     "date": "2026-09-28",
+     "time": "11:27",
+     "ticker": "AVGO",
+     "side": "sell",
+     "shares": 1,
+     "price": 62.82,
+     "value": 62.82,
+     "sleeve": "intraday",
+     "reason": "Run faded: fell below VWAP"
+    },
+    {
+     "date": "2026-09-28",
+     "time": "11:24",
+     "ticker": "AVGO",
+     "side": "buy",
+     "shares": 1,
+     "price": 63.0,
+     "value": 63.0,
+     "sleeve": "intraday",
+     "reason": "Running up +0.46% in 15 min, above VWAP"
+    },
+    {
+     "date": "2026-09-28",
+     "time": "09:57",
+     "ticker": "AMD",
+     "side": "sell",
+     "shares": 1,
+     "price": 188.62,
+     "value": 188.62,
+     "sleeve": "intraday",
+     "reason": "Run faded: fell below VWAP"
+    },
+    {
+     "date": "2026-09-28",
+     "time": "09:54",
+     "ticker": "AMD",
+     "side": "buy",
+     "shares": 1,
+     "price": 189.22,
+     "value": 189.22,
+     "sleeve": "intraday",
+     "reason": "Running up +0.31% in 15 min, above VWAP"
+    },
+    {
+     "date": "2026-09-28",
+     "time": "09:51",
+     "ticker": "NVDA",
+     "side": "sell",
+     "shares": 1,
+     "price": 167.05,
+     "value": 167.05,
+     "sleeve": "intraday",
+     "reason": "Run faded: 15-min move turned -0.12%"
+    },
+    {
+     "date": "2026-09-28",
+     "time": "09:48",
+     "ticker": "NVDA",
+     "side": "buy",
+     "shares": 1,
+     "price": 167.45,
+     "value": 167.45,
+     "sleeve": "intraday",
+     "reason": "Running up +0.23% in 15 min, above VWAP"
+    },
+    {
+     "date": "2026-09-25",
+     "time": "11:09",
+     "ticker": "MU",
+     "side": "sell",
+     "shares": 1,
+     "price": 192.39,
+     "value": 192.39,
+     "sleeve": "intraday",
+     "reason": "Run faded: 15-min move turned -0.26%"
+    },
+    {
+     "date": "2026-09-25",
+     "time": "11:00",
+     "ticker": "AVGO",
+     "side": "sell",
+     "shares": 1,
+     "price": 63.76,
+     "value": 63.76,
+     "sleeve": "intraday",
+     "reason": "Run faded: 15-min move turned -0.02%"
+    },
+    {
+     "date": "2026-09-25",
+     "time": "10:54",
+     "ticker": "AVGO",
+     "side": "buy",
+     "shares": 1,
+     "price": 63.95,
+     "value": 63.95,
+     "sleeve": "intraday",
+     "reason": "Running up +0.52% in 15 min, above VWAP"
+    },
+    {
+     "date": "2026-09-25",
+     "time": "10:18",
+     "ticker": "MU",
+     "side": "buy",
+     "shares": 1,
+     "price": 191.59,
+     "value": 191.59,
+     "sleeve": "intraday",
+     "reason": "Running up +0.43% in 15 min, above VWAP"
+    },
+    {
+     "date": "2026-09-25",
+     "time": "09:51",
+     "ticker": "NVDA",
+     "side": "sell",
+     "shares": 1,
+     "price": 167.52,
+     "value": 167.52,
      "sleeve": "intraday",
      "reason": "Run faded: 15-min move turned -0.01%"
     },
     {
-     "date": "2026-10-05",
-     "time": "13:30",
+     "date": "2026-09-25",
+     "time": "09:45",
      "ticker": "NVDA",
      "side": "buy",
      "shares": 1,
-     "price": 169.3,
-     "value": 169.3,
+     "price": 167.71,
+     "value": 167.71,
      "sleeve": "intraday",
-     "reason": "Running up +0.27% in 15 min, above VWAP"
+     "reason": "Running up +0.20% in 15 min, above VWAP"
     },
     {
-     "date": "2026-10-05",
-     "time": "13:27",
-     "ticker": "MU",
+     "date": "2026-09-24",
+     "time": "10:24",
+     "ticker": "AVGO",
      "side": "sell",
      "shares": 1,
-     "price": 186.12,
-     "value": 186.12,
+     "price": 66.78,
+     "value": 66.78,
      "sleeve": "intraday",
      "reason": "Run faded: fell below VWAP"
     },
     {
-     "date": "2026-10-05",
-     "time": "13:15",
-     "ticker": "MU",
+     "date": "2026-09-24",
+     "time": "10:12",
+     "ticker": "AVGO",
      "side": "buy",
      "shares": 1,
-     "price": 186.78,
-     "value": 186.78,
+     "price": 67.09,
+     "value": 67.09,
      "sleeve": "intraday",
-     "reason": "Running up +0.47% in 15 min, above VWAP"
+     "reason": "Running up +0.51% in 15 min, above VWAP"
     },
     {
-     "date": "2026-10-05",
-     "time": "13:03",
-     "ticker": "NVDA",
+     "date": "2026-09-24",
+     "time": "10:06",
+     "ticker": "ADBE",
      "side": "sell",
      "shares": 1,
-     "price": 168.34,
-     "value": 168.34,
+     "price": 179.13,
+     "value": 179.13,
      "sleeve": "intraday",
-     "reason": "Run faded: 15-min move turned -0.15%"
+     "reason": "Run faded: 15-min move turned -0.09%"
     },
     {
-     "date": "2026-10-05",
-     "time": "12:54",
-     "ticker": "TXN",
+     "date": "2026-09-24",
+     "time": "09:51",
+     "ticker": "AVGO",
      "side": "sell",
-     "shares": 1,
-     "price": 132.44,
-     "value": 132.44,
+     "shares": 2,
+     "price": 66.82,
+     "value": 133.63,
      "sleeve": "intraday",
-     "reason": "Run faded: 15-min move turned -0.08%"
+     "reason": "Run faded: fell below VWAP"
+    },
+    {
+     "date": "2026-09-24",
+     "time": "09:45",
+     "ticker": "AVGO",
+     "side": "buy",
+     "shares": 1,
+     "price": 66.89,
+     "value": 66.89,
+     "sleeve": "ai",
+     "reason": "New pick"
+    },
+    {
+     "date": "2026-09-24",
+     "time": "09:45",
+     "ticker": "AVGO",
+     "side": "buy",
+     "shares": 2,
+     "price": 66.89,
+     "value": 133.79,
+     "sleeve": "intraday",
+     "reason": "Running up +0.48% in 15 min, above VWAP"
+    },
+    {
+     "date": "2026-09-24",
+     "time": "09:45",
+     "ticker": "ADBE",
+     "side": "buy",
+     "shares": 1,
+     "price": 179.06,
+     "value": 179.06,
+     "sleeve": "intraday",
+     "reason": "Running up +0.73% in 15 min, above VWAP"
     }
    ],
    "history": [
     {
      "date": "2026-09-24",
-     "equity": 496.07
+     "equity": 498.51
     },
     {
      "date": "2026-09-25",
-     "equity": 498.6
+     "equity": 496.06
     },
     {
      "date": "2026-09-28",
-     "equity": 494.29
+     "equity": 496.14
     },
     {
      "date": "2026-09-29",
-     "equity": 494.35
+     "equity": 491.45
     },
     {
      "date": "2026-09-30",
-     "equity": 494.79
+     "equity": 488.28
     },
     {
      "date": "2026-10-01",
-     "equity": 496.32
+     "equity": 489.99
     },
     {
      "date": "2026-10-02",
-     "equity": 493.12
+     "equity": 491.29
     },
     {
      "date": "2026-10-05",
-     "equity": 483.13
+     "equity": 487.44
     },
     {
      "date": "2026-10-06",
-     "equity": 481.73
+     "equity": 488.62
     },
     {
      "date": "2026-10-07",
-     "equity": 481.44
+     "equity": 491.04
     }
    ],
    "ranking": [
@@ -1275,12 +1065,48 @@
    "blocked_in_universe": [],
    "notes": [
     {
+     "date": "2026-10-07",
+     "text": "Waiting for cash to settle before buying more (cash account rule)"
+    },
+    {
+     "date": "2026-10-06",
+     "text": "Waiting for cash to settle before buying more (cash account rule)"
+    },
+    {
+     "date": "2026-10-05",
+     "text": "Waiting for cash to settle before buying more (cash account rule)"
+    },
+    {
+     "date": "2026-10-02",
+     "text": "Waiting for cash to settle before buying more (cash account rule)"
+    },
+    {
+     "date": "2026-10-01",
+     "text": "Waiting for cash to settle before buying more (cash account rule)"
+    },
+    {
+     "date": "2026-09-30",
+     "text": "Waiting for cash to settle before buying more (cash account rule)"
+    },
+    {
+     "date": "2026-09-29",
+     "text": "Waiting for cash to settle before buying more (cash account rule)"
+    },
+    {
      "date": "2026-09-29",
      "text": "AVGO: not buying back today after a stop"
     },
     {
      "date": "2026-09-28",
-     "text": "Reached today's limit of 30 buys; selling still works"
+     "text": "Waiting for cash to settle before buying more (cash account rule)"
+    },
+    {
+     "date": "2026-09-25",
+     "text": "Waiting for cash to settle before buying more (cash account rule)"
+    },
+    {
+     "date": "2026-09-24",
+     "text": "Waiting for cash to settle before buying more (cash account rule)"
     }
    ],
    "last_momentum": "2026-10-07T15:54:00",
@@ -1350,235 +1176,16 @@
     "sector": "Energy",
     "color": "#f59e0b"
    },
-   "cash": 489.99,
-   "equity": 489.99,
+   "cash": 501.34,
+   "settling": 392.21,
+   "equity": 501.34,
    "contributed": 500.0,
-   "pnl": -10.01,
-   "pnl_pct": -0.02,
-   "day_change": -2.25,
-   "day_change_pct": -0.0046,
+   "pnl": 1.34,
+   "pnl_pct": 0.0027,
+   "day_change": 0.56,
+   "day_change_pct": 0.0011,
    "positions": [],
    "trades": [
-    {
-     "date": "2026-10-07",
-     "time": "15:30",
-     "ticker": "FSLR",
-     "side": "sell",
-     "shares": 1,
-     "price": 134.26,
-     "value": 134.26,
-     "sleeve": "intraday",
-     "reason": "Run faded: 15-min move turned -0.12%"
-    },
-    {
-     "date": "2026-10-07",
-     "time": "15:06",
-     "ticker": "FSLR",
-     "side": "buy",
-     "shares": 1,
-     "price": 133.86,
-     "value": 133.86,
-     "sleeve": "intraday",
-     "reason": "Running up +0.94% in 15 min, above VWAP"
-    },
-    {
-     "date": "2026-10-07",
-     "time": "15:03",
-     "ticker": "XOM",
-     "side": "sell",
-     "shares": 1,
-     "price": 120.9,
-     "value": 120.9,
-     "sleeve": "intraday",
-     "reason": "Run faded: fell below VWAP"
-    },
-    {
-     "date": "2026-10-07",
-     "time": "14:57",
-     "ticker": "XOM",
-     "side": "buy",
-     "shares": 1,
-     "price": 121.2,
-     "value": 121.2,
-     "sleeve": "intraday",
-     "reason": "Running up +0.32% in 15 min, above VWAP"
-    },
-    {
-     "date": "2026-10-07",
-     "time": "14:45",
-     "ticker": "FSLR",
-     "side": "sell",
-     "shares": 1,
-     "price": 132.33,
-     "value": 132.33,
-     "sleeve": "intraday",
-     "reason": "Run faded: fell below VWAP"
-    },
-    {
-     "date": "2026-10-07",
-     "time": "14:42",
-     "ticker": "FSLR",
-     "side": "buy",
-     "shares": 1,
-     "price": 132.62,
-     "value": 132.62,
-     "sleeve": "intraday",
-     "reason": "Running up +0.30% in 15 min, above VWAP"
-    },
-    {
-     "date": "2026-10-07",
-     "time": "14:09",
-     "ticker": "XOM",
-     "side": "sell",
-     "shares": 1,
-     "price": 120.72,
-     "value": 120.72,
-     "sleeve": "intraday",
-     "reason": "Run faded: fell below VWAP"
-    },
-    {
-     "date": "2026-10-07",
-     "time": "14:03",
-     "ticker": "XOM",
-     "side": "buy",
-     "shares": 1,
-     "price": 121.33,
-     "value": 121.33,
-     "sleeve": "intraday",
-     "reason": "Running up +0.51% in 15 min, above VWAP"
-    },
-    {
-     "date": "2026-10-07",
-     "time": "13:42",
-     "ticker": "XOM",
-     "side": "sell",
-     "shares": 1,
-     "price": 120.76,
-     "value": 120.76,
-     "sleeve": "intraday",
-     "reason": "Run faded: fell below VWAP"
-    },
-    {
-     "date": "2026-10-07",
-     "time": "13:39",
-     "ticker": "XOM",
-     "side": "buy",
-     "shares": 1,
-     "price": 121.21,
-     "value": 121.21,
-     "sleeve": "intraday",
-     "reason": "Running up +0.23% in 15 min, above VWAP"
-    },
-    {
-     "date": "2026-10-07",
-     "time": "13:15",
-     "ticker": "KMI",
-     "side": "sell",
-     "shares": 1,
-     "price": 135.33,
-     "value": 135.33,
-     "sleeve": "intraday",
-     "reason": "Run faded: fell below VWAP"
-    },
-    {
-     "date": "2026-10-07",
-     "time": "13:12",
-     "ticker": "KMI",
-     "side": "buy",
-     "shares": 1,
-     "price": 135.6,
-     "value": 135.6,
-     "sleeve": "intraday",
-     "reason": "Running up +0.50% in 15 min, above VWAP"
-    },
-    {
-     "date": "2026-10-07",
-     "time": "12:57",
-     "ticker": "XOM",
-     "side": "sell",
-     "shares": 1,
-     "price": 121.33,
-     "value": 121.33,
-     "sleeve": "intraday",
-     "reason": "Run faded: 15-min move turned -0.02%"
-    },
-    {
-     "date": "2026-10-07",
-     "time": "12:54",
-     "ticker": "XOM",
-     "side": "buy",
-     "shares": 1,
-     "price": 121.73,
-     "value": 121.73,
-     "sleeve": "intraday",
-     "reason": "Running up +0.25% in 15 min, above VWAP"
-    },
-    {
-     "date": "2026-10-07",
-     "time": "12:54",
-     "ticker": "FSLR",
-     "side": "sell",
-     "shares": 1,
-     "price": 132.95,
-     "value": 132.95,
-     "sleeve": "intraday",
-     "reason": "Run faded: 15-min move turned -0.17%"
-    },
-    {
-     "date": "2026-10-07",
-     "time": "12:42",
-     "ticker": "FSLR",
-     "side": "buy",
-     "shares": 1,
-     "price": 133.42,
-     "value": 133.42,
-     "sleeve": "intraday",
-     "reason": "Running up +0.22% in 15 min, above VWAP"
-    },
-    {
-     "date": "2026-10-07",
-     "time": "12:15",
-     "ticker": "XOM",
-     "side": "sell",
-     "shares": 1,
-     "price": 121.48,
-     "value": 121.48,
-     "sleeve": "intraday",
-     "reason": "Run faded: 15-min move turned -0.10%"
-    },
-    {
-     "date": "2026-10-07",
-     "time": "12:12",
-     "ticker": "FSLR",
-     "side": "sell",
-     "shares": 1,
-     "price": 132.55,
-     "value": 132.55,
-     "sleeve": "intraday",
-     "reason": "Run faded: 15-min move turned -0.05%"
-    },
-    {
-     "date": "2026-10-07",
-     "time": "12:00",
-     "ticker": "XOM",
-     "side": "buy",
-     "shares": 1,
-     "price": 121.72,
-     "value": 121.72,
-     "sleeve": "intraday",
-     "reason": "Running up +0.35% in 15 min, above VWAP"
-    },
-    {
-     "date": "2026-10-07",
-     "time": "11:57",
-     "ticker": "FSLR",
-     "side": "buy",
-     "shares": 1,
-     "price": 132.76,
-     "value": 132.76,
-     "sleeve": "intraday",
-     "reason": "Running up +0.56% in 15 min, above VWAP"
-    },
     {
      "date": "2026-10-07",
      "time": "11:39",
@@ -1648,395 +1255,6 @@
     },
     {
      "date": "2026-10-06",
-     "time": "15:45",
-     "ticker": "FSLR",
-     "side": "sell",
-     "shares": 1,
-     "price": 133.97,
-     "value": 133.97,
-     "sleeve": "intraday",
-     "reason": "Stop: down 0.64%",
-     "protective": true
-    },
-    {
-     "date": "2026-10-06",
-     "time": "15:30",
-     "ticker": "FSLR",
-     "side": "buy",
-     "shares": 1,
-     "price": 134.9,
-     "value": 134.9,
-     "sleeve": "intraday",
-     "reason": "Running up +0.49% in 15 min, above VWAP"
-    },
-    {
-     "date": "2026-10-06",
-     "time": "15:21",
-     "ticker": "KMI",
-     "side": "sell",
-     "shares": 1,
-     "price": 138.23,
-     "value": 138.23,
-     "sleeve": "intraday",
-     "reason": "Run faded: 15-min move turned -0.10%"
-    },
-    {
-     "date": "2026-10-06",
-     "time": "15:15",
-     "ticker": "DVN",
-     "side": "sell",
-     "shares": 1,
-     "price": 139.04,
-     "value": 139.04,
-     "sleeve": "intraday",
-     "reason": "Run faded: 15-min move turned -0.06%"
-    },
-    {
-     "date": "2026-10-06",
-     "time": "15:12",
-     "ticker": "DVN",
-     "side": "buy",
-     "shares": 1,
-     "price": 139.25,
-     "value": 139.25,
-     "sleeve": "intraday",
-     "reason": "Running up +0.23% in 15 min, above VWAP"
-    },
-    {
-     "date": "2026-10-06",
-     "time": "15:06",
-     "ticker": "KMI",
-     "side": "buy",
-     "shares": 1,
-     "price": 138.51,
-     "value": 138.51,
-     "sleeve": "intraday",
-     "reason": "Running up +1.01% in 15 min, above VWAP"
-    },
-    {
-     "date": "2026-10-06",
-     "time": "15:03",
-     "ticker": "FSLR",
-     "side": "sell",
-     "shares": 1,
-     "price": 134.81,
-     "value": 134.81,
-     "sleeve": "intraday",
-     "reason": "Run faded: 15-min move turned -0.01%"
-    },
-    {
-     "date": "2026-10-06",
-     "time": "14:51",
-     "ticker": "FSLR",
-     "side": "buy",
-     "shares": 1,
-     "price": 135.0,
-     "value": 135.0,
-     "sleeve": "intraday",
-     "reason": "Running up +0.55% in 15 min, above VWAP"
-    },
-    {
-     "date": "2026-10-06",
-     "time": "14:51",
-     "ticker": "DVN",
-     "side": "sell",
-     "shares": 1,
-     "price": 138.91,
-     "value": 138.91,
-     "sleeve": "intraday",
-     "reason": "Run faded: 15-min move turned -0.09%"
-    },
-    {
-     "date": "2026-10-06",
-     "time": "14:45",
-     "ticker": "KMI",
-     "side": "sell",
-     "shares": 1,
-     "price": 136.98,
-     "value": 136.98,
-     "sleeve": "intraday",
-     "reason": "Run faded: 15-min move turned -0.01%"
-    },
-    {
-     "date": "2026-10-06",
-     "time": "14:42",
-     "ticker": "KMI",
-     "side": "buy",
-     "shares": 1,
-     "price": 137.13,
-     "value": 137.13,
-     "sleeve": "intraday",
-     "reason": "Running up +0.22% in 15 min, above VWAP"
-    },
-    {
-     "date": "2026-10-06",
-     "time": "14:42",
-     "ticker": "DVN",
-     "side": "buy",
-     "shares": 1,
-     "price": 138.97,
-     "value": 138.97,
-     "sleeve": "intraday",
-     "reason": "Running up +0.34% in 15 min, above VWAP"
-    },
-    {
-     "date": "2026-10-06",
-     "time": "14:30",
-     "ticker": "FSLR",
-     "side": "sell",
-     "shares": 1,
-     "price": 133.98,
-     "value": 133.98,
-     "sleeve": "intraday",
-     "reason": "Take profit: up 0.94%",
-     "protective": true
-    },
-    {
-     "date": "2026-10-06",
-     "time": "14:06",
-     "ticker": "FSLR",
-     "side": "buy",
-     "shares": 1,
-     "price": 132.81,
-     "value": 132.81,
-     "sleeve": "intraday",
-     "reason": "Running up +0.33% in 15 min, above VWAP"
-    },
-    {
-     "date": "2026-10-06",
-     "time": "14:06",
-     "ticker": "DVN",
-     "side": "sell",
-     "shares": 1,
-     "price": 138.6,
-     "value": 138.6,
-     "sleeve": "intraday",
-     "reason": "Run faded: 15-min move turned -0.02%"
-    },
-    {
-     "date": "2026-10-06",
-     "time": "14:00",
-     "ticker": "DVN",
-     "side": "buy",
-     "shares": 1,
-     "price": 139.09,
-     "value": 139.09,
-     "sleeve": "intraday",
-     "reason": "Running up +0.72% in 15 min, above VWAP"
-    },
-    {
-     "date": "2026-10-06",
-     "time": "13:42",
-     "ticker": "FSLR",
-     "side": "sell",
-     "shares": 1,
-     "price": 132.14,
-     "value": 132.14,
-     "sleeve": "intraday",
-     "reason": "Run faded: 15-min move turned -0.08%"
-    },
-    {
-     "date": "2026-10-06",
-     "time": "13:39",
-     "ticker": "DVN",
-     "side": "sell",
-     "shares": 1,
-     "price": 137.9,
-     "value": 137.9,
-     "sleeve": "intraday",
-     "reason": "Take profit: up 0.82%",
-     "protective": true
-    },
-    {
-     "date": "2026-10-06",
-     "time": "13:36",
-     "ticker": "FSLR",
-     "side": "buy",
-     "shares": 1,
-     "price": 132.27,
-     "value": 132.27,
-     "sleeve": "intraday",
-     "reason": "Running up +0.23% in 15 min, above VWAP"
-    },
-    {
-     "date": "2026-10-06",
-     "time": "13:36",
-     "ticker": "KMI",
-     "side": "sell",
-     "shares": 1,
-     "price": 137.92,
-     "value": 137.92,
-     "sleeve": "intraday",
-     "reason": "Run faded: 15-min move turned -0.33%"
-    },
-    {
-     "date": "2026-10-06",
-     "time": "13:27",
-     "ticker": "DVN",
-     "side": "buy",
-     "shares": 1,
-     "price": 136.85,
-     "value": 136.85,
-     "sleeve": "intraday",
-     "reason": "Running up +0.48% in 15 min, above VWAP"
-    },
-    {
-     "date": "2026-10-06",
-     "time": "13:18",
-     "ticker": "KMI",
-     "side": "buy",
-     "shares": 1,
-     "price": 138.35,
-     "value": 138.35,
-     "sleeve": "intraday",
-     "reason": "Running up +0.36% in 15 min, above VWAP"
-    },
-    {
-     "date": "2026-10-06",
-     "time": "13:09",
-     "ticker": "FSLR",
-     "side": "sell",
-     "shares": 1,
-     "price": 131.88,
-     "value": 131.88,
-     "sleeve": "intraday",
-     "reason": "Run faded: fell below VWAP"
-    },
-    {
-     "date": "2026-10-06",
-     "time": "13:06",
-     "ticker": "FSLR",
-     "side": "buy",
-     "shares": 1,
-     "price": 132.11,
-     "value": 132.11,
-     "sleeve": "intraday",
-     "reason": "Running up +0.40% in 15 min, above VWAP"
-    },
-    {
-     "date": "2026-10-06",
-     "time": "12:54",
-     "ticker": "KMI",
-     "side": "sell",
-     "shares": 1,
-     "price": 138.27,
-     "value": 138.27,
-     "sleeve": "intraday",
-     "reason": "Take profit: up 1.02%",
-     "protective": true
-    },
-    {
-     "date": "2026-10-06",
-     "time": "12:42",
-     "ticker": "KMI",
-     "side": "buy",
-     "shares": 1,
-     "price": 136.95,
-     "value": 136.95,
-     "sleeve": "intraday",
-     "reason": "Running up +0.23% in 15 min, above VWAP"
-    },
-    {
-     "date": "2026-10-06",
-     "time": "12:21",
-     "ticker": "KMI",
-     "side": "sell",
-     "shares": 1,
-     "price": 136.45,
-     "value": 136.45,
-     "sleeve": "intraday",
-     "reason": "Run faded: 15-min move turned -0.12%"
-    },
-    {
-     "date": "2026-10-06",
-     "time": "11:54",
-     "ticker": "DVN",
-     "side": "sell",
-     "shares": 1,
-     "price": 136.61,
-     "value": 136.61,
-     "sleeve": "intraday",
-     "reason": "Run faded: fell below VWAP"
-    },
-    {
-     "date": "2026-10-06",
-     "time": "11:48",
-     "ticker": "DVN",
-     "side": "buy",
-     "shares": 1,
-     "price": 136.92,
-     "value": 136.92,
-     "sleeve": "intraday",
-     "reason": "Running up +0.27% in 15 min, above VWAP"
-    },
-    {
-     "date": "2026-10-06",
-     "time": "11:45",
-     "ticker": "KMI",
-     "side": "buy",
-     "shares": 1,
-     "price": 136.24,
-     "value": 136.24,
-     "sleeve": "intraday",
-     "reason": "Running up +0.23% in 15 min, above VWAP"
-    },
-    {
-     "date": "2026-10-06",
-     "time": "11:15",
-     "ticker": "DVN",
-     "side": "sell",
-     "shares": 1,
-     "price": 136.59,
-     "value": 136.59,
-     "sleeve": "intraday",
-     "reason": "Run faded: fell below VWAP"
-    },
-    {
-     "date": "2026-10-06",
-     "time": "11:12",
-     "ticker": "DVN",
-     "side": "buy",
-     "shares": 1,
-     "price": 137.21,
-     "value": 137.21,
-     "sleeve": "intraday",
-     "reason": "Running up +0.29% in 15 min, above VWAP"
-    },
-    {
-     "date": "2026-10-06",
-     "time": "11:12",
-     "ticker": "KMI",
-     "side": "sell",
-     "shares": 1,
-     "price": 136.01,
-     "value": 136.01,
-     "sleeve": "intraday",
-     "reason": "Run faded: 15-min move turned -0.06%"
-    },
-    {
-     "date": "2026-10-06",
-     "time": "11:03",
-     "ticker": "KMI",
-     "side": "buy",
-     "shares": 1,
-     "price": 136.5,
-     "value": 136.5,
-     "sleeve": "intraday",
-     "reason": "Running up +0.33% in 15 min, above VWAP"
-    },
-    {
-     "date": "2026-10-06",
-     "time": "10:27",
-     "ticker": "KMI",
-     "side": "sell",
-     "shares": 1,
-     "price": 135.97,
-     "value": 135.97,
-     "sleeve": "intraday",
-     "reason": "Run faded: 15-min move turned -0.07%"
-    },
-    {
-     "date": "2026-10-06",
      "time": "10:24",
      "ticker": "DVN",
      "side": "sell",
@@ -2045,17 +1263,6 @@
      "value": 136.5,
      "sleeve": "intraday",
      "reason": "Run faded: 15-min move turned -0.10%"
-    },
-    {
-     "date": "2026-10-06",
-     "time": "10:21",
-     "ticker": "KMI",
-     "side": "buy",
-     "shares": 1,
-     "price": 136.08,
-     "value": 136.08,
-     "sleeve": "intraday",
-     "reason": "Running up +0.30% in 15 min, above VWAP"
     },
     {
      "date": "2026-10-06",
@@ -2114,178 +1321,577 @@
     },
     {
      "date": "2026-10-05",
-     "time": "15:36",
+     "time": "10:21",
+     "ticker": "DVN",
+     "side": "sell",
+     "shares": 1,
+     "price": 135.01,
+     "value": 135.01,
+     "sleeve": "intraday",
+     "reason": "Run faded: 15-min move turned -0.16%"
+    },
+    {
+     "date": "2026-10-05",
+     "time": "10:12",
+     "ticker": "FSLR",
+     "side": "sell",
+     "shares": 1,
+     "price": 131.77,
+     "value": 131.77,
+     "sleeve": "intraday",
+     "reason": "Run faded: 15-min move turned -0.17%"
+    },
+    {
+     "date": "2026-10-05",
+     "time": "10:03",
+     "ticker": "DVN",
+     "side": "buy",
+     "shares": 1,
+     "price": 135.08,
+     "value": 135.08,
+     "sleeve": "intraday",
+     "reason": "Running up +0.41% in 15 min, above VWAP"
+    },
+    {
+     "date": "2026-10-05",
+     "time": "09:48",
      "ticker": "XOM",
      "side": "sell",
      "shares": 1,
-     "price": 121.67,
-     "value": 121.67,
+     "price": 120.51,
+     "value": 120.51,
      "sleeve": "intraday",
-     "reason": "Take profit: up 0.83%",
-     "protective": true
+     "reason": "Run faded: fell below VWAP"
     },
     {
      "date": "2026-10-05",
-     "time": "15:03",
+     "time": "09:45",
      "ticker": "XOM",
      "side": "buy",
      "shares": 1,
-     "price": 120.73,
-     "value": 120.73,
+     "price": 120.71,
+     "value": 120.71,
      "sleeve": "intraday",
-     "reason": "Running up +0.73% in 15 min, above VWAP"
+     "reason": "Running up +0.22% in 15 min, above VWAP"
     },
     {
      "date": "2026-10-05",
-     "time": "15:00",
+     "time": "09:45",
      "ticker": "FSLR",
+     "side": "buy",
+     "shares": 1,
+     "price": 131.45,
+     "value": 131.45,
+     "sleeve": "intraday",
+     "reason": "Running up +0.50% in 15 min, above VWAP"
+    },
+    {
+     "date": "2026-10-02",
+     "time": "10:39",
+     "ticker": "KMI",
+     "side": "sell",
+     "shares": 1,
+     "price": 140.29,
+     "value": 140.29,
+     "sleeve": "intraday",
+     "reason": "Run faded: 15-min move turned -0.17%"
+    },
+    {
+     "date": "2026-10-02",
+     "time": "10:15",
+     "ticker": "KMI",
+     "side": "buy",
+     "shares": 1,
+     "price": 140.04,
+     "value": 140.04,
+     "sleeve": "intraday",
+     "reason": "Running up +0.27% in 15 min, above VWAP"
+    },
+    {
+     "date": "2026-10-02",
+     "time": "10:06",
+     "ticker": "FSLR",
+     "side": "sell",
+     "shares": 1,
+     "price": 132.48,
+     "value": 132.48,
+     "sleeve": "intraday",
+     "reason": "Run faded: fell below VWAP"
+    },
+    {
+     "date": "2026-10-02",
+     "time": "10:00",
+     "ticker": "XOM",
+     "side": "sell",
+     "shares": 1,
+     "price": 118.66,
+     "value": 118.66,
+     "sleeve": "intraday",
+     "reason": "Run faded: 15-min move turned -0.06%"
+    },
+    {
+     "date": "2026-10-02",
+     "time": "09:45",
+     "ticker": "FSLR",
+     "side": "buy",
+     "shares": 1,
+     "price": 132.58,
+     "value": 132.58,
+     "sleeve": "intraday",
+     "reason": "Running up +0.41% in 15 min, above VWAP"
+    },
+    {
+     "date": "2026-10-02",
+     "time": "09:45",
+     "ticker": "XOM",
+     "side": "buy",
+     "shares": 1,
+     "price": 118.85,
+     "value": 118.85,
+     "sleeve": "intraday",
+     "reason": "Running up +0.77% in 15 min, above VWAP"
+    },
+    {
+     "date": "2026-10-01",
+     "time": "10:18",
+     "ticker": "DVN",
+     "side": "sell",
+     "shares": 1,
+     "price": 133.18,
+     "value": 133.18,
+     "sleeve": "intraday",
+     "reason": "Run faded: fell below VWAP"
+    },
+    {
+     "date": "2026-10-01",
+     "time": "10:15",
+     "ticker": "DVN",
+     "side": "buy",
+     "shares": 1,
+     "price": 133.54,
+     "value": 133.54,
+     "sleeve": "intraday",
+     "reason": "Running up +0.21% in 15 min, above VWAP"
+    },
+    {
+     "date": "2026-10-01",
+     "time": "10:09",
+     "ticker": "FSLR",
+     "side": "sell",
+     "shares": 1,
+     "price": 133.17,
+     "value": 133.17,
+     "sleeve": "intraday",
+     "reason": "Run faded: fell below VWAP"
+    },
+    {
+     "date": "2026-10-01",
+     "time": "10:06",
+     "ticker": "FSLR",
+     "side": "buy",
+     "shares": 1,
+     "price": 133.57,
+     "value": 133.57,
+     "sleeve": "intraday",
+     "reason": "Running up +0.26% in 15 min, above VWAP"
+    },
+    {
+     "date": "2026-10-01",
+     "time": "10:03",
+     "ticker": "KMI",
+     "side": "sell",
+     "shares": 1,
+     "price": 138.08,
+     "value": 138.08,
+     "sleeve": "intraday",
+     "reason": "Run faded: 15-min move turned -0.07%"
+    },
+    {
+     "date": "2026-10-01",
+     "time": "09:48",
+     "ticker": "KMI",
+     "side": "buy",
+     "shares": 1,
+     "price": 138.31,
+     "value": 138.31,
+     "sleeve": "intraday",
+     "reason": "Running up +0.39% in 15 min, above VWAP"
+    },
+    {
+     "date": "2026-09-30",
+     "time": "10:45",
+     "ticker": "XOM",
+     "side": "sell",
+     "shares": 1,
+     "price": 127.87,
+     "value": 127.87,
+     "sleeve": "intraday",
+     "reason": "Run faded: 15-min move turned -0.03%"
+    },
+    {
+     "date": "2026-09-30",
+     "time": "10:21",
+     "ticker": "FSLR",
+     "side": "sell",
+     "shares": 1,
+     "price": 138.26,
+     "value": 138.26,
+     "sleeve": "intraday",
+     "reason": "Take profit: up 0.81%",
+     "protective": true
+    },
+    {
+     "date": "2026-09-30",
+     "time": "10:12",
+     "ticker": "XOM",
+     "side": "buy",
+     "shares": 1,
+     "price": 127.61,
+     "value": 127.61,
+     "sleeve": "intraday",
+     "reason": "Running up +0.88% in 15 min, above VWAP"
+    },
+    {
+     "date": "2026-09-30",
+     "time": "10:12",
+     "ticker": "DVN",
+     "side": "sell",
+     "shares": 1,
+     "price": 136.97,
+     "value": 136.97,
+     "sleeve": "intraday",
+     "reason": "Take profit: up 1.00%",
+     "protective": true
+    },
+    {
+     "date": "2026-09-30",
+     "time": "09:45",
+     "ticker": "DVN",
+     "side": "buy",
+     "shares": 1,
+     "price": 135.69,
+     "value": 135.69,
+     "sleeve": "intraday",
+     "reason": "Running up +0.30% in 15 min, above VWAP"
+    },
+    {
+     "date": "2026-09-30",
+     "time": "09:45",
+     "ticker": "FSLR",
+     "side": "buy",
+     "shares": 1,
+     "price": 137.22,
+     "value": 137.22,
+     "sleeve": "intraday",
+     "reason": "Running up +0.49% in 15 min, above VWAP"
+    },
+    {
+     "date": "2026-09-29",
+     "time": "10:24",
+     "ticker": "FSLR",
+     "side": "sell",
+     "shares": 1,
+     "price": 135.85,
+     "value": 135.85,
+     "sleeve": "intraday",
+     "reason": "Run faded: fell below VWAP"
+    },
+    {
+     "date": "2026-09-29",
+     "time": "10:15",
+     "ticker": "FSLR",
+     "side": "buy",
+     "shares": 1,
+     "price": 136.39,
+     "value": 136.39,
+     "sleeve": "intraday",
+     "reason": "Running up +0.28% in 15 min, above VWAP"
+    },
+    {
+     "date": "2026-09-29",
+     "time": "10:06",
+     "ticker": "KMI",
+     "side": "sell",
+     "shares": 1,
+     "price": 141.97,
+     "value": 141.97,
+     "sleeve": "intraday",
+     "reason": "Run faded: fell below VWAP"
+    },
+    {
+     "date": "2026-09-29",
+     "time": "10:03",
+     "ticker": "KMI",
+     "side": "buy",
+     "shares": 1,
+     "price": 142.29,
+     "value": 142.29,
+     "sleeve": "intraday",
+     "reason": "Running up +0.27% in 15 min, above VWAP"
+    },
+    {
+     "date": "2026-09-29",
+     "time": "09:57",
+     "ticker": "XOM",
+     "side": "sell",
+     "shares": 1,
+     "price": 124.03,
+     "value": 124.03,
+     "sleeve": "intraday",
+     "reason": "Run faded: fell below VWAP"
+    },
+    {
+     "date": "2026-09-29",
+     "time": "09:45",
+     "ticker": "XOM",
+     "side": "buy",
+     "shares": 1,
+     "price": 124.38,
+     "value": 124.38,
+     "sleeve": "intraday",
+     "reason": "Running up +0.24% in 15 min, above VWAP"
+    },
+    {
+     "date": "2026-09-28",
+     "time": "10:39",
+     "ticker": "KMI",
+     "side": "sell",
+     "shares": 1,
+     "price": 148.36,
+     "value": 148.36,
+     "sleeve": "intraday",
+     "reason": "Run faded: 15-min move turned -0.19%"
+    },
+    {
+     "date": "2026-09-28",
+     "time": "10:30",
+     "ticker": "DVN",
+     "side": "sell",
+     "shares": 1,
+     "price": 131.9,
+     "value": 131.9,
+     "sleeve": "intraday",
+     "reason": "Run faded: 15-min move turned -0.02%"
+    },
+    {
+     "date": "2026-09-28",
+     "time": "10:24",
+     "ticker": "DVN",
+     "side": "buy",
+     "shares": 1,
+     "price": 132.19,
+     "value": 132.19,
+     "sleeve": "intraday",
+     "reason": "Running up +0.37% in 15 min, above VWAP"
+    },
+    {
+     "date": "2026-09-28",
+     "time": "10:18",
+     "ticker": "KMI",
+     "side": "buy",
+     "shares": 1,
+     "price": 148.19,
+     "value": 148.19,
+     "sleeve": "intraday",
+     "reason": "Running up +0.50% in 15 min, above VWAP"
+    },
+    {
+     "date": "2026-09-28",
+     "time": "09:54",
+     "ticker": "KMI",
+     "side": "sell",
+     "shares": 1,
+     "price": 147.38,
+     "value": 147.38,
+     "sleeve": "intraday",
+     "reason": "Run faded: fell below VWAP"
+    },
+    {
+     "date": "2026-09-28",
+     "time": "09:48",
+     "ticker": "KMI",
+     "side": "buy",
+     "shares": 1,
+     "price": 148.11,
+     "value": 148.11,
+     "sleeve": "intraday",
+     "reason": "Running up +0.37% in 15 min, above VWAP"
+    },
+    {
+     "date": "2026-09-25",
+     "time": "10:39",
+     "ticker": "DVN",
+     "side": "sell",
+     "shares": 1,
+     "price": 128.87,
+     "value": 128.87,
+     "sleeve": "intraday",
+     "reason": "Run faded: 15-min move turned -0.04%"
+    },
+    {
+     "date": "2026-09-25",
+     "time": "10:36",
+     "ticker": "FSLR",
+     "side": "sell",
+     "shares": 1,
+     "price": 135.1,
+     "value": 135.1,
+     "sleeve": "intraday",
+     "reason": "Run faded: 15-min move turned -0.55%"
+    },
+    {
+     "date": "2026-09-25",
+     "time": "10:21",
+     "ticker": "DVN",
+     "side": "buy",
+     "shares": 1,
+     "price": 129.09,
+     "value": 129.09,
+     "sleeve": "intraday",
+     "reason": "Running up +0.43% in 15 min, above VWAP"
+    },
+    {
+     "date": "2026-09-25",
+     "time": "10:15",
+     "ticker": "KMI",
+     "side": "sell",
+     "shares": 1,
+     "price": 150.54,
+     "value": 150.54,
+     "sleeve": "intraday",
+     "reason": "Run faded: 15-min move turned -0.09%"
+    },
+    {
+     "date": "2026-09-25",
+     "time": "09:57",
+     "ticker": "KMI",
+     "side": "buy",
+     "shares": 1,
+     "price": 150.55,
+     "value": 150.55,
+     "sleeve": "intraday",
+     "reason": "Running up +0.27% in 15 min, above VWAP"
+    },
+    {
+     "date": "2026-09-25",
+     "time": "09:45",
+     "ticker": "FSLR",
+     "side": "buy",
+     "shares": 1,
+     "price": 134.91,
+     "value": 134.91,
+     "sleeve": "intraday",
+     "reason": "Running up +0.78% in 15 min, above VWAP"
+    },
+    {
+     "date": "2026-09-24",
+     "time": "10:39",
+     "ticker": "DVN",
      "side": "sell",
      "shares": 1,
      "price": 133.12,
      "value": 133.12,
      "sleeve": "intraday",
-     "reason": "Run faded: 15-min move turned -0.08%"
+     "reason": "Take profit: up 0.98%",
+     "protective": true
     },
     {
-     "date": "2026-10-05",
-     "time": "14:48",
-     "ticker": "FSLR",
-     "side": "buy",
-     "shares": 1,
-     "price": 133.6,
-     "value": 133.6,
-     "sleeve": "intraday",
-     "reason": "Running up +0.59% in 15 min, above VWAP"
-    },
-    {
-     "date": "2026-10-05",
-     "time": "14:42",
+     "date": "2026-09-24",
+     "time": "10:06",
      "ticker": "XOM",
      "side": "sell",
      "shares": 1,
-     "price": 118.92,
-     "value": 118.92,
+     "price": 128.46,
+     "value": 128.46,
      "sleeve": "intraday",
-     "reason": "Run faded: 15-min move turned -0.06%"
+     "reason": "Run faded: 15-min move turned -0.03%"
     },
     {
-     "date": "2026-10-05",
-     "time": "14:24",
+     "date": "2026-09-24",
+     "time": "09:57",
+     "ticker": "DVN",
+     "side": "buy",
+     "shares": 1,
+     "price": 131.9,
+     "value": 131.9,
+     "sleeve": "intraday",
+     "reason": "Running up +0.45% in 15 min, above VWAP"
+    },
+    {
+     "date": "2026-09-24",
+     "time": "09:57",
+     "ticker": "FSLR",
+     "side": "sell",
+     "shares": 1,
+     "price": 133.2,
+     "value": 133.2,
+     "sleeve": "intraday",
+     "reason": "Take profit: up 0.82%",
+     "protective": true
+    },
+    {
+     "date": "2026-09-24",
+     "time": "09:45",
+     "ticker": "FSLR",
+     "side": "buy",
+     "shares": 1,
+     "price": 132.19,
+     "value": 132.19,
+     "sleeve": "intraday",
+     "reason": "Running up +0.26% in 15 min, above VWAP"
+    },
+    {
+     "date": "2026-09-24",
+     "time": "09:45",
      "ticker": "XOM",
      "side": "buy",
      "shares": 1,
-     "price": 118.96,
-     "value": 118.96,
+     "price": 128.72,
+     "value": 128.72,
      "sleeve": "intraday",
-     "reason": "Running up +0.31% in 15 min, above VWAP"
-    },
-    {
-     "date": "2026-10-05",
-     "time": "14:24",
-     "ticker": "FSLR",
-     "side": "sell",
-     "shares": 1,
-     "price": 133.23,
-     "value": 133.23,
-     "sleeve": "intraday",
-     "reason": "Run faded: 15-min move turned -0.04%"
-    },
-    {
-     "date": "2026-10-05",
-     "time": "14:15",
-     "ticker": "DVN",
-     "side": "sell",
-     "shares": 1,
-     "price": 138.2,
-     "value": 138.2,
-     "sleeve": "intraday",
-     "reason": "Run faded: 15-min move turned -0.04%"
-    },
-    {
-     "date": "2026-10-05",
-     "time": "14:12",
-     "ticker": "FSLR",
-     "side": "buy",
-     "shares": 1,
-     "price": 133.44,
-     "value": 133.44,
-     "sleeve": "intraday",
-     "reason": "Running up +0.29% in 15 min, above VWAP"
-    },
-    {
-     "date": "2026-10-05",
-     "time": "14:00",
-     "ticker": "DVN",
-     "side": "buy",
-     "shares": 1,
-     "price": 138.39,
-     "value": 138.39,
-     "sleeve": "intraday",
-     "reason": "Running up +0.28% in 15 min, above VWAP"
-    },
-    {
-     "date": "2026-10-05",
-     "time": "13:51",
-     "ticker": "FSLR",
-     "side": "sell",
-     "shares": 1,
-     "price": 132.65,
-     "value": 132.65,
-     "sleeve": "intraday",
-     "reason": "Run faded: 15-min move turned -0.29%"
-    },
-    {
-     "date": "2026-10-05",
-     "time": "13:36",
-     "ticker": "DVN",
-     "side": "sell",
-     "shares": 1,
-     "price": 138.31,
-     "value": 138.31,
-     "sleeve": "intraday",
-     "reason": "Run faded: 15-min move turned -0.13%"
+     "reason": "Running up +0.81% in 15 min, above VWAP"
     }
    ],
    "history": [
     {
      "date": "2026-09-24",
-     "equity": 501.6
+     "equity": 501.98
     },
     {
      "date": "2026-09-25",
-     "equity": 500.15
+     "equity": 501.94
     },
     {
      "date": "2026-09-28",
-     "equity": 499.31
+     "equity": 501.08
     },
     {
      "date": "2026-09-29",
-     "equity": 497.0
+     "equity": 499.87
     },
     {
      "date": "2026-09-30",
-     "equity": 499.47
+     "equity": 502.45
     },
     {
      "date": "2026-10-01",
-     "equity": 494.04
+     "equity": 501.47
     },
     {
      "date": "2026-10-02",
-     "equity": 493.75
+     "equity": 501.44
     },
     {
      "date": "2026-10-05",
-     "equity": 493.78
+     "equity": 501.51
     },
     {
      "date": "2026-10-06",
-     "equity": 492.24
+     "equity": 500.78
     },
     {
      "date": "2026-10-07",
-     "equity": 489.99
+     "equity": 501.34
     }
    ],
    "ranking": [
@@ -2531,31 +2137,39 @@
    "notes": [
     {
      "date": "2026-10-07",
-     "text": "AI picks: no stock here costs under its $99 slot"
+     "text": "Waiting for cash to settle before buying more (cash account rule)"
     },
     {
      "date": "2026-10-07",
-     "text": "AI picks: no stock here costs under its $98 slot"
+     "text": "AI picks: no stock here costs under its $100 slot"
     },
     {
      "date": "2026-10-06",
-     "text": "AI picks: no stock here costs under its $98 slot"
+     "text": "Waiting for cash to settle before buying more (cash account rule)"
     },
     {
      "date": "2026-10-06",
-     "text": "AI picks: no stock here costs under its $99 slot"
+     "text": "AI picks: no stock here costs under its $100 slot"
     },
     {
      "date": "2026-10-05",
-     "text": "AI picks: no stock here costs under its $99 slot"
+     "text": "Waiting for cash to settle before buying more (cash account rule)"
+    },
+    {
+     "date": "2026-10-05",
+     "text": "AI picks: no stock here costs under its $100 slot"
     },
     {
      "date": "2026-10-02",
-     "text": "AI picks: no stock here costs under its $99 slot"
+     "text": "Waiting for cash to settle before buying more (cash account rule)"
+    },
+    {
+     "date": "2026-10-02",
+     "text": "AI picks: no stock here costs under its $100 slot"
     },
     {
      "date": "2026-10-01",
-     "text": "AI picks: no stock here costs under its $99 slot"
+     "text": "Waiting for cash to settle before buying more (cash account rule)"
     },
     {
      "date": "2026-10-01",
@@ -2563,18 +2177,10 @@
     },
     {
      "date": "2026-09-30",
-     "text": "AI picks: no stock here costs under its $100 slot"
+     "text": "Waiting for cash to settle before buying more (cash account rule)"
     },
     {
      "date": "2026-09-30",
-     "text": "AI picks: no stock here costs under its $99 slot"
-    },
-    {
-     "date": "2026-09-29",
-     "text": "AI picks: no stock here costs under its $99 slot"
-    },
-    {
-     "date": "2026-09-29",
      "text": "AI picks: no stock here costs under its $100 slot"
     }
    ],
@@ -2644,570 +2250,51 @@
     "sector": "Financials",
     "color": "#34d399"
    },
-   "cash": 407.92,
-   "equity": 479.8,
+   "cash": 401.11,
+   "settling": 394.47,
+   "equity": 500.56,
    "contributed": 500.0,
-   "pnl": -20.2,
-   "pnl_pct": -0.0404,
-   "day_change": -5.03,
-   "day_change_pct": -0.0104,
+   "pnl": 0.56,
+   "pnl_pct": 0.0011,
+   "day_change": -0.28,
+   "day_change_pct": -0.0006,
    "positions": [
     {
-     "ticker": "BLK",
+     "ticker": "SCHW",
      "sleeve": "ai",
-     "shares": 2,
-     "avg_cost": 36.8884,
-     "opened": "2026-10-07",
-     "opened_at": "2026-10-07T13:45:00",
-     "high": 37.23,
-     "price": 35.94,
-     "value": 71.88,
-     "pnl_pct": -0.0257,
-     "weight": 0.1498
+     "shares": 1,
+     "avg_cost": 98.009,
+     "opened": "2026-10-06",
+     "opened_at": "2026-10-06T09:45:00",
+     "high": 98.99,
+     "price": 99.45,
+     "value": 99.45,
+     "pnl_pct": 0.0147,
+     "weight": 0.1987
     }
    ],
    "trades": [
     {
      "date": "2026-10-07",
-     "time": "15:51",
-     "ticker": "SCHW",
-     "side": "sell",
-     "shares": 1,
-     "price": 98.53,
-     "value": 98.53,
-     "sleeve": "intraday",
-     "reason": "End-of-day close-out (+0.36%)",
-     "protective": true
-    },
-    {
-     "date": "2026-10-07",
-     "time": "15:45",
-     "ticker": "WFC",
-     "side": "sell",
-     "shares": 1,
-     "price": 184.33,
-     "value": 184.33,
-     "sleeve": "intraday",
-     "reason": "Run faded: 15-min move turned -0.24%"
-    },
-    {
-     "date": "2026-10-07",
-     "time": "15:27",
-     "ticker": "SCHW",
-     "side": "buy",
-     "shares": 1,
-     "price": 98.23,
-     "value": 98.23,
-     "sleeve": "intraday",
-     "reason": "Running up +0.21% in 15 min, above VWAP"
-    },
-    {
-     "date": "2026-10-07",
-     "time": "15:18",
-     "ticker": "WFC",
-     "side": "buy",
-     "shares": 1,
-     "price": 183.47,
-     "value": 183.47,
-     "sleeve": "intraday",
-     "reason": "Running up +0.71% in 15 min, above VWAP"
-    },
-    {
-     "date": "2026-10-07",
-     "time": "15:00",
-     "ticker": "SCHW",
-     "side": "sell",
-     "shares": 1,
-     "price": 97.65,
-     "value": 97.65,
-     "sleeve": "intraday",
-     "reason": "Run faded: 15-min move turned -0.12%"
-    },
-    {
-     "date": "2026-10-07",
-     "time": "14:48",
-     "ticker": "WFC",
-     "side": "sell",
-     "shares": 1,
-     "price": 182.47,
-     "value": 182.47,
-     "sleeve": "intraday",
-     "reason": "Run faded: 15-min move turned -0.09%"
-    },
-    {
-     "date": "2026-10-07",
-     "time": "14:39",
-     "ticker": "WFC",
-     "side": "buy",
-     "shares": 1,
-     "price": 182.93,
-     "value": 182.93,
-     "sleeve": "intraday",
-     "reason": "Running up +0.53% in 15 min, above VWAP"
-    },
-    {
-     "date": "2026-10-07",
-     "time": "14:33",
-     "ticker": "SCHW",
-     "side": "buy",
-     "shares": 1,
-     "price": 97.75,
-     "value": 97.75,
-     "sleeve": "intraday",
-     "reason": "Running up +0.26% in 15 min, above VWAP"
-    },
-    {
-     "date": "2026-10-07",
-     "time": "14:18",
-     "ticker": "WFC",
-     "side": "sell",
-     "shares": 1,
-     "price": 181.12,
-     "value": 181.12,
-     "sleeve": "intraday",
-     "reason": "Run faded: 15-min move turned -0.23%"
-    },
-    {
-     "date": "2026-10-07",
-     "time": "14:09",
-     "ticker": "BLK",
-     "side": "sell",
-     "shares": 5,
-     "price": 36.97,
-     "value": 184.86,
-     "sleeve": "intraday",
-     "reason": "Stop: down 0.64%",
-     "protective": true
-    },
-    {
-     "date": "2026-10-07",
-     "time": "14:03",
-     "ticker": "BLK",
-     "side": "buy",
-     "shares": 5,
-     "price": 37.23,
-     "value": 186.14,
-     "sleeve": "intraday",
-     "reason": "Running up +0.98% in 15 min, above VWAP"
-    },
-    {
-     "date": "2026-10-07",
-     "time": "14:03",
-     "ticker": "SCHW",
-     "side": "sell",
-     "shares": 1,
-     "price": 97.87,
-     "value": 97.87,
-     "sleeve": "intraday",
-     "reason": "Run faded: 15-min move turned -0.13%"
-    },
-    {
-     "date": "2026-10-07",
-     "time": "13:45",
-     "ticker": "BLK",
-     "side": "buy",
-     "shares": 2,
-     "price": 36.89,
-     "value": 73.78,
-     "sleeve": "ai",
-     "reason": "New pick"
-    },
-    {
-     "date": "2026-10-07",
-     "time": "13:45",
-     "ticker": "WFC",
-     "side": "buy",
-     "shares": 1,
-     "price": 181.44,
-     "value": 181.44,
-     "sleeve": "intraday",
-     "reason": "Running up +0.42% in 15 min, above VWAP"
-    },
-    {
-     "date": "2026-10-07",
-     "time": "13:30",
-     "ticker": "SCHW",
-     "side": "buy",
-     "shares": 1,
-     "price": 97.61,
-     "value": 97.61,
-     "sleeve": "intraday",
-     "reason": "Running up +0.34% in 15 min, above VWAP"
-    },
-    {
-     "date": "2026-10-07",
-     "time": "13:12",
-     "ticker": "GS",
-     "side": "sell",
-     "shares": 1,
-     "price": 167.47,
-     "value": 167.47,
-     "sleeve": "intraday",
-     "reason": "Run faded: 15-min move turned -0.05%"
-    },
-    {
-     "date": "2026-10-07",
-     "time": "13:06",
-     "ticker": "WFC",
-     "side": "sell",
-     "shares": 1,
-     "price": 180.65,
-     "value": 180.65,
-     "sleeve": "intraday",
-     "reason": "Run faded: 15-min move turned -0.03%"
-    },
-    {
-     "date": "2026-10-07",
-     "time": "12:54",
-     "ticker": "GS",
-     "side": "buy",
-     "shares": 1,
-     "price": 167.67,
-     "value": 167.67,
-     "sleeve": "intraday",
-     "reason": "Running up +0.35% in 15 min, above VWAP"
-    },
-    {
-     "date": "2026-10-07",
-     "time": "12:39",
-     "ticker": "PGR",
-     "side": "sell",
-     "shares": 1,
-     "price": 156.41,
-     "value": 156.41,
-     "sleeve": "intraday",
-     "reason": "Run faded: 15-min move turned -0.15%"
-    },
-    {
-     "date": "2026-10-07",
-     "time": "12:36",
-     "ticker": "WFC",
-     "side": "buy",
-     "shares": 1,
-     "price": 179.84,
-     "value": 179.84,
-     "sleeve": "intraday",
-     "reason": "Running up +0.22% in 15 min, above VWAP"
-    },
-    {
-     "date": "2026-10-07",
-     "time": "12:33",
-     "ticker": "GS",
-     "side": "sell",
-     "shares": 1,
-     "price": 166.45,
-     "value": 166.45,
-     "sleeve": "intraday",
-     "reason": "Run faded: 15-min move turned -0.20%"
-    },
-    {
-     "date": "2026-10-07",
-     "time": "12:27",
-     "ticker": "GS",
-     "side": "buy",
-     "shares": 1,
-     "price": 167.08,
-     "value": 167.08,
-     "sleeve": "intraday",
-     "reason": "Running up +0.22% in 15 min, above VWAP"
-    },
-    {
-     "date": "2026-10-07",
-     "time": "12:27",
-     "ticker": "SCHW",
-     "side": "sell",
-     "shares": 1,
-     "price": 97.82,
-     "value": 97.82,
-     "sleeve": "intraday",
-     "reason": "Take profit: up 1.09%",
-     "protective": true
-    },
-    {
-     "date": "2026-10-07",
-     "time": "12:18",
-     "ticker": "SCHW",
-     "side": "buy",
-     "shares": 1,
-     "price": 96.82,
-     "value": 96.82,
-     "sleeve": "intraday",
-     "reason": "Running up +0.63% in 15 min, above VWAP"
-    },
-    {
-     "date": "2026-10-07",
-     "time": "12:18",
-     "ticker": "BLK",
-     "side": "sell",
-     "shares": 5,
-     "price": 36.9,
-     "value": 184.51,
-     "sleeve": "intraday",
-     "reason": "Run faded: fell below VWAP"
-    },
-    {
-     "date": "2026-10-07",
-     "time": "12:12",
-     "ticker": "BLK",
-     "side": "buy",
-     "shares": 5,
-     "price": 36.97,
-     "value": 184.84,
-     "sleeve": "intraday",
-     "reason": "Running up +0.49% in 15 min, above VWAP"
-    },
-    {
-     "date": "2026-10-07",
-     "time": "12:12",
-     "ticker": "PGR",
-     "side": "buy",
-     "shares": 1,
-     "price": 156.32,
-     "value": 156.32,
-     "sleeve": "intraday",
-     "reason": "Running up +0.50% in 15 min, above VWAP"
-    },
-    {
-     "date": "2026-10-07",
-     "time": "12:06",
-     "ticker": "SCHW",
-     "side": "sell",
-     "shares": 1,
-     "price": 96.32,
-     "value": 96.32,
-     "sleeve": "ai",
-     "reason": "Trimmed back to target size"
-    },
-    {
-     "date": "2026-10-07",
-     "time": "11:45",
-     "ticker": "GS",
-     "side": "sell",
-     "shares": 1,
-     "price": 166.56,
-     "value": 166.56,
-     "sleeve": "intraday",
-     "reason": "Run faded: 15-min move turned -0.46%"
-    },
-    {
-     "date": "2026-10-07",
-     "time": "11:42",
-     "ticker": "BLK",
-     "side": "sell",
-     "shares": 5,
-     "price": 36.93,
-     "value": 184.66,
-     "sleeve": "intraday",
-     "reason": "Run faded: 15-min move turned -0.40%"
-    },
-    {
-     "date": "2026-10-07",
-     "time": "11:39",
-     "ticker": "BLK",
-     "side": "buy",
-     "shares": 5,
-     "price": 37.06,
-     "value": 185.29,
-     "sleeve": "intraday",
-     "reason": "Running up +0.27% in 15 min, above VWAP"
-    },
-    {
-     "date": "2026-10-07",
-     "time": "11:39",
-     "ticker": "PGR",
-     "side": "sell",
-     "shares": 1,
-     "price": 155.47,
-     "value": 155.47,
-     "sleeve": "intraday",
-     "reason": "Run faded: 15-min move turned -0.28%"
-    },
-    {
-     "date": "2026-10-07",
-     "time": "11:21",
-     "ticker": "SCHW",
-     "side": "buy",
-     "shares": 1,
-     "price": 96.54,
-     "value": 96.54,
-     "sleeve": "ai",
-     "reason": "New pick"
-    },
-    {
-     "date": "2026-10-07",
-     "time": "11:12",
-     "ticker": "GS",
-     "side": "buy",
-     "shares": 1,
-     "price": 166.73,
-     "value": 166.73,
-     "sleeve": "intraday",
-     "reason": "Running up +0.52% in 15 min, above VWAP"
-    },
-    {
-     "date": "2026-10-07",
-     "time": "11:12",
-     "ticker": "SCHW",
-     "side": "sell",
-     "shares": 1,
-     "price": 96.56,
-     "value": 96.56,
-     "sleeve": "ai",
-     "reason": "Trimmed back to target size"
-    },
-    {
-     "date": "2026-10-07",
      "time": "11:12",
      "ticker": "BLK",
      "side": "sell",
-     "shares": 5,
+     "shares": 1,
      "price": 36.88,
-     "value": 184.41,
+     "value": 36.88,
      "sleeve": "intraday",
      "reason": "Run faded: fell below VWAP"
-    },
-    {
-     "date": "2026-10-07",
-     "time": "11:09",
-     "ticker": "PGR",
-     "side": "buy",
-     "shares": 1,
-     "price": 155.37,
-     "value": 155.37,
-     "sleeve": "intraday",
-     "reason": "Running up +0.33% in 15 min, above VWAP"
     },
     {
      "date": "2026-10-07",
      "time": "11:03",
      "ticker": "BLK",
      "side": "buy",
-     "shares": 5,
+     "shares": 1,
      "price": 36.94,
-     "value": 184.69,
+     "value": 36.94,
      "sleeve": "intraday",
      "reason": "Running up +0.79% in 15 min, above VWAP"
-    },
-    {
-     "date": "2026-10-07",
-     "time": "10:51",
-     "ticker": "GS",
-     "side": "sell",
-     "shares": 1,
-     "price": 165.62,
-     "value": 165.62,
-     "sleeve": "intraday",
-     "reason": "Run faded: fell below VWAP"
-    },
-    {
-     "date": "2026-10-07",
-     "time": "10:48",
-     "ticker": "GS",
-     "side": "buy",
-     "shares": 1,
-     "price": 165.82,
-     "value": 165.82,
-     "sleeve": "intraday",
-     "reason": "Running up +0.39% in 15 min, above VWAP"
-    },
-    {
-     "date": "2026-10-07",
-     "time": "10:42",
-     "ticker": "SCHW",
-     "side": "buy",
-     "shares": 1,
-     "price": 96.62,
-     "value": 96.62,
-     "sleeve": "ai",
-     "reason": "New pick"
-    },
-    {
-     "date": "2026-10-07",
-     "time": "10:42",
-     "ticker": "WFC",
-     "side": "sell",
-     "shares": 1,
-     "price": 179.5,
-     "value": 179.5,
-     "sleeve": "intraday",
-     "reason": "Run faded: 15-min move turned -0.21%"
-    },
-    {
-     "date": "2026-10-07",
-     "time": "10:36",
-     "ticker": "WFC",
-     "side": "buy",
-     "shares": 1,
-     "price": 179.95,
-     "value": 179.95,
-     "sleeve": "intraday",
-     "reason": "Running up +0.22% in 15 min, above VWAP"
-    },
-    {
-     "date": "2026-10-07",
-     "time": "10:36",
-     "ticker": "JPM",
-     "side": "sell",
-     "shares": 1,
-     "price": 192.32,
-     "value": 192.32,
-     "sleeve": "intraday",
-     "reason": "Run faded: 15-min move turned -0.01%"
-    },
-    {
-     "date": "2026-10-07",
-     "time": "10:33",
-     "ticker": "PGR",
-     "side": "sell",
-     "shares": 1,
-     "price": 154.57,
-     "value": 154.57,
-     "sleeve": "intraday",
-     "reason": "Run faded: 15-min move turned -0.04%"
-    },
-    {
-     "date": "2026-10-07",
-     "time": "10:27",
-     "ticker": "JPM",
-     "side": "buy",
-     "shares": 1,
-     "price": 192.85,
-     "value": 192.85,
-     "sleeve": "intraday",
-     "reason": "Running up +0.32% in 15 min, above VWAP"
-    },
-    {
-     "date": "2026-10-07",
-     "time": "10:21",
-     "ticker": "PGR",
-     "side": "buy",
-     "shares": 1,
-     "price": 155.07,
-     "value": 155.07,
-     "sleeve": "intraday",
-     "reason": "Running up +0.33% in 15 min, above VWAP"
-    },
-    {
-     "date": "2026-10-07",
-     "time": "10:21",
-     "ticker": "SCHW",
-     "side": "sell",
-     "shares": 1,
-     "price": 97.2,
-     "value": 97.2,
-     "sleeve": "intraday",
-     "reason": "Run faded: 15-min move turned -0.01%"
-    },
-    {
-     "date": "2026-10-07",
-     "time": "10:15",
-     "ticker": "SCHW",
-     "side": "sell",
-     "shares": 1,
-     "price": 97.26,
-     "value": 97.26,
-     "sleeve": "ai",
-     "reason": "Trimmed back to target size"
     },
     {
      "date": "2026-10-07",
@@ -3222,40 +2309,6 @@
     },
     {
      "date": "2026-10-07",
-     "time": "10:06",
-     "ticker": "SCHW",
-     "side": "buy",
-     "shares": 1,
-     "price": 97.31,
-     "value": 97.31,
-     "sleeve": "intraday",
-     "reason": "Running up +0.31% in 15 min, above VWAP"
-    },
-    {
-     "date": "2026-10-07",
-     "time": "10:06",
-     "ticker": "WFC",
-     "side": "sell",
-     "shares": 1,
-     "price": 178.89,
-     "value": 178.89,
-     "sleeve": "intraday",
-     "reason": "Stop: down 0.59%",
-     "protective": true
-    },
-    {
-     "date": "2026-10-07",
-     "time": "09:57",
-     "ticker": "WFC",
-     "side": "buy",
-     "shares": 1,
-     "price": 180.04,
-     "value": 180.04,
-     "sleeve": "intraday",
-     "reason": "Running up +0.37% in 15 min, above VWAP"
-    },
-    {
-     "date": "2026-10-07",
      "time": "09:57",
      "ticker": "JPM",
      "side": "sell",
@@ -3264,17 +2317,6 @@
      "value": 191.91,
      "sleeve": "intraday",
      "reason": "Run faded: fell below VWAP"
-    },
-    {
-     "date": "2026-10-07",
-     "time": "09:45",
-     "ticker": "SCHW",
-     "side": "buy",
-     "shares": 1,
-     "price": 97.0,
-     "value": 97.0,
-     "sleeve": "ai",
-     "reason": "New pick"
     },
     {
      "date": "2026-10-07",
@@ -3299,301 +2341,600 @@
      "reason": "Running up +0.81% in 15 min, above VWAP"
     },
     {
-     "date": "2026-10-07",
-     "time": "09:45",
+     "date": "2026-10-06",
+     "time": "10:33",
      "ticker": "BLK",
      "side": "sell",
-     "shares": 2,
-     "price": 36.99,
-     "value": 73.98,
-     "sleeve": "ai",
-     "reason": "Rotated out: no longer a top pick"
-    },
-    {
-     "date": "2026-10-06",
-     "time": "15:51",
-     "ticker": "JPM",
-     "side": "sell",
-     "shares": 1,
-     "price": 193.99,
-     "value": 193.99,
-     "sleeve": "intraday",
-     "reason": "End-of-day close-out (+0.34%)",
-     "protective": true
-    },
-    {
-     "date": "2026-10-06",
-     "time": "15:48",
-     "ticker": "SCHW",
-     "side": "sell",
-     "shares": 1,
-     "price": 98.59,
-     "value": 98.59,
-     "sleeve": "intraday",
-     "reason": "Run faded: 15-min move turned -0.16%"
-    },
-    {
-     "date": "2026-10-06",
-     "time": "15:33",
-     "ticker": "SCHW",
-     "side": "buy",
-     "shares": 1,
-     "price": 98.85,
-     "value": 98.85,
-     "sleeve": "intraday",
-     "reason": "Running up +0.24% in 15 min, above VWAP"
-    },
-    {
-     "date": "2026-10-06",
-     "time": "15:24",
-     "ticker": "JPM",
-     "side": "buy",
-     "shares": 1,
-     "price": 193.43,
-     "value": 193.43,
-     "sleeve": "intraday",
-     "reason": "Running up +0.59% in 15 min, above VWAP"
-    },
-    {
-     "date": "2026-10-06",
-     "time": "15:21",
-     "ticker": "GS",
-     "side": "sell",
-     "shares": 1,
-     "price": 166.06,
-     "value": 166.06,
-     "sleeve": "intraday",
-     "reason": "Run faded: 15-min move turned -0.01%"
-    },
-    {
-     "date": "2026-10-06",
-     "time": "15:15",
-     "ticker": "WFC",
-     "side": "sell",
-     "shares": 1,
-     "price": 174.05,
-     "value": 174.05,
-     "sleeve": "intraday",
-     "reason": "Run faded: 15-min move turned -0.19%"
-    },
-    {
-     "date": "2026-10-06",
-     "time": "15:03",
-     "ticker": "WFC",
-     "side": "buy",
-     "shares": 1,
-     "price": 174.41,
-     "value": 174.41,
-     "sleeve": "intraday",
-     "reason": "Running up +0.50% in 15 min, above VWAP"
-    },
-    {
-     "date": "2026-10-06",
-     "time": "15:03",
-     "ticker": "SCHW",
-     "side": "sell",
-     "shares": 1,
-     "price": 98.65,
-     "value": 98.65,
-     "sleeve": "intraday",
-     "reason": "Run faded: 15-min move turned -0.01%"
-    },
-    {
-     "date": "2026-10-06",
-     "time": "14:51",
-     "ticker": "GS",
-     "side": "buy",
-     "shares": 1,
-     "price": 165.96,
-     "value": 165.96,
-     "sleeve": "intraday",
-     "reason": "Running up +0.66% in 15 min, above VWAP"
-    },
-    {
-     "date": "2026-10-06",
-     "time": "14:51",
-     "ticker": "PGR",
-     "side": "sell",
-     "shares": 1,
-     "price": 162.89,
-     "value": 162.89,
-     "sleeve": "intraday",
-     "reason": "Run faded: 15-min move turned -0.06%"
-    },
-    {
-     "date": "2026-10-06",
-     "time": "14:42",
-     "ticker": "SCHW",
-     "side": "buy",
-     "shares": 1,
-     "price": 98.56,
-     "value": 98.56,
-     "sleeve": "intraday",
-     "reason": "Running up +0.76% in 15 min, above VWAP"
-    },
-    {
-     "date": "2026-10-06",
-     "time": "14:36",
-     "ticker": "PGR",
-     "side": "buy",
-     "shares": 1,
-     "price": 163.15,
-     "value": 163.15,
-     "sleeve": "intraday",
-     "reason": "Running up +0.40% in 15 min, above VWAP"
-    },
-    {
-     "date": "2026-10-06",
-     "time": "14:24",
-     "ticker": "WFC",
-     "side": "sell",
-     "shares": 1,
-     "price": 173.19,
-     "value": 173.19,
+     "shares": 5,
+     "price": 37.3,
+     "value": 186.51,
      "sleeve": "intraday",
      "reason": "Take profit: up 0.81%",
      "protective": true
     },
     {
      "date": "2026-10-06",
-     "time": "14:15",
-     "ticker": "WFC",
-     "side": "buy",
-     "shares": 1,
-     "price": 171.89,
-     "value": 171.89,
-     "sleeve": "intraday",
-     "reason": "Running up +0.57% in 15 min, above VWAP"
-    },
-    {
-     "date": "2026-10-06",
-     "time": "14:15",
-     "ticker": "SCHW",
-     "side": "sell",
-     "shares": 1,
-     "price": 98.12,
-     "value": 98.12,
-     "sleeve": "intraday",
-     "reason": "Run faded: 15-min move turned -0.15%"
-    },
-    {
-     "date": "2026-10-06",
-     "time": "14:15",
+     "time": "09:51",
      "ticker": "PGR",
      "side": "sell",
      "shares": 1,
-     "price": 162.26,
-     "value": 162.26,
+     "price": 161.14,
+     "value": 161.14,
      "sleeve": "intraday",
-     "reason": "Run faded: 15-min move turned -0.18%"
+     "reason": "Run faded: fell below VWAP"
     },
     {
      "date": "2026-10-06",
-     "time": "14:06",
+     "time": "09:48",
+     "ticker": "BLK",
+     "side": "buy",
+     "shares": 5,
+     "price": 37.02,
+     "value": 185.09,
+     "sleeve": "intraday",
+     "reason": "Running up +0.33% in 15 min, above VWAP"
+    },
+    {
+     "date": "2026-10-06",
+     "time": "09:45",
      "ticker": "SCHW",
      "side": "buy",
      "shares": 1,
-     "price": 98.26,
-     "value": 98.26,
-     "sleeve": "intraday",
-     "reason": "Running up +0.24% in 15 min, above VWAP"
+     "price": 98.01,
+     "value": 98.01,
+     "sleeve": "ai",
+     "reason": "New pick"
     },
     {
      "date": "2026-10-06",
-     "time": "14:03",
+     "time": "09:45",
+     "ticker": "PGR",
+     "side": "buy",
+     "shares": 1,
+     "price": 161.68,
+     "value": 161.68,
+     "sleeve": "intraday",
+     "reason": "Running up +0.59% in 15 min, above VWAP"
+    },
+    {
+     "date": "2026-10-05",
+     "time": "10:06",
+     "ticker": "BLK",
+     "side": "sell",
+     "shares": 1,
+     "price": 37.12,
+     "value": 37.12,
+     "sleeve": "intraday",
+     "reason": "Run faded: fell below VWAP"
+    },
+    {
+     "date": "2026-10-05",
+     "time": "10:03",
+     "ticker": "BLK",
+     "side": "buy",
+     "shares": 1,
+     "price": 37.26,
+     "value": 37.26,
+     "sleeve": "intraday",
+     "reason": "Running up +0.27% in 15 min, above VWAP"
+    },
+    {
+     "date": "2026-10-05",
+     "time": "09:51",
+     "ticker": "SCHW",
+     "side": "sell",
+     "shares": 2,
+     "price": 95.77,
+     "value": 191.54,
+     "sleeve": "intraday",
+     "reason": "Run faded: fell below VWAP"
+    },
+    {
+     "date": "2026-10-05",
+     "time": "09:48",
      "ticker": "GS",
      "side": "sell",
      "shares": 1,
-     "price": 164.75,
-     "value": 164.75,
+     "price": 166.73,
+     "value": 166.73,
      "sleeve": "intraday",
-     "reason": "Run faded: 15-min move turned -0.33%"
+     "reason": "Run faded: fell below VWAP"
     },
     {
-     "date": "2026-10-06",
-     "time": "13:57",
-     "ticker": "PGR",
+     "date": "2026-10-05",
+     "time": "09:45",
+     "ticker": "GS",
      "side": "buy",
      "shares": 1,
-     "price": 162.68,
-     "value": 162.68,
+     "price": 167.11,
+     "value": 167.11,
+     "sleeve": "intraday",
+     "reason": "Running up +0.26% in 15 min, above VWAP"
+    },
+    {
+     "date": "2026-10-05",
+     "time": "09:45",
+     "ticker": "SCHW",
+     "side": "buy",
+     "shares": 2,
+     "price": 96.11,
+     "value": 192.22,
      "sleeve": "intraday",
      "reason": "Running up +0.29% in 15 min, above VWAP"
     },
     {
-     "date": "2026-10-06",
-     "time": "13:54",
-     "ticker": "JPM",
+     "date": "2026-10-05",
+     "time": "09:45",
+     "ticker": "BLK",
+     "side": "sell",
+     "shares": 2,
+     "price": 37.19,
+     "value": 74.38,
+     "sleeve": "ai",
+     "reason": "Rotated out: no longer a top pick"
+    },
+    {
+     "date": "2026-10-02",
+     "time": "10:06",
+     "ticker": "BLK",
+     "side": "sell",
+     "shares": 2,
+     "price": 37.27,
+     "value": 74.54,
+     "sleeve": "intraday",
+     "reason": "Run faded: 15-min move turned -0.11%"
+    },
+    {
+     "date": "2026-10-02",
+     "time": "10:03",
+     "ticker": "PGR",
      "side": "sell",
      "shares": 1,
-     "price": 193.72,
-     "value": 193.72,
+     "price": 169.44,
+     "value": 169.44,
      "sleeve": "intraday",
-     "reason": "Run faded: 15-min move turned -0.19%"
+     "reason": "Run faded: 15-min move turned -0.03%"
     },
     {
-     "date": "2026-10-06",
-     "time": "13:45",
-     "ticker": "GS",
+     "date": "2026-10-02",
+     "time": "09:54",
+     "ticker": "BLK",
      "side": "buy",
-     "shares": 1,
-     "price": 164.92,
-     "value": 164.92,
+     "shares": 2,
+     "price": 37.38,
+     "value": 74.76,
      "sleeve": "intraday",
-     "reason": "Running up +0.46% in 15 min, above VWAP"
+     "reason": "Running up +0.38% in 15 min, above VWAP"
     },
     {
-     "date": "2026-10-06",
-     "time": "13:36",
+     "date": "2026-10-02",
+     "time": "09:51",
      "ticker": "WFC",
      "side": "sell",
      "shares": 1,
-     "price": 170.33,
-     "value": 170.33,
+     "price": 172.29,
+     "value": 172.29,
      "sleeve": "intraday",
      "reason": "Run faded: fell below VWAP"
+    },
+    {
+     "date": "2026-10-02",
+     "time": "09:45",
+     "ticker": "WFC",
+     "side": "buy",
+     "shares": 1,
+     "price": 172.93,
+     "value": 172.93,
+     "sleeve": "intraday",
+     "reason": "Running up +0.21% in 15 min, above VWAP"
+    },
+    {
+     "date": "2026-10-02",
+     "time": "09:45",
+     "ticker": "PGR",
+     "side": "buy",
+     "shares": 1,
+     "price": 169.33,
+     "value": 169.33,
+     "sleeve": "intraday",
+     "reason": "Running up +0.55% in 15 min, above VWAP"
+    },
+    {
+     "date": "2026-10-01",
+     "time": "10:12",
+     "ticker": "BLK",
+     "side": "sell",
+     "shares": 5,
+     "price": 37.25,
+     "value": 186.26,
+     "sleeve": "intraday",
+     "reason": "Run faded: 15-min move turned -0.03%"
+    },
+    {
+     "date": "2026-10-01",
+     "time": "10:09",
+     "ticker": "GS",
+     "side": "sell",
+     "shares": 1,
+     "price": 172.0,
+     "value": 172.0,
+     "sleeve": "intraday",
+     "reason": "Run faded: fell below VWAP"
+    },
+    {
+     "date": "2026-10-01",
+     "time": "09:45",
+     "ticker": "GS",
+     "side": "buy",
+     "shares": 1,
+     "price": 172.02,
+     "value": 172.02,
+     "sleeve": "intraday",
+     "reason": "Running up +0.54% in 15 min, above VWAP"
+    },
+    {
+     "date": "2026-10-01",
+     "time": "09:45",
+     "ticker": "BLK",
+     "side": "buy",
+     "shares": 5,
+     "price": 37.33,
+     "value": 186.64,
+     "sleeve": "intraday",
+     "reason": "Running up +0.57% in 15 min, above VWAP"
+    },
+    {
+     "date": "2026-09-30",
+     "time": "12:39",
+     "ticker": "BLK",
+     "side": "sell",
+     "shares": 1,
+     "price": 37.78,
+     "value": 37.78,
+     "sleeve": "intraday",
+     "reason": "Run faded: fell below VWAP"
+    },
+    {
+     "date": "2026-09-30",
+     "time": "12:27",
+     "ticker": "BLK",
+     "side": "buy",
+     "shares": 1,
+     "price": 37.92,
+     "value": 37.92,
+     "sleeve": "intraday",
+     "reason": "Running up +0.58% in 15 min, above VWAP"
+    },
+    {
+     "date": "2026-09-30",
+     "time": "10:09",
+     "ticker": "JPM",
+     "side": "sell",
+     "shares": 1,
+     "price": 184.4,
+     "value": 184.4,
+     "sleeve": "intraday",
+     "reason": "Run faded: fell below VWAP"
+    },
+    {
+     "date": "2026-09-30",
+     "time": "10:03",
+     "ticker": "PGR",
+     "side": "sell",
+     "shares": 1,
+     "price": 174.54,
+     "value": 174.54,
+     "sleeve": "intraday",
+     "reason": "Take profit: up 0.82%",
+     "protective": true
+    },
+    {
+     "date": "2026-09-30",
+     "time": "09:54",
+     "ticker": "PGR",
+     "side": "buy",
+     "shares": 1,
+     "price": 173.21,
+     "value": 173.21,
+     "sleeve": "intraday",
+     "reason": "Running up +0.56% in 15 min, above VWAP"
+    },
+    {
+     "date": "2026-09-30",
+     "time": "09:48",
+     "ticker": "JPM",
+     "side": "buy",
+     "shares": 1,
+     "price": 184.71,
+     "value": 184.71,
+     "sleeve": "intraday",
+     "reason": "Running up +0.43% in 15 min, above VWAP"
+    },
+    {
+     "date": "2026-09-29",
+     "time": "11:00",
+     "ticker": "BLK",
+     "side": "sell",
+     "shares": 1,
+     "price": 37.16,
+     "value": 37.16,
+     "sleeve": "intraday",
+     "reason": "Run faded: fell below VWAP"
+    },
+    {
+     "date": "2026-09-29",
+     "time": "10:51",
+     "ticker": "BLK",
+     "side": "buy",
+     "shares": 1,
+     "price": 37.31,
+     "value": 37.31,
+     "sleeve": "intraday",
+     "reason": "Running up +0.38% in 15 min, above VWAP"
+    },
+    {
+     "date": "2026-09-29",
+     "time": "10:21",
+     "ticker": "WFC",
+     "side": "sell",
+     "shares": 1,
+     "price": 173.56,
+     "value": 173.56,
+     "sleeve": "intraday",
+     "reason": "Take profit: up 1.23%",
+     "protective": true
+    },
+    {
+     "date": "2026-09-29",
+     "time": "09:57",
+     "ticker": "PGR",
+     "side": "sell",
+     "shares": 1,
+     "price": 180.44,
+     "value": 180.44,
+     "sleeve": "intraday",
+     "reason": "Run faded: 15-min move turned -0.01%"
+    },
+    {
+     "date": "2026-09-29",
+     "time": "09:45",
+     "ticker": "BLK",
+     "side": "buy",
+     "shares": 1,
+     "price": 37.33,
+     "value": 37.33,
+     "sleeve": "ai",
+     "reason": "Topped up to target size"
+    },
+    {
+     "date": "2026-09-29",
+     "time": "09:45",
+     "ticker": "WFC",
+     "side": "buy",
+     "shares": 1,
+     "price": 171.54,
+     "value": 171.54,
+     "sleeve": "intraday",
+     "reason": "Running up +0.53% in 15 min, above VWAP"
+    },
+    {
+     "date": "2026-09-29",
+     "time": "09:45",
+     "ticker": "PGR",
+     "side": "buy",
+     "shares": 1,
+     "price": 180.98,
+     "value": 180.98,
+     "sleeve": "intraday",
+     "reason": "Running up +0.77% in 15 min, above VWAP"
+    },
+    {
+     "date": "2026-09-28",
+     "time": "10:09",
+     "ticker": "GS",
+     "side": "sell",
+     "shares": 1,
+     "price": 171.05,
+     "value": 171.05,
+     "sleeve": "intraday",
+     "reason": "Run faded: 15-min move turned -0.01%"
+    },
+    {
+     "date": "2026-09-28",
+     "time": "10:03",
+     "ticker": "PGR",
+     "side": "sell",
+     "shares": 1,
+     "price": 188.53,
+     "value": 188.53,
+     "sleeve": "intraday",
+     "reason": "Take profit: up 0.98%",
+     "protective": true
+    },
+    {
+     "date": "2026-09-28",
+     "time": "09:45",
+     "ticker": "BLK",
+     "side": "buy",
+     "shares": 1,
+     "price": 37.25,
+     "value": 37.25,
+     "sleeve": "ai",
+     "reason": "New pick"
+    },
+    {
+     "date": "2026-09-28",
+     "time": "09:45",
+     "ticker": "PGR",
+     "side": "buy",
+     "shares": 1,
+     "price": 186.79,
+     "value": 186.79,
+     "sleeve": "intraday",
+     "reason": "Running up +0.49% in 15 min, above VWAP"
+    },
+    {
+     "date": "2026-09-28",
+     "time": "09:45",
+     "ticker": "GS",
+     "side": "buy",
+     "shares": 1,
+     "price": 171.21,
+     "value": 171.21,
+     "sleeve": "intraday",
+     "reason": "Running up +0.55% in 15 min, above VWAP"
+    },
+    {
+     "date": "2026-09-28",
+     "time": "09:45",
+     "ticker": "SCHW",
+     "side": "sell",
+     "shares": 1,
+     "price": 93.5,
+     "value": 93.5,
+     "sleeve": "ai",
+     "reason": "Rotated out: no longer a top pick"
+    },
+    {
+     "date": "2026-09-25",
+     "time": "10:00",
+     "ticker": "PGR",
+     "side": "sell",
+     "shares": 1,
+     "price": 189.54,
+     "value": 189.54,
+     "sleeve": "intraday",
+     "reason": "Run faded: 15-min move turned -0.16%"
+    },
+    {
+     "date": "2026-09-25",
+     "time": "09:57",
+     "ticker": "BLK",
+     "side": "sell",
+     "shares": 5,
+     "price": 38.88,
+     "value": 194.4,
+     "sleeve": "intraday",
+     "reason": "Run faded: 15-min move turned -0.18%"
+    },
+    {
+     "date": "2026-09-25",
+     "time": "09:45",
+     "ticker": "PGR",
+     "side": "buy",
+     "shares": 1,
+     "price": 190.03,
+     "value": 190.03,
+     "sleeve": "intraday",
+     "reason": "Running up +0.30% in 15 min, above VWAP"
+    },
+    {
+     "date": "2026-09-25",
+     "time": "09:45",
+     "ticker": "BLK",
+     "side": "buy",
+     "shares": 5,
+     "price": 38.96,
+     "value": 194.8,
+     "sleeve": "intraday",
+     "reason": "Running up +0.75% in 15 min, above VWAP"
+    },
+    {
+     "date": "2026-09-24",
+     "time": "10:12",
+     "ticker": "BLK",
+     "side": "sell",
+     "shares": 5,
+     "price": 38.98,
+     "value": 194.9,
+     "sleeve": "intraday",
+     "reason": "Run faded: 15-min move turned -0.18%"
+    },
+    {
+     "date": "2026-09-24",
+     "time": "10:03",
+     "ticker": "PGR",
+     "side": "sell",
+     "shares": 1,
+     "price": 180.29,
+     "value": 180.29,
+     "sleeve": "intraday",
+     "reason": "Run faded: 15-min move turned -0.04%"
+    },
+    {
+     "date": "2026-09-24",
+     "time": "09:45",
+     "ticker": "SCHW",
+     "side": "buy",
+     "shares": 1,
+     "price": 94.71,
+     "value": 94.71,
+     "sleeve": "ai",
+     "reason": "New pick"
+    },
+    {
+     "date": "2026-09-24",
+     "time": "09:45",
+     "ticker": "PGR",
+     "side": "buy",
+     "shares": 1,
+     "price": 180.4,
+     "value": 180.4,
+     "sleeve": "intraday",
+     "reason": "Running up +0.42% in 15 min, above VWAP"
+    },
+    {
+     "date": "2026-09-24",
+     "time": "09:45",
+     "ticker": "BLK",
+     "side": "buy",
+     "shares": 5,
+     "price": 38.91,
+     "value": 194.55,
+     "sleeve": "intraday",
+     "reason": "Running up +0.80% in 15 min, above VWAP"
     }
    ],
    "history": [
     {
      "date": "2026-09-24",
-     "equity": 496.67
+     "equity": 502.18
     },
     {
      "date": "2026-09-25",
-     "equity": 495.28
+     "equity": 500.82
     },
     {
      "date": "2026-09-28",
-     "equity": 499.72
+     "equity": 499.29
     },
     {
      "date": "2026-09-29",
-     "equity": 497.61
+     "equity": 500.73
     },
     {
      "date": "2026-09-30",
-     "equity": 494.34
+     "equity": 503.59
     },
     {
      "date": "2026-10-01",
-     "equity": 484.85
+     "equity": 498.97
     },
     {
      "date": "2026-10-02",
-     "equity": 490.1
+     "equity": 503.15
     },
     {
      "date": "2026-10-05",
-     "equity": 486.37
+     "equity": 499.42
     },
     {
      "date": "2026-10-06",
-     "equity": 484.83
+     "equity": 500.84
     },
     {
      "date": "2026-10-07",
-     "equity": 481.42
+     "equity": 499.65
     }
    ],
    "ranking": [
@@ -3835,9 +3176,9 @@
     "market_view": "Simulated AI picks (no Claude API key in this run).",
     "picks": [
      {
-      "ticker": "BLK",
+      "ticker": "SCHW",
       "confidence": 0.5,
-      "reason": "-15% over 3 months, -0.9% this week."
+      "reason": "-4% over 3 months, +1.0% this week."
      }
     ],
     "rejected": []
@@ -3846,35 +3187,43 @@
    "notes": [
     {
      "date": "2026-10-07",
-     "text": "SCHW: not buying back today after a stop"
+     "text": "Waiting for cash to settle before buying more (cash account rule)"
     },
     {
-     "date": "2026-10-07",
-     "text": "Skipped SCHW (ai): one share costs more than its $96 slot"
-    },
-    {
-     "date": "2026-10-07",
-     "text": "Skipped SCHW (ai): one share costs more than its $97 slot"
+     "date": "2026-10-06",
+     "text": "Waiting for cash to settle before buying more (cash account rule)"
     },
     {
      "date": "2026-10-05",
-     "text": "Reached today's limit of 30 buys; selling still works"
+     "text": "Waiting for cash to settle before buying more (cash account rule)"
     },
     {
-     "date": "2026-10-05",
-     "text": "BLK: not buying back today after a stop"
+     "date": "2026-10-02",
+     "text": "Waiting for cash to settle before buying more (cash account rule)"
     },
     {
-     "date": "2026-10-05",
-     "text": "SCHW: not buying back today after a stop"
-    },
-    {
-     "date": "2026-10-05",
-     "text": "Skipped SCHW (ai): one share costs more than its $97 slot"
+     "date": "2026-10-01",
+     "text": "Waiting for cash to settle before buying more (cash account rule)"
     },
     {
      "date": "2026-09-30",
-     "text": "Reached today's limit of 30 buys; selling still works"
+     "text": "Waiting for cash to settle before buying more (cash account rule)"
+    },
+    {
+     "date": "2026-09-29",
+     "text": "Waiting for cash to settle before buying more (cash account rule)"
+    },
+    {
+     "date": "2026-09-28",
+     "text": "Waiting for cash to settle before buying more (cash account rule)"
+    },
+    {
+     "date": "2026-09-25",
+     "text": "Waiting for cash to settle before buying more (cash account rule)"
+    },
+    {
+     "date": "2026-09-24",
+     "text": "Waiting for cash to settle before buying more (cash account rule)"
     }
    ],
    "last_momentum": "2026-10-07T15:54:00",
@@ -3944,13 +3293,14 @@
     "sector": "Consumer",
     "color": "#f472b6"
    },
-   "cash": 407.38,
-   "equity": 488.59,
+   "cash": 413.86,
+   "settling": 398.32,
+   "equity": 495.07,
    "contributed": 500.0,
-   "pnl": -11.41,
-   "pnl_pct": -0.0228,
-   "day_change": 0.87,
-   "day_change_pct": 0.0018,
+   "pnl": -4.93,
+   "pnl_pct": -0.0099,
+   "day_change": -0.83,
+   "day_change_pct": -0.0017,
    "positions": [
     {
      "ticker": "KO",
@@ -3963,577 +3313,10 @@
      "price": 27.07,
      "value": 81.21,
      "pnl_pct": -0.014,
-     "weight": 0.1662
+     "weight": 0.164
     }
    ],
    "trades": [
-    {
-     "date": "2026-10-07",
-     "time": "15:51",
-     "ticker": "PG",
-     "side": "sell",
-     "shares": 1,
-     "price": 153.59,
-     "value": 153.59,
-     "sleeve": "intraday",
-     "reason": "End-of-day close-out (+0.33%)",
-     "protective": true
-    },
-    {
-     "date": "2026-10-07",
-     "time": "15:36",
-     "ticker": "PG",
-     "side": "buy",
-     "shares": 1,
-     "price": 153.17,
-     "value": 153.17,
-     "sleeve": "intraday",
-     "reason": "Running up +0.55% in 15 min, above VWAP"
-    },
-    {
-     "date": "2026-10-07",
-     "time": "15:33",
-     "ticker": "NKE",
-     "side": "sell",
-     "shares": 3,
-     "price": 54.78,
-     "value": 164.35,
-     "sleeve": "intraday",
-     "reason": "Run faded: fell below VWAP"
-    },
-    {
-     "date": "2026-10-07",
-     "time": "15:30",
-     "ticker": "NKE",
-     "side": "buy",
-     "shares": 3,
-     "price": 54.92,
-     "value": 164.75,
-     "sleeve": "intraday",
-     "reason": "Running up +0.24% in 15 min, above VWAP"
-    },
-    {
-     "date": "2026-10-07",
-     "time": "15:12",
-     "ticker": "PG",
-     "side": "sell",
-     "shares": 1,
-     "price": 152.63,
-     "value": 152.63,
-     "sleeve": "intraday",
-     "reason": "Run faded: 15-min move turned -0.03%"
-    },
-    {
-     "date": "2026-10-07",
-     "time": "15:00",
-     "ticker": "PG",
-     "side": "buy",
-     "shares": 1,
-     "price": 153.03,
-     "value": 153.03,
-     "sleeve": "intraday",
-     "reason": "Running up +0.47% in 15 min, above VWAP"
-    },
-    {
-     "date": "2026-10-07",
-     "time": "15:00",
-     "ticker": "LULU",
-     "side": "sell",
-     "shares": 1,
-     "price": 174.08,
-     "value": 174.08,
-     "sleeve": "intraday",
-     "reason": "Run faded: 15-min move turned -0.03%"
-    },
-    {
-     "date": "2026-10-07",
-     "time": "14:57",
-     "ticker": "LULU",
-     "side": "buy",
-     "shares": 1,
-     "price": 174.31,
-     "value": 174.31,
-     "sleeve": "intraday",
-     "reason": "Running up +0.39% in 15 min, above VWAP"
-    },
-    {
-     "date": "2026-10-07",
-     "time": "14:57",
-     "ticker": "NKE",
-     "side": "sell",
-     "shares": 3,
-     "price": 54.88,
-     "value": 164.65,
-     "sleeve": "intraday",
-     "reason": "Run faded: 15-min move turned -0.09%"
-    },
-    {
-     "date": "2026-10-07",
-     "time": "14:51",
-     "ticker": "AMZN",
-     "side": "sell",
-     "shares": 1,
-     "price": 154.32,
-     "value": 154.32,
-     "sleeve": "intraday",
-     "reason": "Run faded: 15-min move turned -0.21%"
-    },
-    {
-     "date": "2026-10-07",
-     "time": "14:42",
-     "ticker": "AMZN",
-     "side": "buy",
-     "shares": 1,
-     "price": 154.86,
-     "value": 154.86,
-     "sleeve": "intraday",
-     "reason": "Running up +0.32% in 15 min, above VWAP"
-    },
-    {
-     "date": "2026-10-07",
-     "time": "14:30",
-     "ticker": "NKE",
-     "side": "buy",
-     "shares": 3,
-     "price": 54.97,
-     "value": 164.9,
-     "sleeve": "intraday",
-     "reason": "Running up +0.20% in 15 min, above VWAP"
-    },
-    {
-     "date": "2026-10-07",
-     "time": "14:24",
-     "ticker": "HD",
-     "side": "sell",
-     "shares": 1,
-     "price": 147.11,
-     "value": 147.11,
-     "sleeve": "intraday",
-     "reason": "Run faded: fell below VWAP"
-    },
-    {
-     "date": "2026-10-07",
-     "time": "14:24",
-     "ticker": "LULU",
-     "side": "sell",
-     "shares": 1,
-     "price": 174.22,
-     "value": 174.22,
-     "sleeve": "intraday",
-     "reason": "Run faded: 15-min move turned -0.07%"
-    },
-    {
-     "date": "2026-10-07",
-     "time": "14:21",
-     "ticker": "HD",
-     "side": "buy",
-     "shares": 1,
-     "price": 147.31,
-     "value": 147.31,
-     "sleeve": "intraday",
-     "reason": "Running up +0.64% in 15 min, above VWAP"
-    },
-    {
-     "date": "2026-10-07",
-     "time": "14:21",
-     "ticker": "AMZN",
-     "side": "sell",
-     "shares": 1,
-     "price": 153.99,
-     "value": 153.99,
-     "sleeve": "intraday",
-     "reason": "Stop: down 0.62%",
-     "protective": true
-    },
-    {
-     "date": "2026-10-07",
-     "time": "14:15",
-     "ticker": "AMZN",
-     "side": "buy",
-     "shares": 1,
-     "price": 155.04,
-     "value": 155.04,
-     "sleeve": "intraday",
-     "reason": "Running up +0.33% in 15 min, above VWAP"
-    },
-    {
-     "date": "2026-10-07",
-     "time": "14:00",
-     "ticker": "NKE",
-     "side": "sell",
-     "shares": 3,
-     "price": 54.9,
-     "value": 164.71,
-     "sleeve": "intraday",
-     "reason": "Run faded: 15-min move turned -0.22%"
-    },
-    {
-     "date": "2026-10-07",
-     "time": "13:57",
-     "ticker": "NKE",
-     "side": "buy",
-     "shares": 3,
-     "price": 55.13,
-     "value": 165.38,
-     "sleeve": "intraday",
-     "reason": "Running up +0.46% in 15 min, above VWAP"
-    },
-    {
-     "date": "2026-10-07",
-     "time": "13:57",
-     "ticker": "PG",
-     "side": "sell",
-     "shares": 1,
-     "price": 152.87,
-     "value": 152.87,
-     "sleeve": "intraday",
-     "reason": "Run faded: 15-min move turned -0.33%"
-    },
-    {
-     "date": "2026-10-07",
-     "time": "13:39",
-     "ticker": "LULU",
-     "side": "buy",
-     "shares": 1,
-     "price": 173.63,
-     "value": 173.63,
-     "sleeve": "intraday",
-     "reason": "Running up +0.45% in 15 min, above VWAP"
-    },
-    {
-     "date": "2026-10-07",
-     "time": "13:39",
-     "ticker": "WMT",
-     "side": "sell",
-     "shares": 1,
-     "price": 195.28,
-     "value": 195.28,
-     "sleeve": "intraday",
-     "reason": "Take profit: up 0.84%",
-     "protective": true
-    },
-    {
-     "date": "2026-10-07",
-     "time": "13:24",
-     "ticker": "PG",
-     "side": "buy",
-     "shares": 1,
-     "price": 152.48,
-     "value": 152.48,
-     "sleeve": "intraday",
-     "reason": "Running up +0.41% in 15 min, above VWAP"
-    },
-    {
-     "date": "2026-10-07",
-     "time": "13:24",
-     "ticker": "AMZN",
-     "side": "sell",
-     "shares": 1,
-     "price": 154.63,
-     "value": 154.63,
-     "sleeve": "intraday",
-     "reason": "Run faded: 15-min move turned -0.20%"
-    },
-    {
-     "date": "2026-10-07",
-     "time": "13:15",
-     "ticker": "AMZN",
-     "side": "buy",
-     "shares": 1,
-     "price": 154.89,
-     "value": 154.89,
-     "sleeve": "intraday",
-     "reason": "Running up +0.36% in 15 min, above VWAP"
-    },
-    {
-     "date": "2026-10-07",
-     "time": "13:12",
-     "ticker": "LULU",
-     "side": "sell",
-     "shares": 1,
-     "price": 172.08,
-     "value": 172.08,
-     "sleeve": "intraday",
-     "reason": "Run faded: 15-min move turned -0.02%"
-    },
-    {
-     "date": "2026-10-07",
-     "time": "13:06",
-     "ticker": "WMT",
-     "side": "buy",
-     "shares": 1,
-     "price": 193.76,
-     "value": 193.76,
-     "sleeve": "intraday",
-     "reason": "Running up +0.28% in 15 min, above VWAP"
-    },
-    {
-     "date": "2026-10-07",
-     "time": "12:54",
-     "ticker": "AMZN",
-     "side": "sell",
-     "shares": 1,
-     "price": 154.09,
-     "value": 154.09,
-     "sleeve": "intraday",
-     "reason": "Run faded: 15-min move turned -0.06%"
-    },
-    {
-     "date": "2026-10-07",
-     "time": "12:45",
-     "ticker": "LULU",
-     "side": "buy",
-     "shares": 1,
-     "price": 171.59,
-     "value": 171.59,
-     "sleeve": "intraday",
-     "reason": "Running up +0.32% in 15 min, above VWAP"
-    },
-    {
-     "date": "2026-10-07",
-     "time": "12:39",
-     "ticker": "WMT",
-     "side": "sell",
-     "shares": 1,
-     "price": 193.73,
-     "value": 193.73,
-     "sleeve": "intraday",
-     "reason": "Run faded: 15-min move turned -0.11%"
-    },
-    {
-     "date": "2026-10-07",
-     "time": "12:36",
-     "ticker": "AMZN",
-     "side": "buy",
-     "shares": 1,
-     "price": 154.12,
-     "value": 154.12,
-     "sleeve": "intraday",
-     "reason": "Running up +0.23% in 15 min, above VWAP"
-    },
-    {
-     "date": "2026-10-07",
-     "time": "12:33",
-     "ticker": "MCD",
-     "side": "sell",
-     "shares": 9,
-     "price": 21.19,
-     "value": 190.7,
-     "sleeve": "intraday",
-     "reason": "Take profit: up 0.81%",
-     "protective": true
-    },
-    {
-     "date": "2026-10-07",
-     "time": "12:24",
-     "ticker": "WMT",
-     "side": "buy",
-     "shares": 1,
-     "price": 194.14,
-     "value": 194.14,
-     "sleeve": "intraday",
-     "reason": "Running up +0.71% in 15 min, above VWAP"
-    },
-    {
-     "date": "2026-10-07",
-     "time": "12:24",
-     "ticker": "PG",
-     "side": "sell",
-     "shares": 1,
-     "price": 152.54,
-     "value": 152.54,
-     "sleeve": "intraday",
-     "reason": "Run faded: 15-min move turned -0.09%"
-    },
-    {
-     "date": "2026-10-07",
-     "time": "12:15",
-     "ticker": "PG",
-     "side": "buy",
-     "shares": 1,
-     "price": 152.78,
-     "value": 152.78,
-     "sleeve": "intraday",
-     "reason": "Running up +0.37% in 15 min, above VWAP"
-    },
-    {
-     "date": "2026-10-07",
-     "time": "12:09",
-     "ticker": "MCD",
-     "side": "buy",
-     "shares": 9,
-     "price": 21.03,
-     "value": 189.27,
-     "sleeve": "intraday",
-     "reason": "Running up +0.38% in 15 min, above VWAP"
-    },
-    {
-     "date": "2026-10-07",
-     "time": "11:54",
-     "ticker": "PG",
-     "side": "sell",
-     "shares": 1,
-     "price": 152.0,
-     "value": 152.0,
-     "sleeve": "intraday",
-     "reason": "Run faded: fell below VWAP"
-    },
-    {
-     "date": "2026-10-07",
-     "time": "11:54",
-     "ticker": "NKE",
-     "side": "sell",
-     "shares": 3,
-     "price": 55.49,
-     "value": 166.48,
-     "sleeve": "intraday",
-     "reason": "Take profit: up 0.95%",
-     "protective": true
-    },
-    {
-     "date": "2026-10-07",
-     "time": "11:36",
-     "ticker": "PG",
-     "side": "buy",
-     "shares": 1,
-     "price": 152.17,
-     "value": 152.17,
-     "sleeve": "intraday",
-     "reason": "Running up +0.28% in 15 min, above VWAP"
-    },
-    {
-     "date": "2026-10-07",
-     "time": "11:30",
-     "ticker": "AMZN",
-     "side": "sell",
-     "shares": 1,
-     "price": 154.51,
-     "value": 154.51,
-     "sleeve": "intraday",
-     "reason": "Take profit: up 0.88%",
-     "protective": true
-    },
-    {
-     "date": "2026-10-07",
-     "time": "11:03",
-     "ticker": "AMZN",
-     "side": "buy",
-     "shares": 1,
-     "price": 153.25,
-     "value": 153.25,
-     "sleeve": "intraday",
-     "reason": "Running up +0.22% in 15 min, above VWAP"
-    },
-    {
-     "date": "2026-10-07",
-     "time": "11:03",
-     "ticker": "NKE",
-     "side": "buy",
-     "shares": 3,
-     "price": 55.0,
-     "value": 164.99,
-     "sleeve": "intraday",
-     "reason": "Running up +0.62% in 15 min, above VWAP"
-    },
-    {
-     "date": "2026-10-07",
-     "time": "11:03",
-     "ticker": "BKNG",
-     "side": "sell",
-     "shares": 1,
-     "price": 180.67,
-     "value": 180.67,
-     "sleeve": "intraday",
-     "reason": "Run faded: fell below VWAP"
-    },
-    {
-     "date": "2026-10-07",
-     "time": "11:03",
-     "ticker": "HD",
-     "side": "sell",
-     "shares": 1,
-     "price": 148.52,
-     "value": 148.52,
-     "sleeve": "intraday",
-     "reason": "Run faded: 15-min move turned -0.09%"
-    },
-    {
-     "date": "2026-10-07",
-     "time": "11:00",
-     "ticker": "BKNG",
-     "side": "buy",
-     "shares": 1,
-     "price": 181.39,
-     "value": 181.39,
-     "sleeve": "intraday",
-     "reason": "Running up +0.23% in 15 min, above VWAP"
-    },
-    {
-     "date": "2026-10-07",
-     "time": "11:00",
-     "ticker": "PG",
-     "side": "sell",
-     "shares": 1,
-     "price": 152.29,
-     "value": 152.29,
-     "sleeve": "intraday",
-     "reason": "Run faded: 15-min move turned -0.26%"
-    },
-    {
-     "date": "2026-10-07",
-     "time": "10:45",
-     "ticker": "PG",
-     "side": "buy",
-     "shares": 1,
-     "price": 152.85,
-     "value": 152.85,
-     "sleeve": "intraday",
-     "reason": "Running up +0.40% in 15 min, above VWAP"
-    },
-    {
-     "date": "2026-10-07",
-     "time": "10:45",
-     "ticker": "WMT",
-     "side": "sell",
-     "shares": 1,
-     "price": 192.87,
-     "value": 192.87,
-     "sleeve": "intraday",
-     "reason": "Run faded: fell below VWAP"
-    },
-    {
-     "date": "2026-10-07",
-     "time": "10:39",
-     "ticker": "HD",
-     "side": "buy",
-     "shares": 1,
-     "price": 148.54,
-     "value": 148.54,
-     "sleeve": "intraday",
-     "reason": "Running up +0.40% in 15 min, above VWAP"
-    },
-    {
-     "date": "2026-10-07",
-     "time": "10:27",
-     "ticker": "NKE",
-     "side": "sell",
-     "shares": 3,
-     "price": 54.89,
-     "value": 164.68,
-     "sleeve": "intraday",
-     "reason": "Run faded: 15-min move turned -0.22%"
-    },
-    {
-     "date": "2026-10-07",
-     "time": "10:15",
-     "ticker": "WMT",
-     "side": "buy",
-     "shares": 1,
-     "price": 193.45,
-     "value": 193.45,
-     "sleeve": "intraday",
-     "reason": "Running up +0.60% in 15 min, above VWAP"
-    },
     {
      "date": "2026-10-07",
      "time": "10:15",
@@ -4544,17 +3327,6 @@
      "value": 192.33,
      "sleeve": "intraday",
      "reason": "Run faded: 15-min move turned -0.25%"
-    },
-    {
-     "date": "2026-10-07",
-     "time": "09:57",
-     "ticker": "NKE",
-     "side": "buy",
-     "shares": 3,
-     "price": 54.64,
-     "value": 163.91,
-     "sleeve": "intraday",
-     "reason": "Running up +0.24% in 15 min, above VWAP"
     },
     {
      "date": "2026-10-07",
@@ -4613,288 +3385,744 @@
     },
     {
      "date": "2026-10-06",
-     "time": "14:09",
-     "ticker": "AMZN",
+     "time": "10:12",
+     "ticker": "MCD",
      "side": "sell",
-     "shares": 1,
-     "price": 150.28,
-     "value": 150.28,
-     "sleeve": "intraday",
-     "reason": "Run faded: 15-min move turned -0.07%"
-    },
-    {
-     "date": "2026-10-06",
-     "time": "13:54",
-     "ticker": "BKNG",
-     "side": "sell",
-     "shares": 1,
-     "price": 178.07,
-     "value": 178.07,
+     "shares": 9,
+     "price": 21.42,
+     "value": 192.77,
      "sleeve": "intraday",
      "reason": "Run faded: fell below VWAP"
     },
     {
      "date": "2026-10-06",
-     "time": "13:48",
-     "ticker": "AMZN",
-     "side": "buy",
-     "shares": 1,
-     "price": 150.29,
-     "value": 150.29,
-     "sleeve": "intraday",
-     "reason": "Running up +0.47% in 15 min, above VWAP"
-    },
-    {
-     "date": "2026-10-06",
-     "time": "13:48",
-     "ticker": "HD",
-     "side": "sell",
-     "shares": 1,
-     "price": 149.23,
-     "value": 149.23,
-     "sleeve": "intraday",
-     "reason": "Run faded: fell below VWAP"
-    },
-    {
-     "date": "2026-10-06",
-     "time": "13:45",
-     "ticker": "HD",
-     "side": "buy",
-     "shares": 1,
-     "price": 149.71,
-     "value": 149.71,
-     "sleeve": "intraday",
-     "reason": "Running up +0.82% in 15 min, above VWAP"
-    },
-    {
-     "date": "2026-10-06",
-     "time": "13:45",
-     "ticker": "LULU",
-     "side": "sell",
-     "shares": 1,
-     "price": 171.08,
-     "value": 171.08,
-     "sleeve": "intraday",
-     "reason": "Run faded: 15-min move turned -0.25%"
-    },
-    {
-     "date": "2026-10-06",
-     "time": "13:39",
-     "ticker": "BKNG",
-     "side": "buy",
-     "shares": 1,
-     "price": 178.76,
-     "value": 178.76,
-     "sleeve": "intraday",
-     "reason": "Running up +0.31% in 15 min, above VWAP"
-    },
-    {
-     "date": "2026-10-06",
-     "time": "13:39",
+     "time": "09:57",
      "ticker": "PG",
      "side": "sell",
      "shares": 1,
-     "price": 154.7,
-     "value": 154.7,
+     "price": 153.61,
+     "value": 153.61,
      "sleeve": "intraday",
-     "reason": "Run faded: 15-min move turned -0.06%"
+     "reason": "Run faded: 15-min move turned -0.04%"
     },
     {
      "date": "2026-10-06",
-     "time": "13:36",
-     "ticker": "LULU",
+     "time": "09:45",
+     "ticker": "NKE",
      "side": "buy",
      "shares": 1,
-     "price": 171.59,
-     "value": 171.59,
-     "sleeve": "intraday",
-     "reason": "Running up +0.22% in 15 min, above VWAP"
+     "price": 53.89,
+     "value": 53.89,
+     "sleeve": "ai",
+     "reason": "New pick"
     },
     {
      "date": "2026-10-06",
-     "time": "13:36",
-     "ticker": "KO",
-     "side": "sell",
-     "shares": 6,
-     "price": 27.95,
-     "value": 167.68,
-     "sleeve": "intraday",
-     "reason": "Run faded: 15-min move turned -0.43%"
-    },
-    {
-     "date": "2026-10-06",
-     "time": "13:21",
-     "ticker": "KO",
-     "side": "buy",
-     "shares": 6,
-     "price": 28.09,
-     "value": 168.56,
-     "sleeve": "intraday",
-     "reason": "Running up +0.25% in 15 min, above VWAP"
-    },
-    {
-     "date": "2026-10-06",
-     "time": "13:15",
+     "time": "09:45",
      "ticker": "MCD",
-     "side": "sell",
+     "side": "buy",
      "shares": 9,
-     "price": 21.54,
-     "value": 193.85,
+     "price": 21.44,
+     "value": 192.97,
      "sleeve": "intraday",
-     "reason": "Take profit: up 0.93%",
-     "protective": true
+     "reason": "Running up +0.33% in 15 min, above VWAP"
     },
     {
      "date": "2026-10-06",
-     "time": "13:12",
+     "time": "09:45",
      "ticker": "PG",
      "side": "buy",
      "shares": 1,
-     "price": 154.13,
-     "value": 154.13,
-     "sleeve": "intraday",
-     "reason": "Running up +0.40% in 15 min, above VWAP"
-    },
-    {
-     "date": "2026-10-06",
-     "time": "13:12",
-     "ticker": "AMZN",
-     "side": "sell",
-     "shares": 1,
-     "price": 149.78,
-     "value": 149.78,
-     "sleeve": "intraday",
-     "reason": "Run faded: 15-min move turned -0.05%"
-    },
-    {
-     "date": "2026-10-06",
-     "time": "12:57",
-     "ticker": "AMZN",
-     "side": "buy",
-     "shares": 1,
-     "price": 150.0,
-     "value": 150.0,
-     "sleeve": "intraday",
-     "reason": "Running up +0.37% in 15 min, above VWAP"
-    },
-    {
-     "date": "2026-10-06",
-     "time": "12:57",
-     "ticker": "MCD",
-     "side": "buy",
-     "shares": 9,
-     "price": 21.35,
-     "value": 192.16,
+     "price": 153.78,
+     "value": 153.78,
      "sleeve": "intraday",
      "reason": "Running up +0.42% in 15 min, above VWAP"
     },
     {
      "date": "2026-10-06",
-     "time": "12:57",
-     "ticker": "BKNG",
+     "time": "09:45",
+     "ticker": "KO",
      "side": "sell",
-     "shares": 1,
-     "price": 178.92,
-     "value": 178.92,
-     "sleeve": "intraday",
-     "reason": "Run faded: 15-min move turned -0.26%"
+     "shares": 3,
+     "price": 27.9,
+     "value": 83.69,
+     "sleeve": "ai",
+     "reason": "Rotated out: no longer a top pick"
     },
     {
-     "date": "2026-10-06",
-     "time": "12:57",
+     "date": "2026-10-05",
+     "time": "10:24",
+     "ticker": "MCD",
+     "side": "sell",
+     "shares": 1,
+     "price": 22.15,
+     "value": 22.15,
+     "sleeve": "intraday",
+     "reason": "Run faded: 15-min move turned -0.09%"
+    },
+    {
+     "date": "2026-10-05",
+     "time": "10:06",
+     "ticker": "MCD",
+     "side": "buy",
+     "shares": 1,
+     "price": 22.19,
+     "value": 22.19,
+     "sleeve": "intraday",
+     "reason": "Running up +0.36% in 15 min, above VWAP"
+    },
+    {
+     "date": "2026-10-05",
+     "time": "10:06",
      "ticker": "KO",
      "side": "sell",
      "shares": 6,
-     "price": 28.04,
-     "value": 168.22,
+     "price": 27.36,
+     "value": 164.14,
      "sleeve": "intraday",
-     "reason": "Run faded: 15-min move turned -0.11%"
+     "reason": "Run faded: fell below VWAP"
     },
     {
-     "date": "2026-10-06",
-     "time": "12:42",
-     "ticker": "BKNG",
-     "side": "buy",
-     "shares": 1,
-     "price": 179.56,
-     "value": 179.56,
+     "date": "2026-10-05",
+     "time": "09:54",
+     "ticker": "NKE",
+     "side": "sell",
+     "shares": 3,
+     "price": 55.4,
+     "value": 166.21,
      "sleeve": "intraday",
-     "reason": "Running up +0.37% in 15 min, above VWAP"
+     "reason": "Run faded: fell below VWAP"
     },
     {
-     "date": "2026-10-06",
-     "time": "12:42",
+     "date": "2026-10-05",
+     "time": "09:48",
      "ticker": "KO",
      "side": "buy",
      "shares": 6,
-     "price": 28.09,
-     "value": 168.56,
+     "price": 27.41,
+     "value": 164.48,
      "sleeve": "intraday",
-     "reason": "Running up +0.43% in 15 min, above VWAP"
+     "reason": "Running up +0.33% in 15 min, above VWAP"
     },
     {
-     "date": "2026-10-06",
-     "time": "12:39",
+     "date": "2026-10-05",
+     "time": "09:45",
+     "ticker": "KO",
+     "side": "buy",
+     "shares": 3,
+     "price": 27.31,
+     "value": 81.94,
+     "sleeve": "ai",
+     "reason": "New pick"
+    },
+    {
+     "date": "2026-10-05",
+     "time": "09:45",
+     "ticker": "NKE",
+     "side": "buy",
+     "shares": 3,
+     "price": 55.52,
+     "value": 166.55,
+     "sleeve": "intraday",
+     "reason": "Running up +0.23% in 15 min, above VWAP"
+    },
+    {
+     "date": "2026-10-05",
+     "time": "09:45",
+     "ticker": "NKE",
+     "side": "sell",
+     "shares": 1,
+     "price": 55.46,
+     "value": 55.46,
+     "sleeve": "ai",
+     "reason": "Rotated out: no longer a top pick"
+    },
+    {
+     "date": "2026-10-02",
+     "time": "11:18",
+     "ticker": "KO",
+     "side": "sell",
+     "shares": 1,
+     "price": 27.76,
+     "value": 27.76,
+     "sleeve": "intraday",
+     "reason": "Take profit: up 0.97%",
+     "protective": true
+    },
+    {
+     "date": "2026-10-02",
+     "time": "10:27",
+     "ticker": "KO",
+     "side": "buy",
+     "shares": 1,
+     "price": 27.5,
+     "value": 27.5,
+     "sleeve": "intraday",
+     "reason": "Running up +0.55% in 15 min, above VWAP"
+    },
+    {
+     "date": "2026-10-02",
+     "time": "10:18",
+     "ticker": "NKE",
+     "side": "sell",
+     "shares": 3,
+     "price": 54.93,
+     "value": 164.8,
+     "sleeve": "intraday",
+     "reason": "Run faded: 15-min move turned -0.22%"
+    },
+    {
+     "date": "2026-10-02",
+     "time": "10:12",
      "ticker": "PG",
      "side": "sell",
      "shares": 1,
-     "price": 154.11,
-     "value": 154.11,
+     "price": 155.26,
+     "value": 155.26,
+     "sleeve": "intraday",
+     "reason": "Run faded: 15-min move turned -0.15%"
+    },
+    {
+     "date": "2026-10-02",
+     "time": "09:45",
+     "ticker": "NKE",
+     "side": "buy",
+     "shares": 1,
+     "price": 54.82,
+     "value": 54.82,
+     "sleeve": "ai",
+     "reason": "New pick"
+    },
+    {
+     "date": "2026-10-02",
+     "time": "09:45",
+     "ticker": "NKE",
+     "side": "buy",
+     "shares": 3,
+     "price": 54.82,
+     "value": 164.45,
+     "sleeve": "intraday",
+     "reason": "Running up +0.20% in 15 min, above VWAP"
+    },
+    {
+     "date": "2026-10-02",
+     "time": "09:45",
+     "ticker": "PG",
+     "side": "buy",
+     "shares": 1,
+     "price": 154.96,
+     "value": 154.96,
+     "sleeve": "intraday",
+     "reason": "Running up +0.58% in 15 min, above VWAP"
+    },
+    {
+     "date": "2026-10-02",
+     "time": "09:45",
+     "ticker": "KO",
+     "side": "sell",
+     "shares": 3,
+     "price": 27.22,
+     "value": 81.65,
+     "sleeve": "ai",
+     "reason": "Rotated out: no longer a top pick"
+    },
+    {
+     "date": "2026-10-01",
+     "time": "10:12",
+     "ticker": "HD",
+     "side": "sell",
+     "shares": 1,
+     "price": 138.93,
+     "value": 138.93,
+     "sleeve": "intraday",
+     "reason": "Run faded: 15-min move turned -0.09%"
+    },
+    {
+     "date": "2026-10-01",
+     "time": "10:06",
+     "ticker": "KO",
+     "side": "sell",
+     "shares": 4,
+     "price": 27.77,
+     "value": 111.06,
+     "sleeve": "intraday",
+     "reason": "Run faded: fell below VWAP"
+    },
+    {
+     "date": "2026-10-01",
+     "time": "09:51",
+     "ticker": "KO",
+     "side": "buy",
+     "shares": 4,
+     "price": 27.86,
+     "value": 111.46,
+     "sleeve": "intraday",
+     "reason": "Running up +0.51% in 15 min, above VWAP"
+    },
+    {
+     "date": "2026-10-01",
+     "time": "09:48",
+     "ticker": "HD",
+     "side": "buy",
+     "shares": 1,
+     "price": 139.04,
+     "value": 139.04,
+     "sleeve": "intraday",
+     "reason": "Running up +0.22% in 15 min, above VWAP"
+    },
+    {
+     "date": "2026-10-01",
+     "time": "09:48",
+     "ticker": "AMZN",
+     "side": "sell",
+     "shares": 1,
+     "price": 147.53,
+     "value": 147.53,
+     "sleeve": "intraday",
+     "reason": "Run faded: fell below VWAP"
+    },
+    {
+     "date": "2026-10-01",
+     "time": "09:45",
+     "ticker": "KO",
+     "side": "buy",
+     "shares": 3,
+     "price": 27.76,
+     "value": 83.29,
+     "sleeve": "ai",
+     "reason": "New pick"
+    },
+    {
+     "date": "2026-10-01",
+     "time": "09:45",
+     "ticker": "AMZN",
+     "side": "buy",
+     "shares": 1,
+     "price": 147.93,
+     "value": 147.93,
+     "sleeve": "intraday",
+     "reason": "Running up +0.67% in 15 min, above VWAP"
+    },
+    {
+     "date": "2026-09-30",
+     "time": "12:21",
+     "ticker": "MCD",
+     "side": "sell",
+     "shares": 2,
+     "price": 21.52,
+     "value": 43.04,
      "sleeve": "intraday",
      "reason": "Run faded: 15-min move turned -0.05%"
     },
     {
-     "date": "2026-10-06",
-     "time": "12:36",
+     "date": "2026-09-30",
+     "time": "12:00",
+     "ticker": "MCD",
+     "side": "buy",
+     "shares": 2,
+     "price": 21.51,
+     "value": 43.02,
+     "sleeve": "intraday",
+     "reason": "Running up +0.28% in 15 min, above VWAP"
+    },
+    {
+     "date": "2026-09-30",
+     "time": "10:45",
+     "ticker": "MCD",
+     "side": "sell",
+     "shares": 9,
+     "price": 21.27,
+     "value": 191.42,
+     "sleeve": "intraday",
+     "reason": "Run faded: 15-min move turned -0.05%"
+    },
+    {
+     "date": "2026-09-30",
+     "time": "09:57",
+     "ticker": "MCD",
+     "side": "buy",
+     "shares": 9,
+     "price": 21.16,
+     "value": 190.45,
+     "sleeve": "intraday",
+     "reason": "Running up +0.38% in 15 min, above VWAP"
+    },
+    {
+     "date": "2026-09-30",
+     "time": "09:51",
+     "ticker": "BKNG",
+     "side": "sell",
+     "shares": 1,
+     "price": 192.09,
+     "value": 192.09,
+     "sleeve": "intraday",
+     "reason": "Run faded: fell below VWAP"
+    },
+    {
+     "date": "2026-09-30",
+     "time": "09:45",
+     "ticker": "BKNG",
+     "side": "buy",
+     "shares": 1,
+     "price": 192.84,
+     "value": 192.84,
+     "sleeve": "intraday",
+     "reason": "Running up +0.54% in 15 min, above VWAP"
+    },
+    {
+     "date": "2026-09-30",
+     "time": "09:45",
+     "ticker": "NKE",
+     "side": "sell",
+     "shares": 1,
+     "price": 58.13,
+     "value": 58.13,
+     "sleeve": "ai",
+     "reason": "Trailing stop: down 7.6% from its high of $62.93",
+     "protective": true
+    },
+    {
+     "date": "2026-09-29",
+     "time": "10:51",
+     "ticker": "MCD",
+     "side": "sell",
+     "shares": 1,
+     "price": 21.61,
+     "value": 21.61,
+     "sleeve": "intraday",
+     "reason": "Take profit: up 0.88%",
+     "protective": true
+    },
+    {
+     "date": "2026-09-29",
+     "time": "10:42",
+     "ticker": "KO",
+     "side": "sell",
+     "shares": 1,
+     "price": 28.6,
+     "value": 28.6,
+     "sleeve": "intraday",
+     "reason": "Take profit: up 0.94%",
+     "protective": true
+    },
+    {
+     "date": "2026-09-29",
+     "time": "10:36",
+     "ticker": "MCD",
+     "side": "buy",
+     "shares": 1,
+     "price": 21.43,
+     "value": 21.43,
+     "sleeve": "intraday",
+     "reason": "Running up +0.56% in 15 min, above VWAP"
+    },
+    {
+     "date": "2026-09-29",
+     "time": "10:12",
+     "ticker": "KO",
+     "side": "buy",
+     "shares": 1,
+     "price": 28.34,
+     "value": 28.34,
+     "sleeve": "intraday",
+     "reason": "Running up +0.57% in 15 min, above VWAP"
+    },
+    {
+     "date": "2026-09-29",
+     "time": "10:09",
+     "ticker": "BKNG",
+     "side": "sell",
+     "shares": 1,
+     "price": 188.52,
+     "value": 188.52,
+     "sleeve": "intraday",
+     "reason": "Run faded: fell below VWAP"
+    },
+    {
+     "date": "2026-09-29",
+     "time": "09:54",
+     "ticker": "WMT",
+     "side": "sell",
+     "shares": 1,
+     "price": 192.44,
+     "value": 192.44,
+     "sleeve": "intraday",
+     "reason": "Run faded: fell below VWAP"
+    },
+    {
+     "date": "2026-09-29",
+     "time": "09:45",
+     "ticker": "BKNG",
+     "side": "buy",
+     "shares": 1,
+     "price": 188.78,
+     "value": 188.78,
+     "sleeve": "intraday",
+     "reason": "Running up +0.55% in 15 min, above VWAP"
+    },
+    {
+     "date": "2026-09-29",
+     "time": "09:45",
+     "ticker": "WMT",
+     "side": "buy",
+     "shares": 1,
+     "price": 192.98,
+     "value": 192.98,
+     "sleeve": "intraday",
+     "reason": "Running up +0.90% in 15 min, above VWAP"
+    },
+    {
+     "date": "2026-09-28",
+     "time": "10:12",
+     "ticker": "NKE",
+     "side": "sell",
+     "shares": 1,
+     "price": 61.67,
+     "value": 61.67,
+     "sleeve": "intraday",
+     "reason": "Stop: down 0.52%",
+     "protective": true
+    },
+    {
+     "date": "2026-09-28",
+     "time": "10:06",
+     "ticker": "NKE",
+     "side": "buy",
+     "shares": 1,
+     "price": 62.02,
+     "value": 62.02,
+     "sleeve": "intraday",
+     "reason": "Running up +0.54% in 15 min, above VWAP"
+    },
+    {
+     "date": "2026-09-28",
+     "time": "10:03",
+     "ticker": "LULU",
+     "side": "sell",
+     "shares": 1,
+     "price": 162.96,
+     "value": 162.96,
+     "sleeve": "intraday",
+     "reason": "Run faded: 15-min move turned -0.35%"
+    },
+    {
+     "date": "2026-09-28",
+     "time": "09:51",
+     "ticker": "KO",
+     "side": "sell",
+     "shares": 7,
+     "price": 28.02,
+     "value": 196.11,
+     "sleeve": "intraday",
+     "reason": "Run faded: fell below VWAP"
+    },
+    {
+     "date": "2026-09-28",
+     "time": "09:45",
+     "ticker": "KO",
+     "side": "buy",
+     "shares": 7,
+     "price": 28.09,
+     "value": 196.66,
+     "sleeve": "intraday",
+     "reason": "Running up +0.43% in 15 min, above VWAP"
+    },
+    {
+     "date": "2026-09-28",
+     "time": "09:45",
+     "ticker": "LULU",
+     "side": "buy",
+     "shares": 1,
+     "price": 163.18,
+     "value": 163.18,
+     "sleeve": "intraday",
+     "reason": "Running up +0.73% in 15 min, above VWAP"
+    },
+    {
+     "date": "2026-09-25",
+     "time": "10:12",
+     "ticker": "PG",
+     "side": "sell",
+     "shares": 1,
+     "price": 154.17,
+     "value": 154.17,
+     "sleeve": "intraday",
+     "reason": "Run faded: fell below VWAP"
+    },
+    {
+     "date": "2026-09-25",
+     "time": "10:00",
+     "ticker": "MCD",
+     "side": "sell",
+     "shares": 6,
+     "price": 20.71,
+     "value": 124.26,
+     "sleeve": "intraday",
+     "reason": "Run faded: fell below VWAP"
+    },
+    {
+     "date": "2026-09-25",
+     "time": "09:48",
+     "ticker": "MCD",
+     "side": "buy",
+     "shares": 6,
+     "price": 20.8,
+     "value": 124.8,
+     "sleeve": "intraday",
+     "reason": "Running up +0.48% in 15 min, above VWAP"
+    },
+    {
+     "date": "2026-09-25",
+     "time": "09:48",
+     "ticker": "HD",
+     "side": "sell",
+     "shares": 1,
+     "price": 142.5,
+     "value": 142.5,
+     "sleeve": "intraday",
+     "reason": "Run faded: 15-min move turned -0.07%"
+    },
+    {
+     "date": "2026-09-25",
+     "time": "09:45",
+     "ticker": "HD",
+     "side": "buy",
+     "shares": 1,
+     "price": 142.66,
+     "value": 142.66,
+     "sleeve": "intraday",
+     "reason": "Running up +0.30% in 15 min, above VWAP"
+    },
+    {
+     "date": "2026-09-25",
+     "time": "09:45",
+     "ticker": "PG",
+     "side": "buy",
+     "shares": 1,
+     "price": 154.2,
+     "value": 154.2,
+     "sleeve": "intraday",
+     "reason": "Running up +0.40% in 15 min, above VWAP"
+    },
+    {
+     "date": "2026-09-24",
+     "time": "10:18",
+     "ticker": "MCD",
+     "side": "sell",
+     "shares": 6,
+     "price": 20.73,
+     "value": 124.38,
+     "sleeve": "intraday",
+     "reason": "Run faded: 15-min move turned -0.14%"
+    },
+    {
+     "date": "2026-09-24",
+     "time": "10:15",
      "ticker": "AMZN",
      "side": "sell",
      "shares": 1,
-     "price": 149.13,
-     "value": 149.13,
+     "price": 150.27,
+     "value": 150.27,
      "sleeve": "intraday",
-     "reason": "Run faded: fell below VWAP"
+     "reason": "Take profit: up 1.07%",
+     "protective": true
+    },
+    {
+     "date": "2026-09-24",
+     "time": "10:03",
+     "ticker": "MCD",
+     "side": "buy",
+     "shares": 6,
+     "price": 20.78,
+     "value": 124.68,
+     "sleeve": "intraday",
+     "reason": "Running up +1.22% in 15 min, above VWAP"
+    },
+    {
+     "date": "2026-09-24",
+     "time": "10:03",
+     "ticker": "LULU",
+     "side": "sell",
+     "shares": 1,
+     "price": 162.88,
+     "value": 162.88,
+     "sleeve": "intraday",
+     "reason": "Run faded: 15-min move turned -0.02%"
+    },
+    {
+     "date": "2026-09-24",
+     "time": "09:45",
+     "ticker": "NKE",
+     "side": "buy",
+     "shares": 1,
+     "price": 61.16,
+     "value": 61.16,
+     "sleeve": "ai",
+     "reason": "New pick"
+    },
+    {
+     "date": "2026-09-24",
+     "time": "09:45",
+     "ticker": "AMZN",
+     "side": "buy",
+     "shares": 1,
+     "price": 148.76,
+     "value": 148.76,
+     "sleeve": "intraday",
+     "reason": "Running up +0.68% in 15 min, above VWAP"
+    },
+    {
+     "date": "2026-09-24",
+     "time": "09:45",
+     "ticker": "LULU",
+     "side": "buy",
+     "shares": 1,
+     "price": 162.85,
+     "value": 162.85,
+     "sleeve": "intraday",
+     "reason": "Running up +1.02% in 15 min, above VWAP"
     }
    ],
    "history": [
     {
      "date": "2026-09-24",
-     "equity": 499.64
+     "equity": 501.08
     },
     {
      "date": "2026-09-25",
-     "equity": 490.78
+     "equity": 498.16
     },
     {
      "date": "2026-09-28",
-     "equity": 485.92
+     "equity": 500.55
     },
     {
      "date": "2026-09-29",
-     "equity": 486.43
+     "equity": 497.89
     },
     {
      "date": "2026-09-30",
-     "equity": 481.57
+     "equity": 496.23
     },
     {
      "date": "2026-10-01",
-     "equity": 482.79
+     "equity": 492.97
     },
     {
      "date": "2026-10-02",
-     "equity": 482.48
+     "equity": 493.47
     },
     {
      "date": "2026-10-05",
-     "equity": 486.14
+     "equity": 494.64
     },
     {
      "date": "2026-10-06",
-     "equity": 487.72
+     "equity": 495.9
     },
     {
      "date": "2026-10-07",
-     "equity": 487.69
+     "equity": 494.17
     }
    ],
    "ranking": [
@@ -5146,20 +4374,28 @@
    "blocked_in_universe": [],
    "notes": [
     {
+     "date": "2026-10-07",
+     "text": "Waiting for cash to settle before buying more (cash account rule)"
+    },
+    {
      "date": "2026-10-06",
-     "text": "Reached today's limit of 30 buys; selling still works"
+     "text": "Waiting for cash to settle before buying more (cash account rule)"
     },
     {
      "date": "2026-10-05",
-     "text": "Reached today's limit of 30 buys; selling still works"
+     "text": "Waiting for cash to settle before buying more (cash account rule)"
+    },
+    {
+     "date": "2026-10-02",
+     "text": "Waiting for cash to settle before buying more (cash account rule)"
     },
     {
      "date": "2026-10-01",
-     "text": "Reached today's limit of 30 buys; selling still works"
+     "text": "Waiting for cash to settle before buying more (cash account rule)"
     },
     {
      "date": "2026-09-30",
-     "text": "Reached today's limit of 30 buys; selling still works"
+     "text": "Waiting for cash to settle before buying more (cash account rule)"
     },
     {
      "date": "2026-09-30",
@@ -5167,15 +4403,19 @@
     },
     {
      "date": "2026-09-29",
-     "text": "Reached today's limit of 30 buys; selling still works"
+     "text": "Waiting for cash to settle before buying more (cash account rule)"
     },
     {
      "date": "2026-09-28",
-     "text": "Reached today's limit of 30 buys; selling still works"
+     "text": "Waiting for cash to settle before buying more (cash account rule)"
+    },
+    {
+     "date": "2026-09-25",
+     "text": "Waiting for cash to settle before buying more (cash account rule)"
     },
     {
      "date": "2026-09-24",
-     "text": "Reached today's limit of 30 buys; selling still works"
+     "text": "Waiting for cash to settle before buying more (cash account rule)"
     }
    ],
    "last_momentum": "2026-10-07T15:54:00",

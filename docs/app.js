@@ -781,7 +781,7 @@ function drawSpark(b) {
 }
 
 function holdingsHTML(b) {
-  if (!b.positions.length) return `<p class="empty">No holdings yet. Cash: ${money(b.cash, 2)}.</p>`;
+  if (!b.positions.length) return `<p class="empty">No holdings right now. Cash: ${money(b.cash, 2)}.</p>${settlingHTML(b)}`;
   const rows = b.positions
     .map(
       (p) => `<tr><td class="tk">${esc(p.ticker)}<span class="sleeve ${p.sleeve}">${SLEEVE_TAG[p.sleeve] || "MOM"}</span></td>
@@ -790,7 +790,13 @@ function holdingsHTML(b) {
     .join("");
   return `<table><thead><tr><th>Stock</th><th>Shares</th><th>Price</th><th>Value</th><th>Gain</th></tr></thead>
     <tbody>${rows}<tr><td class="tk">Cash</td><td></td><td></td><td>${money(b.cash)}</td><td></td></tr></tbody></table>
+    ${settlingHTML(b)}
     ${b.notes.length ? `<div class="section-title">Bot notes</div><ul class="notes">${b.notes.slice(0, 6).map((n) => `<li><span class="num">${esc(n.date)}</span> ${esc(n.text)}</li>`).join("")}</ul>` : ""}`;
+}
+
+function settlingHTML(b) {
+  if (!b.settling) return "";
+  return `<p class="blocked">${money(b.settling, 2)} of the cash is from today's sales and can buy again once it settles next trading day. Spendable now: ${money(Math.max(0, b.cash - b.settling), 2)}.</p>`;
 }
 
 function tradesHTML(b) {

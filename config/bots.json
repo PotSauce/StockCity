@@ -1,7 +1,7 @@
 {
   "broker": "paper",
   "live_trading_confirmed": false,
-  "cash_account_rules": "live",
+  "cash_account_rules": "always",
   "bots": [
     {
       "id": "tech",

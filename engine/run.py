@@ -48,6 +48,7 @@ def all_tickers(cfg, ledger):
 def build_state(cfg, ledger, closes, excl_raw, source, broker_name, run_note):
     last = closes.ffill().iloc[-1]
     prices = {t: float(v) for t, v in last.items() if pd.notna(v)}
+    today = datetime.now(ZoneInfo("America/New_York")).date().isoformat()
     bots_out = []
     for bot in cfg["bots"]:
         led = ledger["bots"][bot["id"]]
@@ -76,6 +77,8 @@ def build_state(cfg, ledger, closes, excl_raw, source, broker_name, run_note):
                 "enabled": bot["enabled"],
                 "settings": bot,
                 "cash": round(led["cash"], 2),
+                # sale money that can't buy again until it settles (cash-account rule)
+                "settling": round(sum(u["amount"] for u in led.get("unsettled", []) if u["settles"] > today), 2),
                 "equity": round(eq, 2),
                 "contributed": round(led["contributed"], 2),
                 "pnl": round(eq - led["contributed"], 2),

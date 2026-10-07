@@ -24,9 +24,9 @@ Each building can switch to **Swing** style on its settings tab instead: it hold
 
 - **At most 30 buys a day** per building. Selling is never capped, so stops and the close-out always go through.
 - A stopped-out stock isn't bought back the same day.
-- **Cash-account rule**: in a cash account, money from a sale can't be used again until it settles the next trading day. With real money, each building only spends settled cash, so it never triggers a good-faith violation. Paper trading ignores this unless `"cash_account_rules": "always"` is set in the settings file, which makes a trial behave exactly like the real account.
+- **Cash-account rule**: in a cash account, money from a sale can't be used again until it settles the next trading day. Each building only spends settled cash, so it never triggers a good-faith violation. This is on for paper too (`"cash_account_rules": "always"` in the settings file), so a paper trial trades the way the real account will. Set it to `"live"` to apply it only with real money, or `"off"` for a margin account.
 
-What that means for a $1,000–2,000 cash account: on paper each building makes 20–30 buys a day; with real money each dollar can be spent once a day, so expect about 2–4 buys per building per day. More positions at once (smaller trades) means more trades from the same money. Margin accounts under $25,000 are limited to 3 day trades per 5 days by the pattern day trader rule, which is why a cash account is the right fit here.
+What that means for a $1,000–2,000 cash account: each dollar can be spent once a day, so expect about 3–4 buys per building per day (without the rule, 13–30). More positions at once (smaller trades) means more trades from the same money. Margin accounts under $25,000 are limited to 3 day trades per 5 days by the pattern day trader rule, which is why a cash account is the right fit here.
 
 **Do-not-buy list** (`config/exclusions.json`): no healthcare and no private prisons (GEO Group, CoreCivic, and the prison food contractor Aramark), plus a name/industry keyword check. Every buy is checked against it, including AI picks and any ticker you add yourself. The city also refuses to add a blocked ticker from the settings screen.
 
