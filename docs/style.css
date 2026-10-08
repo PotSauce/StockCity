@@ -238,7 +238,7 @@ pre.json { background: rgba(11, 8, 32, 0.8); border: 1px solid var(--line); bord
 
 @media (prefers-reduced-motion: reduce) {
   .tape-track { animation: none; padding-left: 16px; }
-  .mon.flat, .fader { animation: none; transition: none; }
+  .mon.flat, .fader, .flat-glance, .fg { animation: none; transition: none; }
 }
 
 /* keep 3D labels (which set their own z-index) underneath the HUD and bars */
@@ -302,6 +302,82 @@ details.fine[open] > summary { margin-bottom: 4px; }
 .mon.flat .st-name, .mon.flat .st .spark { grid-column: 1 / -1; }
 .mon.flat .st .spark { height: 90px; }
 
+/* ---------- glance views: what a monitor shows from the desk (sized to read at about a third of full size) ---------- */
+.mon:not(.focused) .detail, .mon.focused .glance { display: none; }
+.mon:not(.focused) .mon-bar { font-size: 24px; padding: 12px 22px; gap: 14px; }
+.mon:not(.focused) .mon-bar i { width: 16px; height: 16px; box-shadow: 0 0 14px var(--acc); }
+.mon:not(.focused) .mon-hint { display: none; }
+.mon:not(.focused) .mon-body { padding: 0; }
+.mon { background: radial-gradient(120% 90% at 50% 0%, color-mix(in srgb, var(--acc) 9%, #0a0820), #070516 70%); }
+
+.g { box-sizing: border-box; height: 100%; padding: 20px 28px; display: flex; flex-direction: column; gap: 14px; font-family: var(--font-display); }
+.g .num { font-family: var(--font-data); font-variant-numeric: tabular-nums; }
+.g-label { font: 600 22px/1 var(--font-display); letter-spacing: 0.14em; text-transform: uppercase; color: var(--ink-dim); margin: 0; }
+.g-dim { color: var(--ink-dim); }
+.g-tk { font: 700 46px/1 var(--font-data); letter-spacing: 0.02em; }
+.g-empty { margin: auto 0; font: 600 44px/1.15 var(--font-display); color: var(--ink-dim); }
+.g-note { margin: 0; font: 600 30px/1.2 var(--font-display); color: var(--ink); }
+.g-note.closed { color: var(--ink-dim); }
+.g-note.paused { color: var(--warn); }
+.g-chip { display: inline-flex; align-items: center; gap: 10px; padding: 7px 16px; border-radius: 999px; font: 700 22px/1 var(--font-display); letter-spacing: 0.12em; text-transform: uppercase; border: 2px solid currentColor; white-space: nowrap; }
+.g-chip i { width: 12px; height: 12px; border-radius: 50%; background: currentColor; box-shadow: 0 0 10px currentColor; }
+.g-chip.on { color: var(--up); }
+.g-chip.closed { color: var(--ink-dim); }
+.g-chip.paused { color: var(--warn); }
+
+/* Building: name and state, value, today, a small chart */
+.g-status { flex-direction: row; align-items: center; gap: 40px; padding-block: 14px; }
+.g-who { display: flex; flex-direction: column; align-items: flex-start; gap: 14px; min-width: 0; flex: 1.1; }
+.g-who b { font: 700 40px/1.05 var(--font-display); letter-spacing: 0.03em; color: var(--acc); text-wrap: balance; }
+.g-fig { display: flex; flex-direction: column; gap: 6px; flex: none; }
+.g-big { font: 600 62px/1 var(--font-data); letter-spacing: -0.02em; }
+.g-sub { font-size: 26px; }
+.g-spark { flex: 1; min-width: 0; height: 130px; }
+.g-spark text { display: none; }
+
+/* Holdings: one row per stock, with where its price sits between selling and the target */
+.g-holdings { gap: 16px; }
+.g-hold { display: flex; flex-direction: column; gap: 12px; padding-bottom: 14px; border-bottom: 2px solid rgba(167, 139, 250, 0.12); }
+.g-hold-top { display: flex; align-items: center; gap: 18px; }
+.g-hold .sleeve { font-size: 18px; padding: 5px 9px; margin: 0; }
+.g-hold-sh { font-size: 26px; color: var(--ink-dim); }
+.g-hold-gain { margin-left: auto; font: 700 50px/1 var(--font-data); }
+.g-range { display: flex; align-items: center; gap: 16px; font-size: 25px; white-space: nowrap; }
+.g-track { position: relative; flex: 1; height: 12px; border-radius: 6px; background: linear-gradient(90deg, rgba(251, 113, 133, 0.55), rgba(167, 139, 250, 0.25) 50%, rgba(74, 222, 128, 0.55)); }
+.g-track i { position: absolute; top: 50%; transform: translate(-50%, -50%); }
+.g-cost { width: 4px; height: 30px; border-radius: 2px; background: var(--ink-dim); }
+.g-now { width: 26px; height: 26px; border-radius: 50%; border: 4px solid var(--night); background: currentColor; box-shadow: 0 0 14px currentColor; }
+.g-now.up { color: var(--up); }
+.g-now.down { color: var(--down); }
+.g-more { margin: 0; font: 600 26px/1 var(--font-display); color: var(--ink-dim); }
+.g-foot { margin-top: auto; display: flex; justify-content: space-between; align-items: baseline; gap: 24px; font: 600 30px/1.2 var(--font-display); }
+.g-foot .g-label { font-size: 20px; margin-right: 8px; }
+
+/* Trades: today's count and what it made, then the latest four */
+.g-trades { gap: 12px; }
+.g-trades .g-note { margin-bottom: 4px; }
+.g-trade { display: grid; grid-template-columns: 96px minmax(0, 1fr) auto 150px 90px; align-items: center; gap: 16px; font-size: 26px; padding: 6px 0; border-bottom: 2px solid rgba(167, 139, 250, 0.1); }
+.g-trade .g-tk { font-size: 36px; }
+.g-trade .side { font-size: 21px; padding: 7px 0; text-align: center; margin: 0; }
+.g-pl { font: 700 32px/1 var(--font-data); text-align: right; }
+.g-trade > :last-child { text-align: right; }
+
+/* Picks: what's running, and the AI's picks */
+.g-picks { gap: 14px; }
+.g-pick { display: flex; align-items: center; gap: 22px; padding: 4px 0; }
+.g-pick .num { font: 700 40px/1 var(--font-data); }
+.g-pick .g-chip { margin-left: auto; font-size: 20px; }
+.g-ai { margin: auto 0 0; display: flex; align-items: baseline; gap: 16px; flex-wrap: wrap; font: 700 36px/1.2 var(--font-data); }
+
+/* Settings: risk level, on/off, money, split */
+.g-settings { gap: 26px; }
+.g-risk { margin: 10px 0 14px; font: 700 64px/1 var(--font-display); letter-spacing: 0.02em; text-shadow: 0 0 24px currentColor; }
+.g-meter { display: flex; gap: 8px; }
+.g-meter i { flex: 1; height: 18px; border-radius: 4px; background: rgba(167, 139, 250, 0.14); }
+.g-meter i.on { background: var(--c); box-shadow: 0 0 12px var(--c); }
+.g-row { display: flex; align-items: center; justify-content: space-between; gap: 16px; font: 600 34px/1.1 var(--font-display); }
+.g-row b { font-weight: 700; }
+
 /* the wide status monitor */
 .st { display: grid; grid-template-columns: minmax(0, 1.3fr) repeat(4, auto) minmax(140px, 1.2fr); gap: 26px; align-items: center; height: 100%; }
 .st h2 { margin: 3px 0 8px; font: 700 26px/1.1 var(--font-display); letter-spacing: 0.04em; text-wrap: balance; }
@@ -349,7 +425,9 @@ ul.next b { font-family: var(--font-data); }
   padding: 9px 13px; border-radius: 12px; background: #f5f3ff; color: #1a1033;
   font: 600 14px/1.35 var(--font-body); box-shadow: 0 6px 24px rgba(0, 0, 0, 0.45); pointer-events: none;
 }
-.bubble::after { content: ""; position: absolute; left: 50%; bottom: -7px; margin-left: -7px; border: 7px solid transparent; border-bottom: 0; border-top-color: #f5f3ff; }
+/* the tail points at his head: from the bubble's right edge when it sits to his left, else from its left edge */
+.bubble::after { content: ""; position: absolute; top: 50%; left: -7px; margin-top: -7px; border: 7px solid transparent; border-left: 0; border-right-color: #f5f3ff; }
+.bubble.left::after { left: auto; right: -7px; border-right: 0; border-left: 7px solid #f5f3ff; }
 
 /* short screens (phones on their side): give the office the height; trades are on the Trades monitor anyway */
 @media (max-height: 500px) {
@@ -360,11 +438,136 @@ ul.next b { font-family: var(--font-data); }
 }
 
 @media (max-width: 760px) {
+  /* in a building the cards show its numbers, so the city's totals make room for them */
+  #app.in-office .hud-stats { display: none; }
   /* two rows on phones: the building on top, its monitors underneath, nothing scrolled out of reach */
   .office-nav { left: 16px; right: 16px; transform: none; max-width: none; bottom: calc(42px + env(safe-area-inset-bottom, 0px)); flex-wrap: wrap; overflow: visible; }
   .o-bld { margin-right: 0; border-right: 0; flex: 1; justify-content: flex-end; }
   .o-mons { width: 100%; border-top: 1px solid var(--line); padding-top: 4px; }
   .o-mons button { flex: 1; padding: 9px 2px; font-size: 11px; letter-spacing: 0.04em; }
   .o-wide { display: none; }
-  .bubble { max-width: 220px; font-size: 13px; }
+  .bubble { font-size: 13px; }
 }
+
+/* ---------- phones: the glance views as flat cards at the top, the trader in the space under them ---------- */
+.flat-glance { display: none; }
+@media (max-width: 760px), (max-height: 500px) {
+  #app.in-office .flat-glance { display: grid; }
+}
+.flat-glance {
+  --acc: var(--neon);
+  position: absolute; z-index: 4; left: 16px; right: 16px; top: var(--top-inset, 140px);
+  max-height: calc(100% - var(--top-inset, 140px) - var(--bottom-inset, 110px) - 110px);
+  overflow-y: auto; overscroll-behavior: contain; scrollbar-width: none;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  grid-template-areas: "status status" "holdings holdings" "trades picks" "settings settings";
+  gap: 6px; align-content: start;
+  opacity: 0; visibility: hidden; transform: translateY(-6px);
+  transition: opacity 0.2s, transform 0.2s, visibility 0s 0.2s;
+}
+.flat-glance.show { opacity: 1; visibility: visible; transform: none; transition: opacity 0.2s, transform 0.2s; }
+.fg {
+  display: flex; flex-direction: column; min-width: 0; border-radius: 6px; overflow: hidden; cursor: pointer; color: var(--ink);
+  background: radial-gradient(120% 90% at 50% 0%, color-mix(in srgb, var(--acc) 12%, #0a0820), rgba(7, 5, 22, 0.95) 70%);
+  box-shadow: 0 0 0 1px color-mix(in srgb, var(--acc) 45%, transparent), 0 0 22px color-mix(in srgb, var(--acc) 18%, transparent);
+  -webkit-tap-highlight-color: transparent; transition: transform 0.12s;
+}
+.fg:active { transform: scale(0.98); }
+.fg:focus-visible { outline: 2px solid var(--acc); outline-offset: 2px; }
+.fg[data-mon="status"] { grid-area: status; }
+.fg[data-mon="holdings"] { grid-area: holdings; }
+.fg[data-mon="trades"] { grid-area: trades; }
+.fg[data-mon="picks"] { grid-area: picks; }
+.fg[data-mon="settings"] { grid-area: settings; }
+.fg .mon-bar { padding: 5px 9px; gap: 6px; font-size: 9.5px; }
+.fg .mon-bar i { width: 6px; height: 6px; }
+.fg .mon-bar::after { content: "›"; margin-left: auto; font-size: 14px; line-height: 0.6; color: var(--ink-dim); }
+.fg .g { height: auto; padding: 8px 10px 9px; gap: 6px; }
+.fg .g-label { font-size: 9px; letter-spacing: 0.12em; }
+.fg .g-tk { font-size: 15px; }
+.fg .g-empty { margin: 2px 0; font-size: 14px; }
+.fg .g-note { font-size: 12px; }
+.fg .g-chip { gap: 5px; padding: 3px 7px; font-size: 9px; border-width: 1px; }
+.fg .g-chip i { width: 5px; height: 5px; box-shadow: 0 0 5px currentColor; }
+
+.fg .g-status { gap: 14px; padding-block: 8px; }
+.fg .g-who { gap: 6px; }
+.fg .g-who b { font-size: 15px; }
+.fg .g-fig { gap: 3px; }
+.fg .g-big { font-size: 20px; }
+.fg .g-sub { font-size: 10.5px; }
+.fg .g-spark { height: 38px; }
+
+/* holdings: one line each, the stock, where its price sits between selling and the target, and the gain */
+.fg .g-holdings { gap: 6px; }
+.fg .g-holdings .g-note { display: none; }
+.fg .g-hold { display: grid; grid-template-columns: 50px auto minmax(0, 1fr) 56px; align-items: center; gap: 8px; padding-bottom: 6px; border-bottom-width: 1px; }
+.fg .g-hold-top, .fg .g-range { display: contents; }
+.fg .g-hold-sh, .fg .g-range > span:not(.g-track) { display: none; }
+.fg .g-hold .sleeve { justify-self: start; font-size: 8px; padding: 2px 4px; }
+.fg .g-track { order: 1; }
+.fg .g-hold-gain { order: 2; font-size: 15px; text-align: right; }
+.fg .g-track { height: 5px; }
+.fg .g-cost { width: 2px; height: 13px; }
+.fg .g-now { width: 12px; height: 12px; border-width: 2px; box-shadow: 0 0 6px currentColor; }
+.fg .g-more { font-size: 10.5px; }
+.fg .g-foot { gap: 10px; font-size: 12px; }
+.fg .g-foot .g-label { margin-right: 4px; font-size: 9px; }
+
+/* trades: buy or sell, the stock, what a sale made, the time (shares and price are one tap away) */
+.fg .g-trades { gap: 3px; }
+.fg .g-trades .g-note { margin-bottom: 2px; font-size: 11px; }
+.fg .g-made, .fg .g-trade:nth-child(n + 5) { display: none; }
+.fg[data-mon="trades"] { container-type: inline-size; }
+/* a narrow card drops the time so the ticker and what it made keep their room */
+@container (max-width: 180px) {
+  .fg .g-trade { grid-template-columns: 30px minmax(0, 1fr) auto; }
+  .fg .g-trade > :last-child { display: none; }
+}
+.fg .g-trade { grid-template-columns: 30px minmax(0, 1fr) auto auto; gap: 6px; padding: 3px 0; font-size: 10px; border-bottom-width: 1px; }
+.fg .g-trade > :nth-child(3) { display: none; }
+.fg .g-trade .g-tk { font-size: 12.5px; }
+.fg .g-trade .side { padding: 3px 0; font-size: 8px; }
+.fg .g-pl { font-size: 11.5px; }
+
+.fg .g-picks { gap: 4px; }
+.fg .g-pick { gap: 8px; padding: 1px 0; }
+.fg .g-pick .g-tk, .fg .g-pick .num { font-size: 13px; }
+.fg .g-pick .g-chip { font-size: 8px; }
+.fg .g-ai { gap: 6px; font-size: 12px; }
+
+/* settings on one line: the risk level and its meter, and whether it's trading (money and split are one tap away) */
+.fg .g-settings { flex-direction: row; align-items: center; gap: 14px; }
+.fg .g-settings > div:first-child { display: flex; align-items: center; gap: 8px; flex: 1; min-width: 0; }
+.fg .g-risk { margin: 0; font-size: 17px; text-shadow: 0 0 10px currentColor; }
+.fg .g-meter { gap: 3px; width: 90px; margin-left: auto; }
+.fg .g-meter i { height: 6px; border-radius: 2px; }
+.fg .g-row { justify-content: flex-start; gap: 6px; font-size: 12px; }
+.fg .g-row:nth-child(n + 3) { display: none; }
+
+/* phones on their side: one row of five, like the desk, with the trader in the strip underneath */
+@media (min-aspect-ratio: 4/3) {
+  .flat-glance {
+    max-height: calc(100% - var(--top-inset, 60px) - var(--bottom-inset, 70px) - 90px);
+    grid-template-columns: 1fr 1.35fr 1fr 1fr 0.9fr;
+    grid-template-areas: "status holdings trades picks settings";
+  }
+  .fg .g-status { flex-direction: column; align-items: stretch; gap: 6px; }
+  .fg .g-who { flex: none; flex-direction: row; align-items: center; justify-content: space-between; gap: 6px; }
+  .fg .g-who b { font-size: 13px; }
+  .fg .g-big { font-size: 18px; }
+  .fg .g-spark { display: none; }
+  .fg .g-settings { flex-direction: column; align-items: stretch; gap: 5px; }
+  .fg .g-settings > div:first-child { flex: none; flex-wrap: wrap; gap: 4px 8px; }
+  .fg .g-meter { width: 100%; margin: 0; }
+  .fg .g-row { justify-content: space-between; }
+  .fg .g-row:nth-child(n + 3) { display: flex; }
+  .fg .g-hold { grid-template-columns: 44px minmax(0, 1fr) 50px; }
+  .fg .g-hold .sleeve { display: none; }
+}
+/* small phones: more of the room goes to the cards */
+@media (max-height: 760px) and (max-aspect-ratio: 4/3) {
+  .flat-glance { max-height: calc(100% - var(--top-inset, 140px) - var(--bottom-inset, 110px) - 80px); }
+}
+/* the cards scroll when there are more than fit: fade the bottom edge so it's clear there's more */
+.flat-glance.more { -webkit-mask-image: linear-gradient(#000 calc(100% - 26px), transparent); mask-image: linear-gradient(#000 calc(100% - 26px), transparent); }
