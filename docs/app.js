@@ -1918,7 +1918,6 @@ function planLine(p, s) {
   const hi = Math.max(p.high || 0, p.avg_cost);
   const trail = hi > p.avg_cost ? ` or if it slips to <b class="down">${money(hi * (1 - m.trailing_stop_pct), 2)}</b> (${num1(m.trailing_stop_pct * 100)}% off its high)` : "";
   const who = p.sleeve === "ai" ? "AI pick, held for days." : "Momentum pick, held while it stays near the top.";
-  if (p.locked_until && p.locked_until > nyToday()) return `${who} Bought with unsettled cash, so it can't be sold until ${esc(p.locked_until)} (cash account rule).`;
   return `${who} Sells below <b class="down">${money(p.avg_cost * (1 - m.stop_loss_pct), 2)}</b> (−${num1(m.stop_loss_pct * 100)}%)${trail}.`;
 }
 
