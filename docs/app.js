@@ -616,10 +616,8 @@ function resize() {
   officeCam.aspect = aspect;
   officeCam.updateProjectionMatrix();
   css3d.setSize(w, h);
-  if (office.active && !tweens.length) {
-    const pose = office.focus ? monitorPose(office.focus) : overviewPose();
-    officeCam.position.copy(pose.p);
-    office.look.copy(pose.t);
+  if (office.active) {
+    snapPose();
     syncFlat();
   }
 }
@@ -758,7 +756,7 @@ const MONITORS = [
   { id: "holdings", title: "Holdings & plan", w: 1.34, h: 0.8, x: 0, y: 1.47, z: -0.98, yaw: 0, tilt: 0.05 },
   { id: "trades", title: "Trades", w: 0.96, h: 0.6, x: -1.27, y: 1.2, z: -0.74, yaw: 0.5, tilt: 0.05 },
   { id: "picks", title: "Picks", w: 0.96, h: 0.6, x: -1.27, y: 1.86, z: -0.8, yaw: 0.5, tilt: 0.12 },
-  { id: "settings", title: "Settings", w: 0.66, h: 1.1, x: 1.12, y: 1.54, z: -0.78, yaw: -0.5, tilt: 0.05 },
+  { id: "settings", title: "Settings", w: 0.66, h: 0.84, x: 1.12, y: 1.62, z: -0.78, yaw: -0.5, tilt: 0.05 },
 ];
 const NAV_ORDER = ["holdings", "trades", "picks", "settings"];
 
@@ -940,7 +938,7 @@ function buildOffice() {
     el.style.width = `${Math.round(m.w * PX_PER_M)}px`;
     el.style.height = `${Math.round(m.h * PX_PER_M)}px`;
     el.setAttribute("aria-label", m.title);
-    el.innerHTML = `<header class="mon-bar"><i></i><b>${esc(m.title)}</b><span class="mon-hint">Click to open</span></header><div class="mon-body"></div>`;
+    el.innerHTML = `<header class="mon-bar"><i></i><b>${esc(m.title)}</b><span class="mon-hint">Click to open</span></header><div class="mon-body" tabindex="-1"></div>`;
     el.addEventListener("click", () => {
       if (office.focus !== m.id) focusMonitor(m.id);
     });
@@ -1143,6 +1141,7 @@ function buildProps(id, accent, parent) {
 function dressOffice(b) {
   const accent = new THREE.Color(b.color);
   if (office.dressing) {
+    Object.values(office.dude?.faces || {}).forEach((t) => t.dispose());
     officeScene.remove(office.dressing);
     office.dressing.traverse((x) => {
       if (x.isMesh) {
@@ -1170,7 +1169,7 @@ function dressOffice(b) {
   office.glowLight.color.copy(accent);
   for (const m of Object.values(office.mons)) {
     m.el.style.setProperty("--acc", b.color);
-    m.screenMat.color.copy(accent).multiplyScalar(0.45);
+    m.screenMat.color.copy(accent).multiplyScalar(0.16);
   }
   document.documentElement.style.setProperty("--acc", b.color);
   $("flat-mon").style.setProperty("--acc", b.color);
@@ -1314,7 +1313,13 @@ function checkNewTrades() {
   const key = tradeKey(b.trades[0]);
   const seen = office.seen[b.id];
   office.seen[b.id] = key;
-  if (seen !== undefined && key && key !== seen) reactTo(b.trades[0]);
+  if (seen === undefined || !key || key === seen) return;
+  const fresh = [];
+  for (const t of b.trades) {
+    if (tradeKey(t) === seen) break;
+    fresh.push(t);
+  }
+  reactTo(fresh.find((t) => t.side === "sell") || fresh[0]);
 }
 
 /* ---------- entering, leaving, focusing ---------- */
@@ -1346,8 +1351,9 @@ function overviewPose() {
       pts.push(new THREE.Vector3((sx * m.w) / 2, (sy * m.h) / 2, 0).applyQuaternion(q).add(new THREE.Vector3(m.x, m.y, m.z)));
   }
   const H = canvas.clientHeight || 1;
-  const top = 1 - (2 * 76) / H;
-  const bottom = -1 + (2 * (H < 700 ? 150 : 120)) / H;
+  const band = layoutInsets();
+  const top = 1 - (2 * band.top) / H;
+  const bottom = -1 + (2 * band.bottom) / H;
   const cam = officeCam.clone();
   const fits = (d) => {
     cam.position.copy(t).addScaledVector(OVERVIEW_DIR, d);
@@ -1376,40 +1382,62 @@ function monitorPose(id) {
   const pxW = m.w * PX_PER_M;
   const pxH = m.h * PX_PER_M;
   // size on screen: at most 1:1, otherwise as big as fits between the top bar and the monitor buttons
-  const scale = Math.min(1, (W - 24) / pxW, (H - (W < 760 ? 230 : 190)) / pxH);
+  const band = layoutInsets();
+  const scale = Math.max(0.05, Math.min(1, (W - 24) / pxW, (H - band.top - band.bottom) / pxH));
   const d = H / (2 * tan * PX_PER_M * scale);
-  // nudge up a little so the monitor sits in the middle of the free space, not behind the buttons
-  const t = m.group.position.clone().add(new THREE.Vector3(0, -((H < 700 ? 22 : 16) / (PX_PER_M * scale)), 0).applyQuaternion(m.group.quaternion));
+  // aim off-centre so the monitor sits in the middle of that free band
+  const t = m.group.position.clone().add(new THREE.Vector3(0, (band.top - band.bottom) / 2 / (PX_PER_M * scale), 0).applyQuaternion(m.group.quaternion));
   return { p: m.group.position.clone().addScaledVector(n, d).add(t.clone().sub(m.group.position)), t };
 }
 
 // On phones the open monitor's page moves into a flat panel that fills the screen, so it stays readable.
+// phones, in either direction, and other small screens
 function narrow() {
-  return innerWidth <= 760;
+  return innerWidth <= 760 || innerHeight <= 500;
 }
 function syncFlat() {
   const id = office.active && office.focus && !office.busy && narrow() ? office.focus : null;
   for (const m of Object.values(office.mons)) {
     const home = m.id === id ? $("flat-mon") : m.el;
-    if (m.body.parentElement !== home) home.appendChild(m.body);
+    if (m.body.parentElement !== home) {
+      const top = m.body.scrollTop;
+      home.appendChild(m.body);
+      m.body.scrollTop = top;
+    }
   }
   $("flat-mon").hidden = !id;
+  // the 3D pages behind the flat one are empty shells: hide them so they don't show through or take taps
+  css3d.domElement.style.visibility = id ? "hidden" : "";
   if (id) $("flat-mon").querySelector(".mon-bar b").textContent = office.mons[id].title;
 }
 
-// keep the banner and the flat monitor clear of the top bar and the bottom buttons, whatever their size
+// The free band between the top bar (and banner) and the bottom buttons, in pixels from each edge.
+// Monitors and the flat panel are fitted into it, so nothing ends up underneath a bar.
 function layoutInsets() {
   const app = $("app");
-  const hudBottom = document.querySelector(".hud").getBoundingClientRect().bottom;
+  const y0 = app.getBoundingClientRect().top;
+  const hudBottom = document.querySelector(".hud").getBoundingClientRect().bottom - y0;
   app.style.setProperty("--hud-bottom", `${Math.round(hudBottom)}px`);
   const banner = $("banner");
-  const top = office.active && !banner.hidden ? banner.getBoundingClientRect().bottom : hudBottom;
-  app.style.setProperty("--top-inset", `${Math.round(top + 10)}px`);
+  const top = Math.round((office.active && !banner.hidden ? Math.max(hudBottom, banner.getBoundingClientRect().bottom - y0) : hudBottom) + 10);
   const nav = $("office-nav");
-  if (!nav.hidden) app.style.setProperty("--bottom-inset", `${Math.round(app.clientHeight - nav.getBoundingClientRect().top + 10)}px`);
+  const bottom = nav.hidden ? 120 : Math.round(app.clientHeight - (nav.getBoundingClientRect().top - y0) + 10);
+  app.style.setProperty("--top-inset", `${top}px`);
+  app.style.setProperty("--bottom-inset", `${bottom}px`);
+  return { top, bottom };
+}
+// put the camera exactly where it belongs for the current screen (after a resize, or a bar changing size)
+function snapPose() {
+  if (!office.active || tweens.length) return;
+  const pose = office.focus ? monitorPose(office.focus) : overviewPose();
+  officeCam.position.copy(pose.p);
+  office.look.copy(pose.t);
 }
 if (window.ResizeObserver) {
-  const ro = new ResizeObserver(layoutInsets);
+  const ro = new ResizeObserver(() => {
+    layoutInsets();
+    snapPose();
+  });
   for (const el of [document.querySelector(".hud"), $("banner"), $("office-nav")]) ro.observe(el);
 }
 
@@ -1459,6 +1487,7 @@ async function openBuilding(id) {
     officeCam.position.copy(pose.p).add(REDUCED ? new THREE.Vector3() : new THREE.Vector3(0.5, 1.4, 2.2));
     await fade(false);
     await flyTo(pose, 1100);
+    snapPose();
   } finally {
     office.busy = false;
   }
@@ -1486,6 +1515,8 @@ async function closeBuilding() {
 
 async function focusMonitor(id) {
   if (!office.active || office.busy || id === office.focus) return;
+  // if the keyboard was inside the monitor that's closing, hand focus to the matching bottom button
+  const lost = office.focus && office.mons[office.focus].body.contains(document.activeElement);
   office.busy = true;
   try {
     office.focus = id;
@@ -1499,9 +1530,10 @@ async function focusMonitor(id) {
   } finally {
     office.busy = false;
   }
-  layoutInsets();
+  snapPose();
   syncFlat();
-  if (id) office.mons[id].body.focus?.({ preventScroll: true });
+  if (id) office.mons[id].body.focus({ preventScroll: true });
+  else if (lost && (document.activeElement === document.body || !document.activeElement)) document.querySelector('#office-nav [data-mon=""]').focus({ preventScroll: true });
 }
 
 
@@ -1525,7 +1557,9 @@ addEventListener("keydown", (e) => {
   const typing = /^(INPUT|SELECT|TEXTAREA)$/.test(document.activeElement?.tagName || "");
   if (office.focus && !typing && (e.key === "ArrowRight" || e.key === "ArrowLeft")) {
     const i = NAV_ORDER.indexOf(office.focus);
-    focusMonitor(NAV_ORDER[(i + (e.key === "ArrowRight" ? 1 : NAV_ORDER.length - 1) + (i < 0 ? 1 : 0)) % NAV_ORDER.length]);
+    const n = NAV_ORDER.length;
+    const right = e.key === "ArrowRight";
+    focusMonitor(NAV_ORDER[i < 0 ? (right ? 0 : n - 1) : (i + (right ? 1 : n - 1)) % n]);
   }
 });
 
@@ -1570,8 +1604,13 @@ function renderScreens(withSettings = true) {
   m.trades.body.innerHTML = tradesHTML(b);
   m.picks.body.innerHTML = picksHTML(b);
   if (withSettings) {
-    m.settings.body.innerHTML = settingsHTML(b);
-    wireSettings(m.settings.body, b);
+    const sb = m.settings.body;
+    const focused = sb.contains(document.activeElement) && document.activeElement.id;
+    const top = sb.scrollTop;
+    sb.innerHTML = settingsHTML(b);
+    wireSettings(sb, b);
+    sb.scrollTop = top;
+    if (focused) sb.querySelector(`#${CSS.escape(focused)}`)?.focus({ preventScroll: true });
   }
   $("o-name").textContent = b.name;
 }
@@ -1852,6 +1891,8 @@ function wireSettings(root, b) {
   const num = (id) => Number(root.querySelector(id).value);
   const has = (id) => !!root.querySelector(id);
   const clamp = (v, lo, hi) => Math.min(hi, Math.max(lo, v));
+  // a percent box as a fraction, to the 2 decimals the box shows (0.07% -> 0.0007)
+  const pctOf = (id, lo, hi) => Math.round(clamp(num(id), lo, hi) * 100) / 10000;
   const sync = () => {
     draft.enabled = root.querySelector("#s-enabled").checked;
     draft.starting_cash = Math.max(0, num("#s-cash"));
@@ -1862,8 +1903,8 @@ function wireSettings(root, b) {
     draft.ai.review_every_minutes = num("#s-aievery");
     draft.min_hold_minutes = clamp(Math.round(num("#s-hold")), 0, 10080);
     draft.max_buys_per_day = clamp(Math.round(num("#s-cap")), 1, 500);
-    draft.momentum.stop_loss_pct = clamp(num("#s-stop"), 1, 90) / 100;
-    draft.momentum.trailing_stop_pct = clamp(num("#s-trail"), 1, 90) / 100;
+    draft.momentum.stop_loss_pct = pctOf("#s-stop", 1, 90);
+    draft.momentum.trailing_stop_pct = pctOf("#s-trail", 1, 90);
     if (has("#s-topn")) {
       draft.momentum.top_n = clamp(Math.round(num("#s-topn")), 1, 10);
       draft.momentum.lookback_days = num("#s-look");
@@ -1871,14 +1912,15 @@ function wireSettings(root, b) {
     }
     if (has("#s-entry")) {
       const day = draft.intraday;
-      day.entry_pct = clamp(num("#s-entry"), 0.05, 5) / 100;
+      day.entry_pct = pctOf("#s-entry", 0.05, 5);
       day.lookback_minutes = clamp(Math.round(num("#s-lookmin")), 2, 120);
-      day.take_profit_pct = clamp(num("#s-tp"), 0.1, 20) / 100;
-      day.stop_pct = clamp(num("#s-dstop"), 0.1, 20) / 100;
+      day.take_profit_pct = pctOf("#s-tp", 0.1, 20);
+      day.stop_pct = pctOf("#s-dstop", 0.1, 20);
       day.max_positions = clamp(Math.round(num("#s-maxpos")), 1, 10);
       day.cooldown_minutes = clamp(Math.round(num("#s-cool")), 0, 390);
     }
   };
+  office.syncSettings = sync;
   root.querySelector("#s-style").addEventListener("change", () => {
     sync();
     renderScreens();
@@ -1912,6 +1954,7 @@ function wireSettings(root, b) {
       sync();
       draft.universe = draft.universe.filter((t) => t !== btn.dataset.rm);
       renderScreens();
+      $("s-add")?.focus({ preventScroll: true });
     }),
   );
   const add = () => {
@@ -1940,6 +1983,11 @@ function wireSettings(root, b) {
   });
   root.querySelector("#settings-form").addEventListener("submit", async (e) => {
     e.preventDefault();
+    if (!e.currentTarget.checkValidity()) {
+      fine.open = true;
+      e.currentTarget.reportValidity();
+      return;
+    }
     sync();
     const out = root.querySelector("#s-out");
     if (MODE === "server") {
@@ -1947,20 +1995,14 @@ function wireSettings(root, b) {
       const btn = root.querySelector("#s-save");
       btn.disabled = true;
       btn.textContent = "Saving…";
+      // the user may switch buildings while this saves, so everything below goes by the saved building's id
+      const body = structuredClone(draft);
       try {
-        const saved = await api.call(`api/bots/${encodeURIComponent(draft.id)}`, { method: "PUT", body: JSON.stringify(draft) });
-        b.settings = saved;
-        b.enabled = saved.enabled;
-        const cur = bot();
-        if (cur && cur !== b) Object.assign(cur, { settings: saved, enabled: saved.enabled });
-        draft = structuredClone(saved);
-        renderHUD();
-        renderScreens();
+        const saved = await api.call(`api/bots/${encodeURIComponent(body.id)}`, { method: "PUT", body: JSON.stringify(body) });
+        savedSettings(b, saved);
         toast(`Saved. ${saved.name} uses the new settings from its next check.`);
       } catch (err) {
-        out.innerHTML = `<p class="err">Couldn't save: ${esc(err.message)}</p>`;
-        btn.disabled = false;
-        btn.textContent = "Save changes";
+        saveFailed(body, out, btn, "Save changes", err);
       }
       return;
     }
@@ -1982,23 +2024,37 @@ function wireSettings(root, b) {
     const btn = root.querySelector("#s-save");
     btn.disabled = true;
     btn.textContent = "Saving…";
+    const body = structuredClone(draft);
     try {
       const { sha, json } = await gh.readConfig();
-      const i = json.bots.findIndex((x) => x.id === draft.id);
-      if (i < 0) throw new Error(`No building "${draft.id}" in config/bots.json`);
-      json.bots[i] = draft;
-      await gh.writeConfig(json, sha, `Update ${draft.name} settings from Stock City`);
-      b.settings = structuredClone(draft);
-      b.enabled = draft.enabled;
-      renderHUD();
-      renderScreens();
-      toast(`Saved. ${draft.name} uses the new settings on its next run.`);
+      const i = json.bots.findIndex((x) => x.id === body.id);
+      if (i < 0) throw new Error(`No building "${body.id}" in config/bots.json`);
+      json.bots[i] = body;
+      await gh.writeConfig(json, sha, `Update ${body.name} settings from Stock City`);
+      savedSettings(b, body);
+      toast(`Saved. ${body.name} uses the new settings on its next run.`);
     } catch (err) {
-      out.innerHTML = `<p class="err">Couldn't save: ${esc(err.message)}</p>`;
-      btn.disabled = false;
-      btn.textContent = "Save to GitHub";
+      saveFailed(body, out, btn, "Save to GitHub", err);
     }
   });
+}
+
+// After a save, update that building (the copy this form was built from and the latest one from the server),
+// and only redraw the Settings monitor if it still shows that building.
+function savedSettings(b, saved) {
+  for (const x of new Set([b, STATE.bots.find((y) => y.id === saved.id)])) if (x) Object.assign(x, { settings: structuredClone(saved), enabled: saved.enabled });
+  if (openId === saved.id) {
+    draft = structuredClone(saved);
+    renderScreens();
+  }
+  renderHUD();
+}
+function saveFailed(body, out, btn, label, err) {
+  if (openId === body.id && out.isConnected) {
+    out.innerHTML = `<p class="err">Couldn't save: ${esc(err.message)}</p>`;
+    btn.disabled = false;
+    btn.textContent = label;
+  } else toast(`Couldn't save ${body.name}: ${err.message}`);
 }
 
 /* =========================================================================
@@ -2024,7 +2080,10 @@ $("u-lock").addEventListener("click", () => {
   store.del("sc.pass");
   $("u-msg").textContent = "Locked on this browser.";
   syncConnectButton();
-  if (openId) renderScreens();
+  if (openId) {
+    office.syncSettings?.();
+    renderScreens();
+  }
 });
 $("unlock-form").addEventListener("submit", async (e) => {
   e.preventDefault();
@@ -2038,7 +2097,10 @@ $("unlock-form").addEventListener("submit", async (e) => {
     $("u-msg").textContent = err.message;
   }
   syncConnectButton();
-  if (openId) renderScreens();
+  if (openId) {
+    office.syncSettings?.();
+    renderScreens();
+  }
 });
 $("c-cancel").addEventListener("click", () => ($("connect-modal").hidden = true));
 $("c-forget").addEventListener("click", () => {
@@ -2057,7 +2119,10 @@ $("connect-form").addEventListener("submit", async (e) => {
     await gh.readConfig();
     $("c-msg").textContent = "Connected. Settings now save to your repo.";
     syncConnectButton();
-    if (openId) renderScreens();
+    if (openId) {
+      office.syncSettings?.();
+      renderScreens();
+    }
   } catch (err) {
     $("c-msg").textContent = `That didn't work: ${err.message}`;
   }

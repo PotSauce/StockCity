@@ -223,6 +223,7 @@ pre.json { background: rgba(11, 8, 32, 0.8); border: 1px solid var(--line); bord
   position: absolute; left: 50%; bottom: calc(52px + env(safe-area-inset-bottom, 0px)); transform: translateX(-50%);
   background: var(--night-2); border: 1px solid var(--neon); padding: 10px 16px; border-radius: 10px; max-width: calc(100% - 32px);
   box-shadow: 0 0 24px rgba(167, 139, 250, 0.3); font-size: 14px;
+  pointer-events: none; /* never blocks the buttons under it */
 }
 
 @media (max-width: 760px) {
@@ -262,7 +263,7 @@ details.fine[open] > summary { margin-bottom: 4px; }
 #app.in-office #labels, #app.in-office .building-list { display: none; }
 #app.in-office #city { cursor: default; }
 #app.in-office #city.hovering { cursor: pointer; }
-#app.in-office .toast { bottom: calc(108px + env(safe-area-inset-bottom, 0px)); }
+#app.in-office .toast { bottom: var(--bottom-inset, 120px); }
 #app.in-office .banner { top: calc(var(--hud-bottom, 64px) + 8px); bottom: auto; }
 .fader { position: absolute; inset: 0; background: var(--night); opacity: 0; pointer-events: none; transition: opacity 0.26s ease; z-index: 3; }
 .fader.on { opacity: 1; }
@@ -349,6 +350,14 @@ ul.next b { font-family: var(--font-data); }
   font: 600 14px/1.35 var(--font-body); box-shadow: 0 6px 24px rgba(0, 0, 0, 0.45); pointer-events: none;
 }
 .bubble::after { content: ""; position: absolute; left: 50%; bottom: -7px; margin-left: -7px; border: 7px solid transparent; border-bottom: 0; border-top-color: #f5f3ff; }
+
+/* short screens (phones on their side): give the office the height; trades are on the Trades monitor anyway */
+@media (max-height: 500px) {
+  #app.in-office .hud-stats, #app.in-office .tape { display: none; }
+  #app.in-office .hud { padding-block: calc(8px + env(safe-area-inset-top, 0px)) 8px; }
+  #app.in-office .office-nav { bottom: calc(8px + env(safe-area-inset-bottom, 0px)); }
+  #app.in-office .banner { font-size: 12px; padding: 5px 10px; }
+}
 
 @media (max-width: 760px) {
   /* two rows on phones: the building on top, its monitors underneath, nothing scrolled out of reach */
