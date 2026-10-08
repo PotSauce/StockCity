@@ -32,6 +32,7 @@ def test_state_and_site(client):
     st = r.json()
     assert {b["id"] for b in st["bots"]} == {"tech", "energy", "finance", "consumer"}
     assert st["server"]["mode"] == "live"
+    assert all("last_check" in b for b in st["bots"])  # shown on the trader's main monitor
     for page in ("/", "/app.js", "/style.css"):
         r = client.get(page)
         # browsers must check for a newer copy, or they keep the old page after a deploy
