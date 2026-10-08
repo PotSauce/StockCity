@@ -609,9 +609,16 @@ ul.next b { font-family: var(--font-data); }
 .flat-glance.more { -webkit-mask-image: linear-gradient(#000 calc(100% - 26px), transparent); mask-image: linear-gradient(#000 calc(100% - 26px), transparent); }
 
 /* ---------- City Hall: the mayor's board (a 1600 × 900 page, read at about half size), and its phone panel ---------- */
-#app.in-hall .o-mons { display: none; }
-.o-zoom { display: none; }
-#app.in-hall .o-zoom { display: inline-block; color: var(--ink); }
+/* the bottom bar keeps its size in the hall, so ‹ and › stay under the pointer going in and out:
+   the monitor buttons' slot holds Zoom (big screens) or a hint (phones) */
+.o-zoom, .o-hint { display: none; }
+#app.in-hall .o-mons { position: relative; }
+#app.in-hall .o-mons [data-mon] { visibility: hidden; }
+#app.in-hall .o-zoom, #app.in-hall .o-hint { position: absolute; left: 50%; top: 50%; transform: translate(-50%, -50%); white-space: nowrap; }
+#app.in-hall .o-zoom { display: block; }
+#app.in-hall .o-zoom { color: var(--ink); border-color: var(--line); }
+.o-hint { font: 500 12px/1.2 var(--font-body); color: var(--ink-dim); }
+.sr-only { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); clip-path: inset(50%); white-space: nowrap; }
 .board {
   display: flex; flex-direction: column; box-sizing: border-box; overflow: hidden; border-radius: 4px; color: var(--ink);
   background: radial-gradient(120% 90% at 50% 0%, color-mix(in srgb, var(--acc) 10%, #0a0820), #070516 70%);
@@ -627,7 +634,7 @@ ul.next b { font-family: var(--font-data); }
 .hb-fig { display: flex; flex-direction: column; gap: 8px; min-width: 0; }
 .hb-fig .g-label { font-size: 22px; }
 .hb-big { font: 600 54px/1 var(--font-data); font-variant-numeric: tabular-nums; letter-spacing: -0.02em; white-space: nowrap; }
-.hb-cols { flex: 1; min-height: 0; display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 22px; }
+.hb-cols { flex: 1; min-height: 0; display: grid; grid-auto-flow: column; grid-auto-columns: minmax(0, 1fr); gap: 22px; }
 /* a column per building, topped with its colour */
 .hb-col { --c: var(--acc); display: flex; flex-direction: column; min-width: 0; min-height: 0; overflow: hidden; border-radius: 8px; border-top: 6px solid var(--c); background: color-mix(in srgb, var(--c) 7%, transparent); }
 .hb-head {
@@ -640,7 +647,7 @@ ul.next b { font-family: var(--font-data); }
 .hb-head b::after { content: " ›"; color: var(--ink-dim); }
 .hb-hv { display: flex; flex-wrap: wrap; align-items: baseline; gap: 6px 14px; font: 600 26px/1 var(--font-data); font-variant-numeric: tabular-nums; white-space: nowrap; }
 .hb-paused { font: 700 18px/1 var(--font-display); letter-spacing: 0.12em; text-transform: uppercase; color: var(--warn); }
-.hb-rows { display: flex; flex-direction: column; padding: 2px 18px; }
+.hb-rows { display: flex; flex-direction: column; min-height: 0; overflow: hidden; padding: 2px 18px; }
 /* one stock: ticker, sleeve and gain on top; shares, value and the dollar gain under them.
    The gains keep their width; a long ticker or value gives way. */
 .hb-row { display: grid; grid-template-columns: minmax(0, 1fr) auto; align-items: center; gap: 6px 12px; padding: 10px 0; border-bottom: 2px solid rgba(167, 139, 250, 0.1); }
@@ -654,7 +661,7 @@ ul.next b { font-family: var(--font-data); }
 .board .hb-row:nth-child(n + 6) { display: none; }
 .hb-more { margin: 8px 18px 0; font: 600 22px/1 var(--font-display); color: var(--ink-dim); }
 .hb-empty { margin: 18px; font: 600 28px/1.2 var(--font-display); color: var(--ink-dim); }
-.hb-cash { margin: auto 0 0; display: flex; justify-content: space-between; gap: 10px; padding: 12px 18px 14px; border-top: 2px solid rgba(167, 139, 250, 0.1); font: 600 24px/1 var(--font-display); color: var(--ink-dim); }
+.hb-cash { flex: none; margin: auto 0 0; display: flex; justify-content: space-between; gap: 10px; padding: 12px 18px 14px; border-top: 2px solid rgba(167, 139, 250, 0.1); font: 600 24px/1 var(--font-display); color: var(--ink-dim); }
 .hb-cash b { font: 600 24px/1 var(--font-data); color: var(--ink); }
 
 /* phones: the same list, flat at the top, with the mayor in the space under it */
@@ -662,6 +669,7 @@ ul.next b { font-family: var(--font-data); }
 @media (max-width: 760px), (max-height: 500px) {
   #app.in-hall .flat-hall { display: flex; }
   #app.in-hall .o-zoom { display: none; }
+  #app.in-hall .o-hint { display: block; }
 }
 .flat-hall {
   position: absolute; z-index: 4; left: 16px; right: 16px; top: var(--top-inset, 140px);
@@ -681,7 +689,7 @@ ul.next b { font-family: var(--font-data); }
 .flat-hall .hb-fig { gap: 3px; }
 .flat-hall .hb-fig .g-label { font-size: 9px; letter-spacing: 0.12em; }
 .flat-hall .hb-big { font-size: 19px; }
-.flat-hall .hb-cols { flex: none; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 8px; }
+.flat-hall .hb-cols { flex: none; grid-auto-flow: row; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 8px; }
 .flat-hall .hb-col { container-type: inline-size; border-top-width: 3px; border-radius: 5px; }
 .flat-hall .hb-head { gap: 4px; padding: 7px 9px 6px; border-bottom-width: 1px; }
 .flat-hall .hb-head:focus-visible { outline-width: 2px; outline-offset: -2px; }
@@ -711,6 +719,7 @@ ul.next b { font-family: var(--font-data); }
 }
 
 /* the mayor's speech bubble sits above his hat, its tail pointing down at him */
+.bubble.down::after { top: -7px; left: var(--tail-x, 50%); right: auto; margin: 0 0 0 -7px; border: 7px solid transparent; border-top: 0; border-bottom-color: #f5f3ff; }
 .bubble.up::after { top: auto; bottom: -7px; left: var(--tail-x, 50%); right: auto; margin: 0 0 0 -7px; border: 7px solid transparent; border-bottom: 0; border-top-color: #f5f3ff; }
 
 /* last, so it wins over the transitions declared above */

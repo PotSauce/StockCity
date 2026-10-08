@@ -628,11 +628,7 @@ function resize() {
   css3d.setSize(w, h);
   office.bubbleSide = null;
   if (office.active) {
-    if (office.mode === "hall" && office.focus && narrow() && !office.busy) {
-      office.focus = null;
-      office.dude.root.visible = true;
-      syncMonitors();
-    }
+    unzoomHallIfNarrow();
     snapPose();
     syncFlat();
   }
@@ -984,6 +980,7 @@ function buildOffice() {
     obj.position.copy(g.position);
     obj.quaternion.copy(g.quaternion);
     obj.scale.setScalar(1 / PX_PER_M);
+    obj.visible = false; // setOfficeMode shows the pages of the room you're in
     cssScene.add(obj);
     office.mons[m.id] = { ...m, group: g, el, body: el.querySelector(".mon-body"), screenMat, obj };
   }
@@ -1437,7 +1434,7 @@ hallScene.fog = new THREE.Fog(0x0b0820, 9, 22);
 const HALL_PX = 400;
 const BOARD = { w: 4, h: 2.25, x: 1.1, y: 2.15, z: -0.94, px: HALL_PX };
 const MAYOR_AT = new THREE.Vector3(-1.9, 0.12, -0.25);
-const hall = { built: false, board: null, mayor: null, anims: [], greets: 0, frameMat: null };
+const hall = { built: false, board: null, mayor: null, anims: [], greets: 0, frameMat: null, lastHTML: "" };
 const MAYOR_OUTFIT = { skin: 0xd6a17a, hair: 0xb8bcc6, top: 0x2a2c40, arm: 0x2a2c40, fore: 0x2a2c40, pants: 0x1d1f2e, shoes: 0x0b0b0b, gear: ["collar", "sash", "medal", "mustache", "tophat"] };
 
 function buildHall() {
@@ -1530,6 +1527,7 @@ function buildHall() {
   obj.position.copy(bg.position);
   obj.quaternion.copy(bg.quaternion);
   obj.scale.setScalar(1 / HALL_PX);
+  obj.visible = false; // setOfficeMode shows it once you're in the hall
   cssScene.add(obj);
   hall.board = { ...BOARD, group: bg, el, body: el.querySelector(".hb-body"), obj };
 
@@ -1614,7 +1612,7 @@ function mayorLine(i) {
   const cash = STATE.bots.reduce((a, b) => a + b.cash, 0);
   const d = STATE.totals.day_change;
   const today = `Today the city is ${d >= 0 ? "up" : "down"} ${money(Math.abs(d), 2)}.`;
-  const closed = marketOpen() === false ? ` The market's closed until ${tradingStarts()} New York time.` : "";
+  const closed = marketOpen() === false ? ` The market's closed. The buildings start trading again at ${tradingStarts()} New York time.` : "";
   const count = held.length === 1 ? "One stock" : `${held.length} stocks`;
   const summary = held.length ? `${count} held across the city, worth ${money(invested, 2)}. ${today}` : `Nobody's holding a stock right now. ${today}`;
   if (i === 0) return `Welcome to City Hall! ${summary}${closed}`;
@@ -1637,7 +1635,11 @@ function hallHTML() {
   const held = STATE.bots.flatMap((b) => b.positions);
   const invested = held.reduce((a, p) => a + p.value, 0);
   const cash = STATE.bots.reduce((a, b) => a + b.cash, 0);
-  const signed = (x) => `${x >= 0 ? "+" : "−"}${money(Math.abs(x), 2)}`;
+  // dollars with a sign, except an amount that rounds to $0.00
+  const signed = (x) => {
+    const r = Math.round(x * 100) / 100;
+    return `${r === 0 ? "" : r > 0 ? "+" : "−"}${money(Math.abs(r), 2)}`;
+  };
   const sum = `<div class="hb-sum">
     <div class="hb-fig"><span class="g-label">City value</span><span class="hb-big num">${money(t.equity, 2)}</span></div>
     <div class="hb-fig"><span class="g-label">Today</span><span class="hb-big num ${cls(t.day_change)}">${signed(t.day_change)}</span></div>
@@ -1649,7 +1651,7 @@ function hallHTML() {
       const pos = [...b.positions].sort((a, c) => c.value - a.value);
       const rows = pos
         .map((p) => {
-          const gain = (p.price - p.avg_cost) * p.shares;
+          const gain = p.value - p.avg_cost * p.shares;
           // an AI pick bought with unsettled cash can't be sold until that cash settles (cash account rule)
           const lock = p.locked_until && p.locked_until > nyToday() ? ` title="Bought with unsettled cash, so it can't be sold until ${esc(p.locked_until)}"` : "";
           return `<div class="hb-row"${lock}>
@@ -1661,8 +1663,8 @@ function hallHTML() {
       // the board has room for five; the rest are one click away, in the building
       const more = pos.length > 5 ? `<p class="hb-more">+${pos.length - 5} more</p>` : "";
       return `<section class="hb-col" style="--c:${esc(b.color)}">
-        <button type="button" class="hb-head" data-open="${esc(b.id)}" aria-label="Visit ${esc(b.name)}">
-          <b>${esc(b.name)}</b>
+        <button type="button" class="hb-head" data-open="${esc(b.id)}">
+          <span class="sr-only">Visit </span><b>${esc(b.name)}</b>
           <span class="hb-hv"><span class="num">${money(b.equity, 2)}</span><span class="num ${cls(b.day_change)}">${signed(b.day_change)}</span>${b.enabled ? "" : `<span class="hb-paused">Paused</span>`}</span>
         </button>
         ${pos.length ? `<div class="hb-rows">${rows}</div>${more}` : `<p class="hb-empty">Not holding anything</p>`}
@@ -1676,11 +1678,19 @@ function hallHTML() {
 function renderHall() {
   if (!hall.built) return;
   const html = hallHTML();
-  hall.board.body.innerHTML = html;
-  $("flat-hall-body").innerHTML = html;
+  if (html !== hall.lastHTML) {
+    hall.lastHTML = html;
+    for (const box of [hall.board.body, $("flat-hall-body")]) {
+      // a refresh mustn't throw the keyboard off the building it was on
+      const open = box.contains(document.activeElement) && document.activeElement.dataset.open;
+      box.innerHTML = html;
+      if (open) box.querySelector(`[data-open="${CSS.escape(open)}"]`)?.focus({ preventScroll: true });
+    }
+  }
   const at = STATE.server?.last_quote_at || STATE.generated_at;
   const when = marketOpen() === false ? "Market closed" : at ? `Prices at ${nyTime(at)}` : "";
-  document.querySelectorAll(".hb-when").forEach((x) => (x.textContent = when));
+  // (the board's page isn't in the document until it's first drawn, so not a document query)
+  for (const root of [hall.board.el, $("flat-hall")]) root.querySelector(".hb-when").textContent = when;
   $("o-name").textContent = "City Hall";
   markMore();
 }
@@ -1770,6 +1780,7 @@ function setOfficeMode(on) {
   // the monitors and the board share one layer of web pages: show the ones for this room
   for (const m of Object.values(office.mons)) m.obj.visible = !inHall;
   if (hall.board) hall.board.obj.visible = inHall;
+  $("office-nav").setAttribute("aria-label", inHall ? "City Hall" : "This building's monitors");
   renderPass.camera = on ? officeCam : camera;
   bloom.strength = on ? 0.5 : 0.85;
   bloom.threshold = on ? 0.55 : 0.18;
@@ -1859,6 +1870,14 @@ function traderPose() {
   return { p: tt.clone().addScaledVector(OVERVIEW_DIR, hi), t: tt };
 }
 
+// a phone reads City Hall's board from the flat panel, so a zoom left over from a bigger screen is dropped
+function unzoomHallIfNarrow() {
+  if (!office.active || office.mode !== "hall" || !office.focus || !narrow() || office.busy) return false;
+  office.focus = null;
+  office.dude.root.visible = true;
+  syncMonitors();
+  return true;
+}
 // a monitor, or City Hall's board
 function screenOf(id) {
   return office.mode === "hall" ? (id === "board" ? hall.board : null) : office.mons[id];
@@ -1954,7 +1973,6 @@ function syncMonitors() {
   document.querySelectorAll("#office-nav [data-mon]").forEach((btn) => btn.setAttribute("aria-pressed", String((btn.dataset.mon || null) === office.focus)));
   const zoomed = office.mode === "hall" && office.focus === "board";
   hall.board?.el.classList.toggle("focused", zoomed);
-  $("o-zoom").setAttribute("aria-pressed", String(zoomed));
   $("o-zoom").textContent = zoomed ? "Zoom out" : "Zoom in";
 }
 
@@ -2052,10 +2070,12 @@ async function focusMonitor(id) {
   } finally {
     office.busy = false;
   }
+  // the window may have become phone-sized during the flight
+  const dropped = unzoomHallIfNarrow();
   snapPose();
   syncFlat();
-  if (id) screenOf(id).body.focus({ preventScroll: true });
-  else if (lost && (document.activeElement === document.body || !document.activeElement)) {
+  if (id && !dropped) screenOf(id).body.focus({ preventScroll: true });
+  else if (lost && (!document.activeElement || document.activeElement === document.body || document.activeElement === screenOf(from)?.body)) {
     // back to the card it was opened from on phones, else the All screens (or Zoom) button
     const card = $("flat-glance").classList.contains("show") && $("flat-glance").querySelector(`[data-mon="${from}"]`);
     (card || (office.mode === "hall" ? $("o-zoom") : document.querySelector('#office-nav [data-mon=""]'))).focus({ preventScroll: true });
@@ -2105,6 +2125,12 @@ function officeFrame(t, dt, now) {
   const base = inHall ? (marketOpen() === false ? "relaxed" : "present") : !b?.enabled || marketOpen() === false ? "relaxed" : "typing";
   animateDude(office.act || base, REDUCED ? 0 : t, dt);
   if (!REDUCED) (inHall ? hall.anims : office.anims).forEach((fn) => fn(t, dt));
+  if (inHall) {
+    // the fog starts just behind the mayor, however far back the camera had to go to fit him and the board
+    const d = officeCam.position.distanceTo(MAYOR_AT);
+    hallScene.fog.near = d - 0.5;
+    hallScene.fog.far = d + 12.5;
+  }
   // a slow drift while looking at the whole desk; perfectly still when a monitor is open
   const drift = !office.focus && !tweens.length && !REDUCED;
   officeCam.lookAt(office.look.x + (drift ? Math.sin(t * 0.25) * 0.05 : 0), office.look.y + (drift ? Math.sin(t * 0.18) * 0.02 : 0), office.look.z);
@@ -2120,23 +2146,28 @@ function officeFrame(t, dt, now) {
       };
       const head = office.dude.neck.getWorldPosition(new THREE.Vector3()).add(new THREE.Vector3(0, 0.3, 0));
       const [hx, hy] = toScreen(head.clone());
-      if (inHall && !narrow()) {
-        // above the mayor's hat: his board takes the room beside him
-        const [, ty] = toScreen(head.clone().add(new THREE.Vector3(0, 0.58, 0)));
-        if (!office.bubbleSide) {
-          bubble.style.maxWidth = "260px";
-          office.bubbleSide = "up";
-        }
+      if (inHall && (!narrow() || officeCam.aspect >= 4 / 3)) {
+        // the mayor's words stay in the strip left of his board (or of the list, on a phone on its side):
+        // above his hat on a big screen, under his chin on a phone
+        const up = !narrow();
+        const app = $("app").getBoundingClientRect();
+        const edge = up ? toScreen(new THREE.Vector3(BOARD.x - BOARD.w / 2, BOARD.y + BOARD.h / 2, BOARD.z))[0] : $("flat-hall").getBoundingClientRect().left - app.left;
+        const [, y] = toScreen(head.clone().add(new THREE.Vector3(0, up ? 0.58 : -0.32, 0)));
+        // 8px from the screen's edge, 12px short of the board; the 26px is the bubble's side padding.
+        // Re-fit every frame: the camera is still gliding in when he greets you.
+        const fit = `${Math.round(Math.max(100, Math.min(up ? 260 : 300, edge - 20 - 26)))}px`;
+        if (bubble.style.maxWidth !== fit) bubble.style.maxWidth = fit;
+        office.bubbleSide = up ? "up" : "down";
         const w = bubble.offsetWidth;
-        const x = Math.max(8, Math.min(hx - w / 2, canvas.clientWidth - w - 8));
-        bubble.classList.remove("left");
-        bubble.classList.add("up");
+        const x = Math.min(Math.max(8, hx - w / 2), edge - w - 12);
+        bubble.classList.remove("left", up ? "down" : "up");
+        bubble.classList.add(up ? "up" : "down");
         bubble.style.setProperty("--tail-x", `${Math.max(16, Math.min(w - 16, hx - x)).toFixed(1)}px`);
-        bubble.style.transform = `translate(${x.toFixed(1)}px, ${(ty - 10).toFixed(1)}px) translate(0, -100%)`;
+        bubble.style.transform = `translate(${x.toFixed(1)}px, ${(up ? y - 10 : y + 10).toFixed(1)}px) translate(0, ${up ? "-100%" : "0"})`;
         return;
       }
-      bubble.classList.remove("up");
-      if (office.bubbleSide === "up") office.bubbleSide = null;
+      bubble.classList.remove("up", "down");
+      if (office.bubbleSide === "up" || office.bubbleSide === "down") office.bubbleSide = null;
       const [ex] = toScreen(head.clone().add(new THREE.Vector3(0.3, 0, 0)));
       const half = Math.abs(ex - hx);
       // narrow enough to fit beside him, on the side with more room. The side is kept for the whole message
