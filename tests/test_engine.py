@@ -94,6 +94,7 @@ def test_stop_loss_sells():
     BotDay(bot, led, closes, "2026-10-07", PaperBroker(), EXCL, picker_returning()).run()
     assert "momentum:UP1" not in led["positions"]
     assert led["trades"][-1]["reason"].startswith("Stop loss")
+    assert led["trades"][-1]["cost"] == 1e6  # so the screen can show the sale lost money
 
 
 def test_paused_bot_does_not_trade():
@@ -222,6 +223,8 @@ def test_intraday_buys_a_stock_running_up_and_takes_profit():
     run_at(bot, led, minute_bars({"RUN": more, "FLAT": [50.0] * len(more)}), "10:21")
     assert "intraday:RUN" not in led["positions"]
     assert led["trades"][-1]["reason"].startswith("Take profit")
+    sale = led["trades"][-1]
+    assert sale["price"] > sale["cost"] and "cost" not in led["trades"][0]
 
 
 def test_intraday_closes_everything_before_the_bell():

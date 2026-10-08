@@ -86,7 +86,7 @@ class BotDay:
     def buys_today(self):
         return sum(1 for t in self.led["trades"] if t["date"] == self.today and t["side"] == "buy")
 
-    def _record(self, fill, sleeve, reason, protective=False):
+    def _record(self, fill, sleeve, reason, protective=False, cost=None):
         self.led["trades"].append(
             {
                 "date": self.today,
@@ -99,6 +99,8 @@ class BotDay:
                 "sleeve": sleeve,
                 "reason": reason,
                 **({"protective": True} if protective else {}),
+                # what the shares cost, so a sale shows whether it made or lost money
+                **({"cost": round(cost, 4)} if cost is not None else {}),
             }
         )
         self.led["trades"] = self.led["trades"][-MAX_TRADES_KEPT:]
@@ -109,6 +111,7 @@ class BotDay:
         if price is None or shares <= 0:
             return
         fill = self.broker.sell(pos["ticker"], int(shares), price)
+        cost = pos["avg_cost"]
         self.led["cash"] += fill.shares * fill.price
         if self.settle:
             settles = str(next_trading_day(pd.Timestamp(self.today).date()))
@@ -116,7 +119,7 @@ class BotDay:
         pos["shares"] -= fill.shares
         if pos["shares"] <= 0:
             del self.led["positions"][key]
-        self._record(fill, pos["sleeve"], reason, protective)
+        self._record(fill, pos["sleeve"], reason, protective, cost)
 
     def _buy(self, ticker, sleeve, shares, reason, cash_cap):
         price = self.prices.get(ticker)

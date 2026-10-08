@@ -95,6 +95,7 @@ def build_state(cfg, ledger, closes, excl_raw, source, broker_name, run_note):
                 "notes": list(reversed(led.get("notes", [])[-12:])),
                 "last_momentum": led.get("last_momentum"),
                 "last_ai": led.get("last_ai"),
+                "last_check": led.get("last_check"),
             }
         )
     total = sum(b["equity"] for b in bots_out)
