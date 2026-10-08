@@ -616,6 +616,7 @@ function resize() {
   officeCam.aspect = aspect;
   officeCam.updateProjectionMatrix();
   css3d.setSize(w, h);
+  office.bubbleSide = null;
   if (office.active) {
     snapPose();
     syncFlat();
@@ -773,6 +774,7 @@ const office = {
   act: null, // a short reaction (cheer, facepalm, wave, nod) that overrides the normal pose
   actUntil: 0,
   bubbleUntil: 0,
+  bubbleSide: null, // "left" or "right" of his head, kept for one message
   seen: {}, // building id -> newest trade already reacted to
   cityZoom: 1,
 };
@@ -813,6 +815,17 @@ function flyTo(pose, ms, onStep) {
   });
 }
 const nyToday = () => new Date().toLocaleDateString("en-CA", { timeZone: "America/New_York" });
+// the time in New York as "HH:MM" (24-hour), to compare with the server's "15:40"-style settings
+const nyClock = () => new Date().toLocaleTimeString("en-GB", { timeZone: "America/New_York", hour: "2-digit", minute: "2-digit", hourCycle: "h23" });
+const clockMinutes = (hhmm) => {
+  const [h, m] = String(hhmm || "0:0").split(":").map(Number);
+  return h * 60 + m;
+};
+const clock12 = (hhmm) => {
+  const mins = clockMinutes(hhmm);
+  const h = Math.floor(mins / 60);
+  return `${((h + 11) % 12) + 1}:${String(mins % 60).padStart(2, "0")}${h < 12 ? "am" : "pm"}`;
+};
 const nyTime = (iso) => (iso ? new Date(iso).toLocaleTimeString("en-US", { timeZone: "America/New_York", hour: "numeric", minute: "2-digit" }) : "");
 const marketOpen = () => {
   const mk = STATE.server?.markets?.[0];
@@ -962,8 +975,9 @@ function buildOffice() {
     card.dataset.mon = m.id;
     card.tabIndex = 0;
     card.setAttribute("role", "button");
-    card.setAttribute("aria-label", `Open ${m.title}`);
-    card.innerHTML = `<header class="mon-bar"><i></i><b>${esc(m.title)}</b></header><div class="fg-body"></div>`;
+    card.setAttribute("aria-labelledby", `fg-t-${m.id}`);
+    card.setAttribute("aria-describedby", `fg-b-${m.id}`);
+    card.innerHTML = `<header class="mon-bar"><i></i><b id="fg-t-${m.id}">${esc(m.title)}</b></header><div class="fg-body" id="fg-b-${m.id}"></div>`;
     card.addEventListener("click", () => focusMonitor(m.id));
     card.addEventListener("keydown", (e) => {
       if (e.key !== "Enter" && e.key !== " ") return;
@@ -1190,6 +1204,7 @@ function dressOffice(b) {
     m.el.style.setProperty("--acc", b.color);
     m.screenMat.color.copy(accent).multiplyScalar(0.16);
   }
+  office.screenGlow = accent.clone().multiplyScalar(0.16);
   document.documentElement.style.setProperty("--acc", b.color);
   $("flat-mon").style.setProperty("--acc", b.color);
   $("flat-glance").style.setProperty("--acc", b.color);
@@ -1294,6 +1309,7 @@ function say(text, ms = 5000) {
   const el = $("bubble");
   el.textContent = text;
   el.hidden = false;
+  office.bubbleSide = null; // chosen on the first frame it's shown, then kept
   office.bubbleUntil = performance.now() + ms;
 }
 function act(name, ms) {
@@ -1456,6 +1472,7 @@ function monitorPose(id) {
 function narrow() {
   return innerWidth <= 760 || innerHeight <= 500;
 }
+const SCREEN_OFF = new THREE.Color(0x05040f);
 function syncFlat() {
   const id = office.active && office.focus && !office.busy && narrow() ? office.focus : null;
   const cards = office.active && !office.focus && !office.busy && narrow();
@@ -1472,6 +1489,8 @@ function syncFlat() {
   $("flat-mon").hidden = !id;
   // the 3D pages behind the flat ones are empty shells or unreadably small: hide them so they don't show through or take taps
   css3d.domElement.style.visibility = id || cards ? "hidden" : "";
+  // and with the cards up the screens look switched off, not like blank slabs
+  if (office.screenGlow) for (const m of Object.values(office.mons)) m.screenMat.color.copy(cards ? SCREEN_OFF : office.screenGlow);
   if (id) $("flat-mon").querySelector(".mon-bar b").textContent = office.mons[id].title;
 }
 
@@ -1520,6 +1539,7 @@ async function openBuilding(id) {
   if (office.busy || !STATE.bots.some((b) => b.id === id)) return;
   if (office.active && openId === id) return focusMonitor(null);
   office.busy = true;
+  syncFlat(); // the cards fade out with the scene
   try {
     if (!office.built) buildOffice();
     if (!office.active) {
@@ -1542,6 +1562,7 @@ async function openBuilding(id) {
     dressOffice(bot());
     office.active = true;
     office.focus = null;
+    $("flat-glance").scrollTop = 0;
     office.seen[id] = tradeKey(bot().trades[0]);
     setOfficeMode(true);
     renderScreens();
@@ -1563,6 +1584,7 @@ async function openBuilding(id) {
 async function closeBuilding() {
   if (!office.active || office.busy) return;
   office.busy = true;
+  syncFlat();
   try {
     await fade(true);
     office.active = false;
@@ -1583,6 +1605,7 @@ async function focusMonitor(id) {
   if (!office.active || office.busy || id === office.focus) return;
   // if the keyboard was inside the monitor that's closing, hand focus to the matching bottom button
   const lost = office.focus && office.mons[office.focus].body.contains(document.activeElement);
+  const from = office.focus;
   office.busy = true;
   try {
     office.focus = id;
@@ -1599,7 +1622,11 @@ async function focusMonitor(id) {
   snapPose();
   syncFlat();
   if (id) office.mons[id].body.focus({ preventScroll: true });
-  else if (lost && (document.activeElement === document.body || !document.activeElement)) document.querySelector('#office-nav [data-mon=""]').focus({ preventScroll: true });
+  else if (lost && (document.activeElement === document.body || !document.activeElement)) {
+    // back to the card it was opened from on phones, else the All screens button
+    const card = $("flat-glance").classList.contains("show") && $("flat-glance").querySelector(`[data-mon="${from}"]`);
+    (card || document.querySelector('#office-nav [data-mon=""]')).focus({ preventScroll: true });
+  }
 }
 
 
@@ -1660,12 +1687,17 @@ function officeFrame(t, dt, now) {
       const [hx, hy] = toScreen(head.clone());
       const [ex] = toScreen(head.clone().add(new THREE.Vector3(0.3, 0, 0)));
       const half = Math.abs(ex - hx);
-      // narrow enough to fit beside him on one side or the other
+      // narrow enough to fit beside him, on the side with more room. The side is kept for the whole message
+      // (his head drifts across the middle as he moves); it only changes if the bubble stops fitting there.
       const roomL = hx - half - 22;
       const roomR = canvas.clientWidth - hx - half - 22;
-      bubble.style.maxWidth = `${Math.max(150, Math.min(narrow() ? 220 : 300, Math.max(roomL, roomR) - 26))}px`;
+      if (!office.bubbleSide) {
+        bubble.style.maxWidth = `${Math.max(150, Math.min(narrow() ? 220 : 300, Math.max(roomL, roomR) - 26))}px`;
+        office.bubbleSide = roomL > roomR && bubble.offsetWidth <= roomL ? "left" : "right";
+      }
       const w = bubble.offsetWidth;
-      const left = w <= roomL && roomL > roomR;
+      if (office.bubbleSide === "left" ? w > roomL + 20 : w > roomR + 20 && w <= roomL) office.bubbleSide = office.bubbleSide === "left" ? "right" : "left";
+      const left = office.bubbleSide === "left";
       const x = left ? hx - half - 14 : Math.min(hx + half + 14, canvas.clientWidth - w - 8);
       bubble.classList.toggle("left", left);
       bubble.style.transform = `translate(${x.toFixed(1)}px, ${hy.toFixed(1)}px) translate(${left ? "-100%" : "0"}, -50%)`;
@@ -1708,6 +1740,47 @@ function markMore() {
 $("flat-glance").addEventListener("scroll", markMore, { passive: true });
 
 /* ---------- glance views: big type, only what you need at a glance ---------- */
+// The running list is only current while the building is on and has checked since today's open.
+// Paused, or the market's closed, or before the first check of the day: it's an older list.
+function glanceFresh(b) {
+  return b.enabled && marketOpen() !== false && !!b.last_check && new Date(b.last_check).toLocaleDateString("en-CA", { timeZone: "America/New_York" }) === nyToday();
+}
+
+// What the next check would buy, worked out the way the server picks (engine/city.py), so a glance
+// never promises a buy that won't come. Cash isn't checked; the detail pages say "if there's cash".
+function nextBuys(b) {
+  const s = b.settings;
+  const today = nyToday();
+  if (!glanceFresh(b)) return { tickers: [], why: "" };
+  if (b.trades.filter((t) => t.side === "buy" && t.date === today).length >= s.max_buys_per_day) return { tickers: [], why: "cap" };
+  if (s.style === "intraday") {
+    const d = s.intraday;
+    if (nyClock() >= d.no_entries_after) return { tickers: [], why: "late" };
+    const held = new Set(b.positions.filter((p) => p.sleeve === "intraday").map((p) => p.ticker));
+    let slots = d.max_positions - held.size;
+    if (slots <= 0) return { tickers: [], why: "full" };
+    const slot = (b.equity * (1 - s.ai_share)) / d.max_positions;
+    const now = clockMinutes(nyClock());
+    const tickers = [];
+    for (const r of b.intraday_signals || []) {
+      if (slots <= 0) break;
+      if (!r.qualifies || held.has(r.ticker) || Math.floor(slot / r.price) === 0) continue;
+      const exit = b.trades.find((t) => t.ticker === r.ticker && t.side === "sell" && t.sleeve === "intraday" && t.date === today);
+      if (exit && now - clockMinutes(exit.time) < d.cooldown_minutes) continue;
+      tickers.push(r.ticker);
+      slots--;
+    }
+    return { tickers, why: "" };
+  }
+  // momentum: the top picks, where a stock already held keeps its place while it's within the buffer
+  const m = s.momentum;
+  const held = b.positions.filter((p) => p.sleeve === "momentum").map((p) => p.ticker);
+  const ok = b.ranking.filter((r) => r.qualifies).map((r) => r.ticker);
+  const keep = ok.slice(0, m.top_n + m.rank_buffer).filter((t) => held.includes(t)).slice(0, m.top_n);
+  const fill = ok.filter((t) => !keep.includes(t)).slice(0, m.top_n - keep.length);
+  return { tickers: [...keep, ...fill].filter((t) => !held.includes(t)), why: "" };
+}
+
 function glanceState(b) {
   if (!b.enabled) return ["paused", "Paused"];
   if (marketOpen() === false) return ["closed", "Market closed"];
@@ -1720,7 +1793,7 @@ function glanceStatus(b) {
   const label = { on: "Trading", closed: "Closed", paused: "Paused" }[st];
   return `<div class="g g-status">
     <div class="g-who"><b>${esc(b.name)}</b><span class="g-chip ${st}"><i></i>${label}</span></div>
-    <div class="g-fig"><span class="g-label">Value</span><span class="g-big num">${money(b.equity, 2)}</span><span class="g-sub num ${cls(b.pnl)}">${signedMoney(b.pnl)} all-time</span></div>
+    <div class="g-fig"><span class="g-label">Value</span><span class="g-big num">${money(b.equity, 2)}</span><span class="g-sub num ${cls(b.pnl)}">${b.pnl >= 0 ? "+" : "−"}${money(Math.abs(b.pnl), 2)} all-time</span></div>
     <div class="g-fig"><span class="g-label">Today</span><span class="g-big num ${cls(b.day_change)}">${b.day_change >= 0 ? "+" : "−"}${money(Math.abs(b.day_change), 2)}</span><span class="g-sub num ${cls(b.day_change)}">${pct(b.day_change_pct || 0, 2) || "0.00%"}</span></div>
     <svg class="spark g-spark" viewBox="0 0 320 80" preserveAspectRatio="none" aria-hidden="true"></svg>
   </div>`;
@@ -1756,9 +1829,13 @@ function glanceHoldings(b) {
     </div>`;
   });
   const more = pos.length > 3 ? `<p class="g-more">+${pos.length - 3} more</p>` : "";
-  const held = new Set(pos.map((p) => p.ticker));
-  const ready = (b.intraday_signals || []).filter((r) => r.qualifies && !held.has(r.ticker)).slice(0, 3).map((r) => r.ticker);
-  const next = st !== "on" ? "—" : s.style === "intraday" && ready.length ? `${ready.map(esc).join(" · ")} <span class="up">ready</span>` : `Watching ${s.universe.length} stocks`;
+  const buys = nextBuys(b);
+  const next =
+    st !== "on"
+      ? "—"
+      : buys.tickers.length
+        ? `${buys.tickers.slice(0, 3).map(esc).join(" · ")} <span class="up">ready</span>`
+        : { cap: "Hit today's buy limit", late: `No new buys after ${clock12(s.intraday.no_entries_after)}`, full: "Slots full" }[buys.why] || `Watching ${s.universe.length} stocks`;
   return `<div class="g g-holdings">
     <p class="g-note ${st}">${note}</p>
     ${rows.length ? rows.join("") + more : `<p class="g-empty">Not holding anything</p>`}
@@ -1786,19 +1863,23 @@ function glanceTrades(b) {
 function glancePicks(b) {
   const s = b.settings;
   const day = s.style === "intraday";
-  // after the close the day-trading list is the last session's, so nothing is "ready"
-  const live = marketOpen() !== false;
+  // only what the next check would really buy gets a chip; an older list (paused, closed, before the first check) gets none
+  const live = glanceFresh(b);
+  const buys = new Set(nextBuys(b).tickers);
+  const held = new Set(b.positions.map((p) => p.ticker));
   const list = day ? (b.intraday_signals || []).slice(0, 3) : b.ranking.slice(0, 3);
   const rows = list.map((r) => {
     const v = day ? r.move : r.score;
-    return `<div class="g-pick"><b class="g-tk">${esc(r.ticker)}</b><span class="num ${cls(v)}">${pct(v, day ? 2 : 1)}</span>${r.qualifies && (live || !day) ? `<span class="g-chip on">${day ? "Ready" : "Buy"}</span>` : ""}</div>`;
+    const chip = buys.has(r.ticker) ? `<span class="g-chip on">${day ? "Ready" : "Buy"}</span>` : held.has(r.ticker) ? `<span class="g-chip closed">Held</span>` : "";
+    return `<div class="g-pick"><b class="g-tk">${esc(r.ticker)}</b><span class="num ${cls(v)}">${pct(v, day ? 2 : 1)}</span>${chip}</div>`;
   });
   const empty = marketOpen() === false ? "Shows up after the open" : day ? "Nothing running yet" : "Ranks after the first run";
   const ai = (b.ai?.picks || []).map((p) => p.ticker);
+  const aiNone = s.ai_share === 0 ? "off" : b.ai?.status === "error" ? "unavailable" : "none yet";
   return `<div class="g g-picks">
     <p class="g-label">${!day ? "Momentum leaders" : live ? "Running now" : "At the last check"}</p>
     ${rows.length ? rows.join("") : `<p class="g-empty">${empty}</p>`}
-    <p class="g-ai"><span class="g-label">AI picks</span> ${ai.length ? ai.map(esc).join(" · ") : `<span class="g-dim">none yet</span>`}</p>
+    <p class="g-ai"><span class="g-label">AI picks</span> ${ai.length && s.ai_share > 0 ? ai.map(esc).join(" · ") : `<span class="g-dim">${aiNone}</span>`}</p>
   </div>`;
 }
 
@@ -1813,7 +1894,7 @@ function glanceSettings(b) {
     <div><p class="g-label">Risk</p><p class="g-risk" style="color:${col}">${esc(riskName(s.risk))}</p><div class="g-meter" aria-hidden="true">${segs}</div></div>
     <div class="g-row"><span class="g-label">Trading</span><span class="g-chip ${s.enabled ? "on" : "paused"}"><i></i>${s.enabled ? "On" : "Off"}</span></div>
     <div class="g-row"><span class="g-label">Money</span><b class="num">${money(s.starting_cash)}</b></div>
-    <div class="g-row"><span class="g-label">Split</span><span class="num">${100 - aiPct}% day · ${aiPct}% AI</span></div>
+    <div class="g-row"><span class="g-label">Split</span><span class="num">${100 - aiPct}% ${s.style === "intraday" ? "day" : "momentum"} · ${aiPct}% AI</span></div>
   </div>`;
 }
 
