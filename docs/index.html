@@ -47,13 +47,16 @@
   <nav class="office-nav" id="office-nav" hidden aria-label="This building's monitors">
     <button type="button" class="o-back" id="o-back">← City</button>
     <span class="o-bld"><button type="button" id="o-prev" aria-label="Previous building">‹</button><b id="o-name"></b><button type="button" id="o-next" aria-label="Next building">›</button></span>
-    <button type="button" data-mon="">All screens</button>
-    <button type="button" data-mon="holdings">Holdings</button>
-    <button type="button" data-mon="trades">Trades</button>
-    <button type="button" data-mon="picks">Picks</button>
-    <button type="button" data-mon="settings">Settings</button>
+    <span class="o-mons">
+      <button type="button" data-mon="">All<span class="o-wide"> screens</span></button>
+      <button type="button" data-mon="holdings">Holdings</button>
+      <button type="button" data-mon="trades">Trades</button>
+      <button type="button" data-mon="picks">Picks</button>
+      <button type="button" data-mon="settings">Settings</button>
+    </span>
   </nav>
   <div class="bubble" id="bubble" hidden aria-live="polite"></div>
+  <section class="mon focused flat" id="flat-mon" hidden><header class="mon-bar"><i></i><b></b></header></section>
   <div class="fader" id="fader"></div>
 
   <div class="modal" id="connect-modal" hidden role="dialog" aria-modal="true" aria-labelledby="c-title">

@@ -620,6 +620,7 @@ function resize() {
     const pose = office.focus ? monitorPose(office.focus) : overviewPose();
     officeCam.position.copy(pose.p);
     office.look.copy(pose.t);
+    syncFlat();
   }
 }
 addEventListener("resize", resize);
@@ -877,7 +878,9 @@ function buildOffice() {
   const key = new THREE.DirectionalLight(0xe9e4ff, 1.0);
   key.position.set(1.5, 4, 4);
   officeScene.add(key);
-  office.glowLight = place(new THREE.PointLight(0x22d3ee, 2.4, 4, 1.5), 0, 1.35, -0.5, officeScene);
+  office.glowLight = place(new THREE.PointLight(0x22d3ee, 1.8, 4, 1.5), 0, 1.35, -0.5, officeScene);
+  // a soft lamp over the chair so the trader reads against the dark room
+  place(new THREE.PointLight(0xfff1dc, 4, 4.5, 1.6), 0.4, 2.7, 1.5, officeScene);
 
   const floor = new THREE.Mesh(new THREE.PlaneGeometry(18, 18), new THREE.MeshStandardMaterial({ color: 0x120d2e, roughness: 0.9 }));
   floor.rotation.x = -Math.PI / 2;
@@ -956,9 +959,9 @@ function buildOffice() {
 
 /* ---------- the trader: a blocky figure dressed for his sector ---------- */
 const OUTFITS = {
-  tech: { skin: 0xb07a4f, hair: 0x1b120b, top: 0x313a4f, arm: 0x313a4f, fore: 0x313a4f, pants: 0x1f2433, shoes: 0xe5e7eb, gear: ["hood", "headphones"] },
+  tech: { skin: 0xb07a4f, hair: 0x1b120b, top: 0x4a5370, arm: 0x4a5370, fore: 0x4a5370, pants: 0x1f2433, shoes: 0xe5e7eb, gear: ["hood", "headphones"] },
   energy: { skin: 0xf0c8a0, hair: 0x6b3f1d, top: 0x3a3a44, arm: 0x3a3a44, fore: 0x3a3a44, pants: 0x27406b, shoes: 0x6b4423, gear: ["hardhat", "vest", "beard"] },
-  finance: { skin: 0x7a4a2a, hair: 0x111111, top: 0x1b2a4a, arm: 0x1b2a4a, fore: 0x1b2a4a, pants: 0x1b2a4a, shoes: 0x0b0b0b, gear: ["suit", "glasses"] },
+  finance: { skin: 0x8a5532, hair: 0x111111, top: 0x2c406e, arm: 0x2c406e, fore: 0x2c406e, pants: 0x24365e, shoes: 0x0b0b0b, gear: ["suit", "glasses"] },
   consumer: { skin: 0xd9a36c, hair: 0x3d2414, top: 0xec4899, arm: 0xec4899, fore: 0xd9a36c, pants: 0x7aa7d9, shoes: 0xf5f5f5, gear: ["cap"] },
 };
 
@@ -994,7 +997,8 @@ function buildDude(o, accent) {
   const m = (c, opts) => new THREE.MeshStandardMaterial({ color: c, roughness: 0.8, metalness: 0.05, ...opts });
   const root = new THREE.Group();
   root.position.set(0, 0, 0.45);
-  const skin = m(o.skin);
+  // skin glows a little on its own so the colored monitor light doesn't turn it green
+  const skin = m(new THREE.Color(o.skin).multiplyScalar(0.65), { emissive: new THREE.Color(o.skin).multiplyScalar(0.36) });
   const hair = m(o.hair);
   // seated legs
   for (const side of [-1, 1]) {
@@ -1008,7 +1012,7 @@ function buildDude(o, accent) {
   const neck = place(new THREE.Group(), 0, 0.66, 0, torso);
   neck.rotation.order = "YXZ";
   const faces = { neutral: faceTexture(o.skin, "neutral"), happy: faceTexture(o.skin, "happy"), sad: faceTexture(o.skin, "sad") };
-  const faceMat = m(0xffffff, { map: faces.neutral });
+  const faceMat = m(0xa6a6a6, { map: faces.neutral, emissiveMap: faces.neutral, emissive: 0x5c5c5c });
   // box faces: +x, -x, +y (top), -y, +z (back of the head), -z (face, toward the monitors)
   const head = new THREE.Mesh(new THREE.BoxGeometry(0.44, 0.44, 0.44), [skin, skin, hair, skin, hair, faceMat]);
   place(head, 0, 0.24, 0, neck);
@@ -1019,23 +1023,23 @@ function buildDude(o, accent) {
     const sh = place(new THREE.Group(), side * 0.37, 0.58, 0, torso);
     place(obox(0.17, 0.32, 0.17, o.arm), 0, -0.14, 0, sh);
     const el = place(new THREE.Group(), 0, -0.3, 0, sh);
-    place(obox(0.16, 0.28, 0.16, o.fore), 0, -0.13, 0, el);
+    place(o.fore === o.skin ? new THREE.Mesh(new THREE.BoxGeometry(0.16, 0.28, 0.16), skin) : obox(0.16, 0.28, 0.16, o.fore), 0, -0.13, 0, el);
     place(new THREE.Mesh(new THREE.BoxGeometry(0.15, 0.12, 0.15), skin), 0, -0.31, 0, el);
     arms[name] = { sh, el };
   }
 
   const g = new Set(o.gear || []);
-  const accentGlow = glow(accent, 1.4);
+  const accentGlow = glow(accent, 0.7);
   if (g.has("hood")) place(obox(0.5, 0.24, 0.13, o.top), 0, 0.64, 0.17, torso);
   if (g.has("headphones")) {
     place(obox(0.5, 0.05, 0.09, 0x111827), 0, 0.48, 0, neck);
     for (const s of [-1, 1]) {
       place(obox(0.07, 0.17, 0.17, 0x111827), s * 0.255, 0.26, 0, neck);
-      place(new THREE.Mesh(new THREE.BoxGeometry(0.075, 0.06, 0.06), accentGlow), s * 0.26, 0.26, 0.0, neck);
+      place(new THREE.Mesh(new THREE.BoxGeometry(0.012, 0.045, 0.045), accentGlow), s * 0.296, 0.26, 0.0, neck);
     }
   }
   if (g.has("hardhat")) {
-    const yellow = m(0xfacc15, { roughness: 0.4 });
+    const yellow = m(0xe0a800, { roughness: 0.7 });
     place(new THREE.Mesh(new THREE.CylinderGeometry(0.22, 0.26, 0.16, 20), yellow), 0, 0.53, 0, neck);
     place(new THREE.Mesh(new THREE.CylinderGeometry(0.33, 0.33, 0.025, 24), yellow), 0, 0.46, 0, neck);
   }
@@ -1065,9 +1069,9 @@ function buildDude(o, accent) {
 function buildChair(accent, parent) {
   const dark = 0x1d1838;
   place(obox(0.56, 0.08, 0.52, dark), 0, 0.46, 0.45, parent);
-  const back = place(obox(0.56, 0.5, 0.08, dark), 0, 0.78, 0.76, parent);
+  const back = place(obox(0.56, 0.38, 0.08, dark), 0, 0.72, 0.76, parent);
   back.rotation.x = 0.12;
-  const stripe = place(new THREE.Mesh(new THREE.BoxGeometry(0.08, 0.5, 0.085), glow(accent, 1.3)), 0, 0.78, 0.765, parent);
+  const stripe = place(new THREE.Mesh(new THREE.BoxGeometry(0.08, 0.38, 0.085), glow(accent, 1.3)), 0, 0.72, 0.765, parent);
   stripe.rotation.x = 0.12;
   parent.add(rod(new THREE.Vector3(0, 0.08, 0.45), new THREE.Vector3(0, 0.42, 0.45), 0.035, 0x2a2350));
   for (let i = 0; i < 5; i++) {
@@ -1152,11 +1156,14 @@ function dressOffice(b) {
   }
   const dressing = new THREE.Group();
   office.dressing = dressing;
-  buildChair(accent, dressing);
+  // the chair and the trader swivel together around the chair post
+  office.seat = place(new THREE.Group(), 0, 0, 0.45, dressing);
+  const seatInner = place(new THREE.Group(), 0, 0, -0.45, office.seat);
+  buildChair(accent, seatInner);
   office.anims = buildProps(b.id, accent, dressing);
   const outfit = OUTFITS[b.id] || { skin: 0xc68642, hair: 0x2b1a0e, top: accent.getHex(), arm: accent.getHex(), fore: accent.getHex(), pants: 0x1f2433, shoes: 0xe5e7eb, gear: [] };
   office.dude = buildDude(outfit, accent);
-  dressing.add(office.dude.root);
+  seatInner.add(office.dude.root);
   officeScene.add(dressing);
   office.edgeMat.emissive.copy(accent);
   office.kbGlow.emissive.copy(accent);
@@ -1166,40 +1173,51 @@ function dressOffice(b) {
     m.screenMat.color.copy(accent).multiplyScalar(0.45);
   }
   document.documentElement.style.setProperty("--acc", b.color);
+  $("flat-mon").style.setProperty("--acc", b.color);
   office.act = null;
   $("bubble").hidden = true;
 }
 
 /* ---------- poses ---------- */
-// Arm angles: sh = [x, z] at the shoulder (x swings the arm forward, z sideways), el = elbow bend.
+// Each arm is aimed by direction, in the trader's own space (he faces -z, his right hand is +x):
+// [upper arm direction, forearm direction].
 function poseTargets(name, t) {
   const typing = () => {
-    const k = Math.sin(t * 15);
+    const k = 0.05 * Math.sin(t * 15);
     const cycle = Math.floor(t / 9);
     const glance = t % 9 > 5.6 && t % 9 < 7.2 ? (cycle % 2 ? 0.55 : -0.5) : 0;
     return {
-      torsoX: -0.08, headX: -0.12 + 0.03 * Math.sin(t * 1.7), headY: glance, bounce: 0,
-      LshX: 0.82 + 0.05 * k, LshZ: 0.14, LelX: 0.78, RshX: 0.82 - 0.05 * k, RshZ: -0.14, RelX: 0.78,
+      torsoX: -0.08, headX: -0.12 + 0.03 * Math.sin(t * 1.7), headY: glance, bounce: 0, spin: 0,
+      L: [[0.12, -0.8, -0.55], [0.22, -0.12 + k, -1]],
+      R: [[-0.12, -0.8, -0.55], [-0.22, -0.12 - k, -1]],
     };
   };
   switch (name) {
     case "relaxed":
       return {
-        torsoX: 0.2, headX: 0.18, headY: 0.3 * Math.sin(t * 0.35), bounce: 0.008 * Math.sin(t * 1.4),
-        LshX: 3.55, LshZ: -0.75, LelX: 2.3, RshX: 3.55, RshZ: 0.75, RelX: 2.3,
+        torsoX: 0.2, headX: 0.15, headY: 0.3 * Math.sin(t * 0.35), bounce: 0.008 * Math.sin(t * 1.4), spin: 0.12 * Math.sin(t * 0.25),
+        L: [[-0.75, 0.62, 0.18], [0.92, 0.2, 0.36]],
+        R: [[0.75, 0.62, 0.18], [-0.92, 0.2, 0.36]],
       };
-    case "cheer":
+    case "cheer": {
+      const w = 0.15 * Math.sin(t * 12);
       return {
-        torsoX: 0.12, headX: 0.3, headY: 0, bounce: 0.07 * Math.abs(Math.sin(t * 9)),
-        LshX: Math.PI, LshZ: -0.45 + 0.12 * Math.sin(t * 12), LelX: 0.2, RshX: Math.PI, RshZ: 0.45 - 0.12 * Math.sin(t * 12), RelX: 0.2,
+        torsoX: 0.1, headX: 0.3, headY: 0, bounce: 0.07 * Math.abs(Math.sin(t * 9)), spin: 0.35 * Math.sin(t * 5),
+        L: [[-0.5 - w, 1, -0.05], [-0.3 - w, 1, -0.1]],
+        R: [[0.5 + w, 1, -0.05], [0.3 + w, 1, -0.1]],
       };
+    }
     case "facepalm":
       return {
-        torsoX: -0.2, headX: -0.45, headY: 0.12 * Math.sin(t * 6), bounce: 0,
-        LshX: 0.6, LshZ: 0.1, LelX: 0.9, RshX: 2.0, RshZ: -0.3, RelX: 2.2,
+        torsoX: -0.16, headX: -0.22, headY: 0.1 * Math.sin(t * 6), bounce: 0, spin: 0,
+        L: [[0.12, -0.8, -0.55], [0.22, -0.1, -1]],
+        R: [[-0.25, 0.1, -1], [-0.7, 0.72, 0.05]],
       };
-    case "wave":
-      return { ...typing(), headY: -0.55, headX: 0.05, RshX: 2.75, RshZ: 0.35 + 0.3 * Math.sin(t * 11), RelX: 0.45 };
+    case "wave": {
+      const base = typing();
+      // swivel round to face the camera behind him, then wave
+      return { ...base, spin: -2.75, torsoX: 0.05, headX: 0.12, headY: 0, L: [[-0.25, -0.9, 0.1], [-0.1, -0.6, -0.8]], R: [[0.75, 0.75, 0.05], [0.2 + 0.5 * Math.sin(t * 10), 1, 0]] };
+    }
     case "nod":
       return { ...typing(), headX: -0.1 + 0.2 * Math.max(0, Math.sin(t * 8)) };
     default:
@@ -1207,25 +1225,39 @@ function poseTargets(name, t) {
   }
 }
 
+const DOWN = new THREE.Vector3(0, -1, 0);
+const _aim = new THREE.Quaternion();
+const _inv = new THREE.Quaternion();
+const _dir = new THREE.Vector3();
+function aimArm(arm, [upper, fore], k) {
+  _aim.setFromUnitVectors(DOWN, _dir.set(...upper).normalize());
+  arm.sh.quaternion.slerp(_aim, k);
+  // the forearm direction is given in the trader's space; turn it into the shoulder's own space
+  _inv.copy(arm.sh.quaternion).invert();
+  _aim.setFromUnitVectors(DOWN, _dir.set(...fore).normalize().applyQuaternion(_inv));
+  arm.el.quaternion.slerp(_aim, k);
+}
+
 function animateDude(name, t, dt) {
   const d = office.dude;
   if (!d) return;
   const want = poseTargets(name, t);
-  if (!d.cur) d.cur = { ...want };
-  const k = REDUCED ? 1 : 1 - Math.exp(-dt * 9);
-  for (const key of Object.keys(want)) d.cur[key] += (want[key] - d.cur[key]) * k;
-  const c = d.cur;
+  const k = REDUCED || !d.posed ? 1 : 1 - Math.exp(-dt * 9);
+  d.posed = true;
+  const c = (d.cur ||= { torsoX: want.torsoX, headX: want.headX, headY: want.headY, bounce: want.bounce, spin: want.spin });
+  for (const key of ["torsoX", "headX", "headY", "bounce"]) c[key] += (want[key] - c[key]) * k;
+  // the chair turns slower than the arms move
+  c.spin += (want.spin - c.spin) * (REDUCED || k === 1 ? 1 : 1 - Math.exp(-dt * 4.5));
+  if (office.seat) office.seat.rotation.y = c.spin;
   d.hips.position.y = 0.5 + c.bounce;
   d.torso.rotation.x = c.torsoX;
   d.neck.rotation.set(c.headX, c.headY, 0);
-  d.arms.L.sh.rotation.set(c.LshX, 0, c.LshZ);
-  d.arms.L.el.rotation.x = c.LelX;
-  d.arms.R.sh.rotation.set(c.RshX, 0, c.RshZ);
-  d.arms.R.el.rotation.x = c.RelX;
+  aimArm(d.arms.L, want.L, k);
+  aimArm(d.arms.R, want.R, k);
   const mood = name === "cheer" || name === "wave" ? "happy" : name === "facepalm" ? "sad" : "neutral";
   if (mood !== d.mood) {
     d.mood = mood;
-    d.faceMat.map = d.faces[mood];
+    d.faceMat.map = d.faceMat.emissiveMap = d.faces[mood];
     d.faceMat.needsUpdate = true;
   }
 }
@@ -1252,7 +1284,7 @@ function act(name, ms) {
 function greet() {
   const b = bot();
   if (!b || office.focus) return;
-  act("wave", 1800);
+  act("wave", 2600);
   say(dudeLine(b));
 }
 function reactTo(t) {
@@ -1262,8 +1294,9 @@ function reactTo(t) {
     say(`Bought ${t.shares} ${t.ticker} at ${money(t.price, 2)}.`);
     return;
   }
+  // made or lost money? Use what the shares cost when the server sends it, else read the reason
   const sign = r.match(/\(([+-])\d/);
-  const mood = /^Take profit/.test(r) ? 1 : /^Stop/.test(r) ? -1 : sign ? (sign[1] === "+" ? 1 : -1) : 0;
+  const mood = t.cost ? Math.sign(t.price - t.cost) : /^Take profit/.test(r) ? 1 : /^Stop/.test(r) ? -1 : sign ? (sign[1] === "+" ? 1 : -1) : 0;
   if (mood > 0) {
     act("cheer", 2600);
     say(`Sold ${t.ticker}! ${r}.`);
@@ -1293,8 +1326,10 @@ function setOfficeMode(on) {
   renderPass.scene = on ? officeScene : scene;
   renderPass.camera = on ? officeCam : camera;
   bloom.strength = on ? 0.5 : 0.85;
-  bloom.threshold = on ? 0.35 : 0.18;
+  bloom.threshold = on ? 0.55 : 0.18;
   if (!on) $("bubble").hidden = true;
+  syncFlat();
+  layoutInsets();
   canvas.classList.remove("hovering");
   canvas.setAttribute("aria-label", on ? "A trader at his desk. Click a monitor to zoom in." : "3D city of trading bots. Click a building to visit its trader.");
 }
@@ -1346,6 +1381,36 @@ function monitorPose(id) {
   // nudge up a little so the monitor sits in the middle of the free space, not behind the buttons
   const t = m.group.position.clone().add(new THREE.Vector3(0, -((H < 700 ? 22 : 16) / (PX_PER_M * scale)), 0).applyQuaternion(m.group.quaternion));
   return { p: m.group.position.clone().addScaledVector(n, d).add(t.clone().sub(m.group.position)), t };
+}
+
+// On phones the open monitor's page moves into a flat panel that fills the screen, so it stays readable.
+function narrow() {
+  return innerWidth <= 760;
+}
+function syncFlat() {
+  const id = office.active && office.focus && !office.busy && narrow() ? office.focus : null;
+  for (const m of Object.values(office.mons)) {
+    const home = m.id === id ? $("flat-mon") : m.el;
+    if (m.body.parentElement !== home) home.appendChild(m.body);
+  }
+  $("flat-mon").hidden = !id;
+  if (id) $("flat-mon").querySelector(".mon-bar b").textContent = office.mons[id].title;
+}
+
+// keep the banner and the flat monitor clear of the top bar and the bottom buttons, whatever their size
+function layoutInsets() {
+  const app = $("app");
+  const hudBottom = document.querySelector(".hud").getBoundingClientRect().bottom;
+  app.style.setProperty("--hud-bottom", `${Math.round(hudBottom)}px`);
+  const banner = $("banner");
+  const top = office.active && !banner.hidden ? banner.getBoundingClientRect().bottom : hudBottom;
+  app.style.setProperty("--top-inset", `${Math.round(top + 10)}px`);
+  const nav = $("office-nav");
+  if (!nav.hidden) app.style.setProperty("--bottom-inset", `${Math.round(app.clientHeight - nav.getBoundingClientRect().top + 10)}px`);
+}
+if (window.ResizeObserver) {
+  const ro = new ResizeObserver(layoutInsets);
+  for (const el of [document.querySelector(".hud"), $("banner"), $("office-nav")]) ro.observe(el);
 }
 
 function syncMonitors() {
@@ -1425,6 +1490,7 @@ async function focusMonitor(id) {
   try {
     office.focus = id;
     syncMonitors();
+    syncFlat();
     $("bubble").hidden = true;
     if (!id) office.dude.root.visible = true;
     await flyTo(id ? monitorPose(id) : overviewPose(), id ? 650 : 750, (k) => {
@@ -1433,8 +1499,11 @@ async function focusMonitor(id) {
   } finally {
     office.busy = false;
   }
+  layoutInsets();
+  syncFlat();
   if (id) office.mons[id].body.focus?.({ preventScroll: true });
 }
+
 
 function stepBuilding(dir) {
   const ids = STATE.bots.map((b) => b.id);
@@ -1602,13 +1671,14 @@ function drawSpark(svg, b) {
     <text x="2" y="10">${esc(h[0].date)}</text><text x="${W - 2}" y="10" text-anchor="end">${esc(h[h.length - 1].date)}</text>`;
 }
 
+const plTag = (pl) => ` <b class="pl ${cls(pl)}">${pl >= 0 ? "+" : "−"}${money(Math.abs(pl), 2)}</b>`;
 function tradesHTML(b) {
   if (!b.trades.length) return `<p class="empty">No trades yet.</p>`;
   return b.trades
     .slice(0, 60)
     .map(
       (t) => `<div class="trade"><span class="side ${t.side}">${t.side.toUpperCase()}</span>
-      <span class="what">${t.shares} ${esc(t.ticker)} @ ${money(t.price, 2)}<span class="sleeve ${t.sleeve}">${SLEEVE_TAG[t.sleeve] || "MOM"}</span></span>
+      <span class="what">${t.shares} ${esc(t.ticker)} @ ${money(t.price, 2)}<span class="sleeve ${t.sleeve}">${SLEEVE_TAG[t.sleeve] || "MOM"}</span>${t.side === "sell" && t.cost ? plTag((t.price - t.cost) * t.shares) : ""}</span>
       <span class="when">${esc(t.date)}${t.time ? " " + esc(t.time) : ""}</span><span class="why">${esc(t.reason)}</span></div>`,
     )
     .join("");
@@ -1677,16 +1747,16 @@ function settingsHTML(b) {
   const opt = (list, cur) => list.map(([v, l]) => `<option value="${v}" ${v === cur ? "selected" : ""}>${l}</option>`).join("");
   const dayFields = `
     <div class="two">
-      <div class="field"><label for="s-entry">Buy when up at least (%)</label><input id="s-entry" type="number" min="0.05" max="5" step="0.05" value="${num1(day.entry_pct * 100)}"></div>
+      <div class="field"><label for="s-entry">Buy when up at least (%)</label><input id="s-entry" type="number" min="0.05" max="5" step="any" value="${num1(day.entry_pct * 100)}"></div>
       <div class="field"><label for="s-lookmin">…over the last (minutes)</label><input id="s-lookmin" type="number" min="2" max="120" step="1" value="${day.lookback_minutes}"></div>
     </div>
     <div class="two">
-      <div class="field"><label for="s-tp">Take profit at (%)</label><input id="s-tp" type="number" min="0.1" max="20" step="0.1" value="${num1(day.take_profit_pct * 100)}"></div>
-      <div class="field"><label for="s-dstop">Stop at (%)</label><input id="s-dstop" type="number" min="0.1" max="20" step="0.1" value="${num1(day.stop_pct * 100)}"></div>
+      <div class="field"><label for="s-tp">Take profit at (%)</label><input id="s-tp" type="number" min="0.1" max="20" step="any" value="${num1(day.take_profit_pct * 100)}"></div>
+      <div class="field"><label for="s-dstop">Stop at (%)</label><input id="s-dstop" type="number" min="0.1" max="20" step="any" value="${num1(day.stop_pct * 100)}"></div>
     </div>
     <div class="two">
       <div class="field"><label for="s-maxpos">Day trades open at once</label><input id="s-maxpos" type="number" min="1" max="10" value="${day.max_positions}"></div>
-      <div class="field"><label for="s-cool">Wait before re-buying (minutes)</label><input id="s-cool" type="number" min="0" max="390" step="5" value="${day.cooldown_minutes}"></div>
+      <div class="field"><label for="s-cool">Wait before re-buying (minutes)</label><input id="s-cool" type="number" min="0" max="390" step="1" value="${day.cooldown_minutes}"></div>
     </div>
     <span class="help">Buys a stock that is up this much over the last few minutes and above VWAP. Sells at the take profit, at the stop, when the run fades, and always by ${esc(day.close_out_at)} so nothing is held overnight. No new buys after ${esc(day.no_entries_after)}.</span>`;
   const swingFields = `
@@ -1694,10 +1764,10 @@ function settingsHTML(b) {
       <div class="field"><label for="s-topn">Momentum stocks held</label><input id="s-topn" type="number" min="1" max="10" value="${d.momentum.top_n}"></div>
       <div class="field"><label for="s-look">Momentum looks back</label><select id="s-look">${opt(LOOKBACKS, d.momentum.lookback_days)}</select></div>
     </div>`;
-  return `<form class="settings" id="settings-form">
+  return `<form class="settings" id="settings-form" novalidate>
     <div class="toggle"><input type="checkbox" id="s-enabled" ${d.enabled ? "checked" : ""}><label for="s-enabled">Trading on (untick to pause this building)</label></div>
     <div class="field"><label for="s-cash">Money in this building ($)</label>
-      <input id="s-cash" type="number" min="0" step="100" value="${d.starting_cash}">
+      <input id="s-cash" type="number" min="0" step="1" value="${d.starting_cash}">
       <span class="help">Raising it adds cash on the next check; lowering it takes cash out (only uninvested cash).</span></div>
     <div class="field"><label for="s-style">Trading style</label><select id="s-style">${opt(STYLES, d.style)}</select></div>
     <div class="field"><span class="flabel">Strategy split</span>
@@ -1727,10 +1797,10 @@ function settingsHTML(b) {
       <div class="field"><label for="s-aievery">AI re-picks every</label><select id="s-aievery">${opt(AI_EVERY, d.ai.review_every_minutes)}</select></div>
     </div>
     <div class="two">
-      <div class="field"><label for="s-stop">Stop loss (%)</label><input id="s-stop" type="number" min="1" max="90" step="1" value="${Math.round(d.momentum.stop_loss_pct * 100)}"></div>
-      <div class="field"><label for="s-trail">Trailing stop (%)</label><input id="s-trail" type="number" min="1" max="90" step="1" value="${Math.round(d.momentum.trailing_stop_pct * 100)}"></div>
+      <div class="field"><label for="s-stop">Stop loss (%)</label><input id="s-stop" type="number" min="1" max="90" step="any" value="${num1(d.momentum.stop_loss_pct * 100)}"></div>
+      <div class="field"><label for="s-trail">Trailing stop (%)</label><input id="s-trail" type="number" min="1" max="90" step="any" value="${num1(d.momentum.trailing_stop_pct * 100)}"></div>
     </div>
-    <div class="field"><label for="s-hold">Hold at least (minutes)</label><input id="s-hold" type="number" min="0" max="10080" step="15" value="${d.min_hold_minutes}">
+    <div class="field"><label for="s-hold">Hold at least (minutes)</label><input id="s-hold" type="number" min="0" max="10080" step="1" value="${d.min_hold_minutes}">
       <span class="help">${isDay ? "These three apply to the AI picks." : "These apply to every holding."} Stop loss sells when a stock falls this far below what the bot paid; trailing stop sells a winner that falls this far from its high. Each AI review is one Claude request, roughly 3–5¢.</span></div>
     </details>
     <div class="actions"><button type="submit" class="primary" id="s-save">${MODE === "server" ? (api.unlocked() ? "Save changes" : "Unlock to save") : gh.connected() ? "Save to GitHub" : "Save changes"}</button><button type="button" id="s-reset">Undo changes</button></div>
