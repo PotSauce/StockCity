@@ -608,9 +608,114 @@ ul.next b { font-family: var(--font-data); }
 /* the cards scroll when there are more than fit: fade the bottom edge so it's clear there's more */
 .flat-glance.more { -webkit-mask-image: linear-gradient(#000 calc(100% - 26px), transparent); mask-image: linear-gradient(#000 calc(100% - 26px), transparent); }
 
+/* ---------- City Hall: the mayor's board (a 1600 × 900 page, read at about half size), and its phone panel ---------- */
+#app.in-hall .o-mons { display: none; }
+.o-zoom { display: none; }
+#app.in-hall .o-zoom { display: inline-block; color: var(--ink); }
+.board {
+  display: flex; flex-direction: column; box-sizing: border-box; overflow: hidden; border-radius: 4px; color: var(--ink);
+  background: radial-gradient(120% 90% at 50% 0%, color-mix(in srgb, var(--acc) 10%, #0a0820), #070516 70%);
+  box-shadow: 0 0 0 2px color-mix(in srgb, var(--acc) 45%, transparent), 0 0 60px color-mix(in srgb, var(--acc) 22%, transparent);
+  cursor: zoom-in;
+}
+.board.focused { cursor: zoom-out; }
+.board .mon-bar { font-size: 26px; padding: 14px 26px; gap: 14px; }
+.board .mon-bar i { width: 16px; height: 16px; box-shadow: 0 0 14px var(--acc); }
+.hb-when { margin-left: auto; color: var(--ink-dim); font-weight: 500; letter-spacing: 0.08em; white-space: nowrap; }
+.hb-body { flex: 1; min-height: 0; display: flex; flex-direction: column; gap: 22px; padding: 22px 28px 26px; outline: none; font-family: var(--font-display); }
+.hb-sum { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 24px; }
+.hb-fig { display: flex; flex-direction: column; gap: 8px; min-width: 0; }
+.hb-fig .g-label { font-size: 22px; }
+.hb-big { font: 600 54px/1 var(--font-data); font-variant-numeric: tabular-nums; letter-spacing: -0.02em; white-space: nowrap; }
+.hb-cols { flex: 1; min-height: 0; display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 22px; }
+/* a column per building, topped with its colour */
+.hb-col { --c: var(--acc); display: flex; flex-direction: column; min-width: 0; min-height: 0; overflow: hidden; border-radius: 8px; border-top: 6px solid var(--c); background: color-mix(in srgb, var(--c) 7%, transparent); }
+.hb-head {
+  display: flex; flex-direction: column; align-items: flex-start; gap: 8px; width: 100%; padding: 14px 18px 12px;
+  background: none; border: 0; border-bottom: 2px solid color-mix(in srgb, var(--c) 30%, transparent); border-radius: 0; text-align: left; color: inherit; cursor: pointer;
+}
+.hb-head:hover { background: color-mix(in srgb, var(--c) 14%, transparent); }
+.hb-head:focus-visible { outline: 3px solid var(--c); outline-offset: -3px; }
+.hb-head b { font: 700 32px/1.05 var(--font-display); letter-spacing: 0.03em; color: var(--c); }
+.hb-head b::after { content: " ›"; color: var(--ink-dim); }
+.hb-hv { display: flex; flex-wrap: wrap; align-items: baseline; gap: 6px 14px; font: 600 26px/1 var(--font-data); font-variant-numeric: tabular-nums; white-space: nowrap; }
+.hb-paused { font: 700 18px/1 var(--font-display); letter-spacing: 0.12em; text-transform: uppercase; color: var(--warn); }
+.hb-rows { display: flex; flex-direction: column; padding: 2px 18px; }
+/* one stock: ticker, sleeve and gain on top; shares, value and the dollar gain under them.
+   The gains keep their width; a long ticker or value gives way. */
+.hb-row { display: grid; grid-template-columns: minmax(0, 1fr) auto; align-items: center; gap: 6px 12px; padding: 10px 0; border-bottom: 2px solid rgba(167, 139, 250, 0.1); }
+.hb-row .num { font-variant-numeric: tabular-nums; white-space: nowrap; }
+.hb-name { display: flex; align-items: center; gap: 12px; min-width: 0; overflow: hidden; }
+.hb-tk { font: 700 40px/1 var(--font-data); }
+.hb-row .sleeve { flex: none; margin: 0; font-size: 17px; padding: 4px 7px; }
+.hb-gain { font: 700 36px/1 var(--font-data); text-align: right; }
+.hb-sh { min-width: 0; font: 500 22px/1.1 var(--font-data); color: var(--ink-dim); overflow: hidden; text-overflow: ellipsis; }
+.hb-pl { font: 600 22px/1.1 var(--font-data); text-align: right; }
+.board .hb-row:nth-child(n + 6) { display: none; }
+.hb-more { margin: 8px 18px 0; font: 600 22px/1 var(--font-display); color: var(--ink-dim); }
+.hb-empty { margin: 18px; font: 600 28px/1.2 var(--font-display); color: var(--ink-dim); }
+.hb-cash { margin: auto 0 0; display: flex; justify-content: space-between; gap: 10px; padding: 12px 18px 14px; border-top: 2px solid rgba(167, 139, 250, 0.1); font: 600 24px/1 var(--font-display); color: var(--ink-dim); }
+.hb-cash b { font: 600 24px/1 var(--font-data); color: var(--ink); }
+
+/* phones: the same list, flat at the top, with the mayor in the space under it */
+.flat-hall { display: none; }
+@media (max-width: 760px), (max-height: 500px) {
+  #app.in-hall .flat-hall { display: flex; }
+  #app.in-hall .o-zoom { display: none; }
+}
+.flat-hall {
+  position: absolute; z-index: 4; left: 16px; right: 16px; top: var(--top-inset, 140px);
+  max-height: max(calc(100% - var(--top-inset, 140px) - var(--bottom-inset, 110px) - 160px), 220px);
+  flex-direction: column; overflow: hidden; border-radius: 6px; color: var(--ink);
+  background: radial-gradient(120% 90% at 50% 0%, color-mix(in srgb, var(--acc) 12%, #0a0820), #070516 70%);
+  box-shadow: 0 0 0 1px color-mix(in srgb, var(--acc) 45%, transparent), 0 0 22px color-mix(in srgb, var(--acc) 18%, transparent);
+  opacity: 0; visibility: hidden; transform: translateY(-6px);
+  transition: opacity 0.2s, transform 0.2s, visibility 0s 0.2s;
+}
+.flat-hall.show { opacity: 1; visibility: visible; transform: none; transition: opacity 0.2s, transform 0.2s; }
+.flat-hall .mon-bar { padding: 6px 10px; gap: 6px; font-size: 10px; }
+.flat-hall .mon-bar i { width: 6px; height: 6px; }
+.flat-hall .hb-body { overflow-y: auto; overscroll-behavior: contain; scrollbar-width: none; gap: 10px; padding: 10px; }
+.flat-hall .hb-body.more { -webkit-mask-image: linear-gradient(#000 calc(100% - 26px), transparent); mask-image: linear-gradient(#000 calc(100% - 26px), transparent); }
+.flat-hall .hb-sum { grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 8px 12px; }
+.flat-hall .hb-fig { gap: 3px; }
+.flat-hall .hb-fig .g-label { font-size: 9px; letter-spacing: 0.12em; }
+.flat-hall .hb-big { font-size: 19px; }
+.flat-hall .hb-cols { flex: none; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 8px; }
+.flat-hall .hb-col { container-type: inline-size; border-top-width: 3px; border-radius: 5px; }
+.flat-hall .hb-head { gap: 4px; padding: 7px 9px 6px; border-bottom-width: 1px; }
+.flat-hall .hb-head:focus-visible { outline-width: 2px; outline-offset: -2px; }
+.flat-hall .hb-head b { font-size: 13px; }
+.flat-hall .hb-hv { gap: 2px 8px; font-size: 11px; }
+.flat-hall .hb-paused { font-size: 8.5px; }
+.flat-hall .hb-rows { padding: 1px 9px; }
+.flat-hall .hb-row { gap: 2px 6px; padding: 5px 0; border-bottom-width: 1px; }
+.flat-hall .hb-name { gap: 6px; }
+.flat-hall .hb-tk { font-size: 14px; }
+.flat-hall .hb-row .sleeve { font-size: 7.5px; padding: 2px 3px; }
+.flat-hall .hb-gain { font-size: 13px; }
+.flat-hall .hb-sh, .flat-hall .hb-pl { font-size: 10.5px; }
+.flat-hall .hb-more { display: none; }
+/* the smallest phones: the dollar gain goes, the percentage above it stays */
+@container (max-width: 155px) {
+  .flat-hall .hb-row { grid-template-columns: minmax(0, 1fr) auto; }
+  .flat-hall .hb-pl { display: none; }
+  .flat-hall .hb-sh { grid-column: 1 / -1; }
+}
+.flat-hall .hb-empty { margin: 8px 9px; font-size: 12px; }
+.flat-hall .hb-cash { padding: 6px 9px 7px; border-top-width: 1px; font-size: 10.5px; }
+.flat-hall .hb-cash b { font-size: 10.5px; }
+/* phones on their side: the list down the right, the mayor beside it */
+@media (min-aspect-ratio: 4/3) {
+  .flat-hall { left: auto; width: 60%; bottom: var(--bottom-inset, 70px); max-height: none; }
+}
+
+/* the mayor's speech bubble sits above his hat, its tail pointing down at him */
+.bubble.up::after { top: auto; bottom: -7px; left: var(--tail-x, 50%); right: auto; margin: 0 0 0 -7px; border: 7px solid transparent; border-bottom: 0; border-top-color: #f5f3ff; }
+
 /* last, so it wins over the transitions declared above */
 @media (prefers-reduced-motion: reduce) {
   .tape-track { animation: none; padding-left: 16px; }
-  .mon.flat, .fader, .flat-glance, .flat-glance.show, .fg { animation: none; transition: none; }
+  .mon.flat, .fader, .flat-glance, .flat-glance.show, .fg, .flat-hall, .flat-hall.show { animation: none; transition: none; }
   .fg:active { transform: none; }
 }

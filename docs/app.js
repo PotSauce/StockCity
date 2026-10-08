@@ -123,6 +123,9 @@ function toast(msg, ms = 4200) {
 /* =========================================================================
    3D city
    ========================================================================= */
+// City Hall opens like a building, under this id
+const HALL = "hall";
+const HALL_GOLD = "#f5c542";
 const PLOTS = {
   tech: new THREE.Vector3(-13, 0, -13),
   energy: new THREE.Vector3(13, 0, -13),
@@ -485,14 +488,21 @@ function layoutCity(bots) {
     });
   }
 
-  // HQ
+  // City Hall: click it to visit the mayor, who shows every building's holdings
   const hq = buildHQ();
   hq.position.y = 0.6;
   scene.add(hq);
-  const hqLabel = makeLabel("hq", "City Hall", "");
+  const hqLabel = makeLabel(HALL, "City Hall", "");
   hqLabel.position.set(0, 26, 0);
   scene.add(hqLabel);
-  buildings.__hq = { label: hqLabel };
+  for (const part of [hq, plaza])
+    part.traverse((o) => {
+      if (o.isMesh) {
+        o.userData.botId = HALL;
+        pickables.push(o);
+      }
+    });
+  buildings[HALL] = { group: hq, pos: new THREE.Vector3(0, 0, 0), label: hqLabel, scale: 1 };
 
   bots.forEach((bot, i) => {
     const pos = (PLOTS[bot.id] || EXTRA_SPOTS[i % EXTRA_SPOTS.length]).clone();
@@ -557,10 +567,10 @@ function layoutCity(bots) {
 
 function makeLabel(id, name, sub, color) {
   const el = document.createElement("div");
-  el.className = "label" + (id === "hq" ? " hq" : "");
+  el.className = "label" + (id === HALL ? " hq" : "");
   el.style.color = color || "";
   el.innerHTML = `<span class="lname">${esc(name)}</span><span class="lsub num"></span><span class="ltick"></span>`;
-  if (id !== "hq") el.addEventListener("click", () => openBuilding(id));
+  el.addEventListener("click", () => openBuilding(id));
   const obj = new CSS2DObject(el);
   obj.userData.el = el;
   return obj;
@@ -618,6 +628,11 @@ function resize() {
   css3d.setSize(w, h);
   office.bubbleSide = null;
   if (office.active) {
+    if (office.mode === "hall" && office.focus && narrow() && !office.busy) {
+      office.focus = null;
+      office.dude.root.visible = true;
+      syncMonitors();
+    }
     snapPose();
     syncFlat();
   }
@@ -643,7 +658,7 @@ function frame() {
     const want = id === hovered || id === openId ? 1.06 : 1;
     b.scale += (want - b.scale) * 0.15;
     b.group.scale.setScalar(b.scale);
-    b.line.material.dashOffset = REDUCED ? 0 : -t * 2;
+    if (b.line) b.line.material.dashOffset = REDUCED ? 0 : -t * 2;
   }
   controls.target.lerp(focusTarget, 0.08);
   controls.update();
@@ -695,11 +710,18 @@ function renderHUD() {
     banner.hidden = false;
   } else banner.hidden = true;
 
-  const hq = buildings.__hq.label.userData.el.querySelector(".lsub");
+  const hq = buildings[HALL].label.userData.el.querySelector(".lsub");
   hq.innerHTML = `${money(t.equity)} <span class="${cls(t.pnl)}">${pct(t.pnl_pct)}</span>`;
 
   const list = $("building-list");
   list.innerHTML = "";
+  const hallBtn = document.createElement("button");
+  hallBtn.type = "button";
+  hallBtn.dataset.id = HALL;
+  if (openId === HALL) hallBtn.classList.add("active");
+  hallBtn.innerHTML = `<span class="dot" style="color:${HALL_GOLD}"></span><span class="bl-name">City Hall</span><span class="bl-pnl ${cls(t.pnl)}">${pct(t.pnl_pct)}</span>`;
+  hallBtn.addEventListener("click", () => openBuilding(HALL));
+  list.appendChild(hallBtn);
   for (const b of STATE.bots) {
     const btn = document.createElement("button");
     btn.type = "button";
@@ -768,7 +790,9 @@ const office = {
   focus: null, // monitor id, or null for the whole desk
   look: new THREE.Vector3(),
   mons: {},
-  dude: null,
+  dude: null, // whoever is on screen: the building's trader, or the mayor at City Hall
+  trader: null,
+  mode: "desk", // "desk" in a building, "hall" at City Hall
   dressing: null,
   anims: [], // (t, dt) => void for the current building's props
   act: null, // a short reaction (cheer, facepalm, wave, nod) that overrides the normal pose
@@ -961,7 +985,7 @@ function buildOffice() {
     obj.quaternion.copy(g.quaternion);
     obj.scale.setScalar(1 / PX_PER_M);
     cssScene.add(obj);
-    office.mons[m.id] = { ...m, group: g, el, body: el.querySelector(".mon-body"), screenMat };
+    office.mons[m.id] = { ...m, group: g, el, body: el.querySelector(".mon-body"), screenMat, obj };
   }
   for (const p of Object.values(poleTop)) {
     officeScene.add(rod(new THREE.Vector3(p.x, 0.78, p.z), new THREE.Vector3(p.x, p.top, p.z), 0.03, 0x241e48));
@@ -1024,20 +1048,26 @@ function faceTexture(skin, mood) {
   return t;
 }
 
-function buildDude(o, accent) {
+// Seated at a desk by default; the mayor stands (hips higher, legs straight).
+function buildDude(o, accent, standing = false) {
   const m = (c, opts) => new THREE.MeshStandardMaterial({ color: c, roughness: 0.8, metalness: 0.05, ...opts });
   const root = new THREE.Group();
-  root.position.set(0, 0, 0.45);
+  root.position.set(0, 0, standing ? 0 : 0.45);
   // skin glows a little on its own so the colored monitor light doesn't turn it green
   const skin = m(new THREE.Color(o.skin).multiplyScalar(0.65), { emissive: new THREE.Color(o.skin).multiplyScalar(0.36) });
   const hair = m(o.hair);
-  // seated legs
   for (const side of [-1, 1]) {
-    place(obox(0.22, 0.2, 0.5, o.pants), side * 0.13, 0.55, -0.2, root);
-    place(obox(0.2, 0.5, 0.2, o.pants), side * 0.13, 0.3, -0.42, root);
-    place(obox(0.22, 0.1, 0.3, o.shoes), side * 0.13, 0.05, -0.47, root);
+    if (standing) {
+      place(obox(0.22, 0.86, 0.24, o.pants), side * 0.13, 0.52, 0, root);
+      place(obox(0.24, 0.1, 0.34, o.shoes), side * 0.13, 0.05, -0.05, root);
+    } else {
+      place(obox(0.22, 0.2, 0.5, o.pants), side * 0.13, 0.55, -0.2, root);
+      place(obox(0.2, 0.5, 0.2, o.pants), side * 0.13, 0.3, -0.42, root);
+      place(obox(0.22, 0.1, 0.3, o.shoes), side * 0.13, 0.05, -0.47, root);
+    }
   }
-  const hips = place(new THREE.Group(), 0, 0.5, 0, root);
+  const hipY = standing ? 0.95 : 0.5;
+  const hips = place(new THREE.Group(), 0, hipY, 0, root);
   const torso = place(new THREE.Group(), 0, 0, 0, hips);
   place(obox(0.56, 0.62, 0.3, o.top), 0, 0.33, 0, torso);
   const neck = place(new THREE.Group(), 0, 0.66, 0, torso);
@@ -1080,9 +1110,26 @@ function buildDude(o, accent) {
     for (const y of [0.22, 0.42]) place(new THREE.Mesh(new THREE.BoxGeometry(0.595, 0.04, 0.33), stripe), 0, y, 0, torso);
   }
   if (g.has("beard")) place(new THREE.Mesh(new THREE.BoxGeometry(0.4, 0.15, 0.06), hair), 0, 0.1, -0.23, neck);
-  if (g.has("suit")) {
-    place(obox(0.22, 0.12, 0.04, 0xf5f5f5), 0, 0.6, -0.15, torso);
-    place(obox(0.07, 0.36, 0.03, 0xdc2626), 0, 0.4, -0.165, torso);
+  if (g.has("suit") || g.has("collar")) place(obox(0.22, 0.12, 0.04, 0xf5f5f5), 0, 0.6, -0.15, torso);
+  if (g.has("suit")) place(obox(0.07, 0.36, 0.03, 0xdc2626), 0, 0.4, -0.165, torso);
+  const gold = () => m(0xf5c542, { metalness: 0.85, roughness: 0.3, emissive: 0x3a2a05 });
+  if (g.has("sash")) {
+    // a red sash from his right shoulder down to his left hip
+    const sash = place(obox(0.13, 0.78, 0.025, 0xc81e3a, { emissive: 0x2a0410 }), 0, 0.31, -0.163, torso);
+    sash.rotation.z = -0.72;
+  }
+  if (g.has("medal")) {
+    // the chain of office, with a gold medallion on his chest
+    for (const s of [-1, 1]) torso.add(rod(new THREE.Vector3(s * 0.17, 0.63, -0.17), new THREE.Vector3(0, 0.4, -0.18), 0.014, 0xf5c542));
+    const medal = place(new THREE.Mesh(new THREE.CylinderGeometry(0.075, 0.075, 0.025, 20), gold()), 0, 0.36, -0.18, torso);
+    medal.rotation.x = Math.PI / 2;
+  }
+  if (g.has("mustache")) place(new THREE.Mesh(new THREE.BoxGeometry(0.28, 0.045, 0.04), hair), 0, 0.205, -0.225, neck);
+  if (g.has("tophat")) {
+    const black = m(0x15131f, { roughness: 0.6 });
+    place(new THREE.Mesh(new THREE.CylinderGeometry(0.34, 0.34, 0.03, 24), black), 0, 0.47, 0, neck);
+    place(new THREE.Mesh(new THREE.CylinderGeometry(0.21, 0.21, 0.36, 20), black), 0, 0.64, 0, neck);
+    place(new THREE.Mesh(new THREE.CylinderGeometry(0.215, 0.215, 0.07, 20), gold()), 0, 0.52, 0, neck);
   }
   if (g.has("glasses")) place(obox(0.38, 0.05, 0.02, 0x0b0b0b), 0, 0.27, -0.23, neck);
   if (g.has("cap")) {
@@ -1093,7 +1140,7 @@ function buildDude(o, accent) {
 
   const parts = [];
   root.traverse((x) => x.isMesh && parts.push(x));
-  return { root, hips, torso, neck, arms, faceMat, faces, parts, mood: "neutral", cur: null };
+  return { root, hips, hipY, torso, neck, arms, faceMat, faces, parts, mood: "neutral", cur: null, poses: poseTargets, spinObj: null };
 }
 
 /* ---------- props that make each office different ---------- */
@@ -1174,7 +1221,7 @@ function buildProps(id, accent, parent) {
 function dressOffice(b) {
   const accent = new THREE.Color(b.color);
   if (office.dressing) {
-    Object.values(office.dude?.faces || {}).forEach((t) => t.dispose());
+    Object.values(office.trader?.faces || {}).forEach((t) => t.dispose());
     officeScene.remove(office.dressing);
     office.dressing.traverse((x) => {
       if (x.isMesh) {
@@ -1194,7 +1241,8 @@ function dressOffice(b) {
   buildChair(accent, seatInner);
   office.anims = buildProps(b.id, accent, dressing);
   const outfit = OUTFITS[b.id] || { skin: 0xc68642, hair: 0x2b1a0e, top: accent.getHex(), arm: accent.getHex(), fore: accent.getHex(), pants: 0x1f2433, shoes: 0xe5e7eb, gear: [] };
-  office.dude = buildDude(outfit, accent);
+  office.trader = office.dude = buildDude(outfit, accent);
+  office.dude.spinObj = office.seat;
   seatInner.add(office.dude.root);
   officeScene.add(dressing);
   office.edgeMat.emissive.copy(accent);
@@ -1275,15 +1323,15 @@ function aimArm(arm, [upper, fore], k) {
 function animateDude(name, t, dt) {
   const d = office.dude;
   if (!d) return;
-  const want = poseTargets(name, t);
+  const want = d.poses(name, t);
   const k = REDUCED || !d.posed ? 1 : 1 - Math.exp(-dt * 9);
   d.posed = true;
   const c = (d.cur ||= { torsoX: want.torsoX, headX: want.headX, headY: want.headY, bounce: want.bounce, spin: want.spin });
   for (const key of ["torsoX", "headX", "headY", "bounce"]) c[key] += (want[key] - c[key]) * k;
   // the chair turns slower than the arms move
   c.spin += (want.spin - c.spin) * (REDUCED || k === 1 ? 1 : 1 - Math.exp(-dt * 4.5));
-  if (office.seat) office.seat.rotation.y = c.spin;
-  d.hips.position.y = 0.5 + c.bounce;
+  if (d.spinObj) d.spinObj.rotation.y = c.spin;
+  d.hips.position.y = d.hipY + c.bounce;
   d.torso.rotation.x = c.torsoX;
   d.neck.rotation.set(c.headX, c.headY, 0);
   aimArm(d.arms.L, want.L, k);
@@ -1317,54 +1365,411 @@ function act(name, ms) {
   office.actUntil = performance.now() + ms;
 }
 function greet() {
+  if (office.focus) return;
+  if (office.mode === "hall") {
+    act("wave", 2600);
+    say(mayorLine(hall.greets++), 6500);
+    return;
+  }
   const b = bot();
-  if (!b || office.focus) return;
+  if (!b) return;
   act("wave", 2600);
   say(dudeLine(b));
 }
-function reactTo(t) {
+// who: the building's name when the mayor is the one telling you
+function reactTo(t, who) {
   const r = t.reason || "";
   if (t.side === "buy") {
     act("nod", 1500);
-    say(`Bought ${t.shares} ${t.ticker} at ${money(t.price, 2)}.`);
+    say(`${who ? `${who} bought` : "Bought"} ${t.shares} ${t.ticker} at ${money(t.price, 2)}.`);
     return;
   }
+  const sold = who ? `${who} sold` : "Sold";
   // made or lost money? Use what the shares cost when the server sends it, else read the reason
   const sign = r.match(/\(([+-])\d/);
   const mood = t.cost ? Math.sign(t.price - t.cost) : /^Take profit/.test(r) ? 1 : /^Stop/.test(r) ? -1 : sign ? (sign[1] === "+" ? 1 : -1) : 0;
   if (mood > 0) {
     act("cheer", 2600);
-    say(`Sold ${t.ticker}! ${r}.`);
+    say(`${sold} ${t.ticker}! ${r}.`);
   } else if (mood < 0) {
     act("facepalm", 2800);
-    say(`Ugh. Sold ${t.ticker}. ${r}.`);
+    say(`Ugh. ${sold} ${t.ticker}. ${r}.`);
   } else {
     act("nod", 1500);
-    say(`Sold ${t.ticker}. ${r}.`);
+    say(`${sold} ${t.ticker}. ${r}.`);
   }
 }
-function checkNewTrades() {
-  const b = bot();
-  if (!b) return;
+// a building's trades since the last look, newest first
+function freshTrades(b) {
   const key = tradeKey(b.trades[0]);
   const seen = office.seen[b.id];
   office.seen[b.id] = key;
-  if (seen === undefined || !key || key === seen) return;
+  if (seen === undefined || !key || key === seen) return [];
   const fresh = [];
   for (const t of b.trades) {
     if (tradeKey(t) === seen) break;
     fresh.push(t);
   }
-  reactTo(fresh.find((t) => t.side === "sell") || fresh[0]);
+  return fresh;
+}
+function checkNewTrades() {
+  if (office.mode === "hall") {
+    // the mayor keeps an eye on every building: a sale first, else the newest buy
+    const fresh = STATE.bots.flatMap((b) => freshTrades(b).map((t) => ({ t, who: b.name })));
+    const news = fresh.find((x) => x.t.side === "sell") || fresh[0];
+    if (news) reactTo(news.t, news.who);
+    return;
+  }
+  const b = bot();
+  if (!b) return;
+  const fresh = freshTrades(b);
+  if (fresh.length) reactTo(fresh.find((t) => t.side === "sell") || fresh[0]);
+}
+
+/* =========================================================================
+   City Hall: the mayor stands at his podium beside a big board that lists
+   every building's holdings. It opens like a building (openBuilding(HALL)).
+   ========================================================================= */
+const hallScene = new THREE.Scene();
+hallScene.background = new THREE.Color(0x0b0820);
+hallScene.fog = new THREE.Fog(0x0b0820, 9, 22);
+// the board is a web page of 1600 × 900 px on a 4 × 2.25 m screen, a little taller than the mayor
+const HALL_PX = 400;
+const BOARD = { w: 4, h: 2.25, x: 1.1, y: 2.15, z: -0.94, px: HALL_PX };
+const MAYOR_AT = new THREE.Vector3(-1.9, 0.12, -0.25);
+const hall = { built: false, board: null, mayor: null, anims: [], greets: 0, frameMat: null };
+const MAYOR_OUTFIT = { skin: 0xd6a17a, hair: 0xb8bcc6, top: 0x2a2c40, arm: 0x2a2c40, fore: 0x2a2c40, pants: 0x1d1f2e, shoes: 0x0b0b0b, gear: ["collar", "sash", "medal", "mustache", "tophat"] };
+
+function buildHall() {
+  hall.built = true;
+  const S = hallScene;
+  const gold = (o = {}) => new THREE.MeshStandardMaterial({ color: 0xf5c542, metalness: 0.85, roughness: 0.3, emissive: 0x3a2a05, ...o });
+  S.add(new THREE.HemisphereLight(0xb4a8ff, 0x140f33, 0.75));
+  const key = new THREE.DirectionalLight(0xe9e4ff, 0.9);
+  key.position.set(-2, 4, 5);
+  S.add(key);
+  // a warm spotlight on the mayor, and the board's gold glow on the stage
+  const spot = new THREE.SpotLight(0xfff1dc, 9, 12, 0.42, 0.6, 1.2);
+  spot.position.set(-1.2, 4.4, 2.6);
+  spot.target.position.set(MAYOR_AT.x, 1.5, MAYOR_AT.z);
+  S.add(spot, spot.target);
+  place(new THREE.PointLight(0xf5c542, 2.4, 5, 1.5), BOARD.x, BOARD.y, -0.3, S);
+
+  // floor, a red carpet up to the podium, and the stage
+  const floor = new THREE.Mesh(new THREE.PlaneGeometry(20, 20), new THREE.MeshStandardMaterial({ color: 0x120d2e, roughness: 0.55, metalness: 0.2 }));
+  floor.rotation.x = -Math.PI / 2;
+  S.add(floor);
+  const grid = new THREE.GridHelper(20, 20, 0x3b2f7a, 0x231b4e);
+  grid.position.y = 0.002;
+  S.add(grid);
+  const goldGlow = glow(0xf5c542, 1.4);
+  place(obox(1.3, 0.012, 7, 0x8b1a2b, { roughness: 0.95 }), MAYOR_AT.x, 0.006, 3.1, S);
+  for (const s of [-1, 1]) place(new THREE.Mesh(new THREE.BoxGeometry(0.04, 0.014, 7), goldGlow), MAYOR_AT.x + s * 0.67, 0.007, 3.1, S);
+  place(obox(9, 0.12, 1.4, 0x1c1640, { metalness: 0.4, roughness: 0.45 }), 0.4, 0.06, -0.45, S);
+  place(new THREE.Mesh(new THREE.BoxGeometry(9, 0.02, 0.02), goldGlow), 0.4, 0.12, 0.25, S);
+
+  // the back wall: panels, a gold line along the top, a column at each side
+  place(obox(14, 5.5, 0.2, 0x181240), 0, 2.75, -1.25, S);
+  for (const x of [-5.4, -4.2, 4.6, 5.8]) place(obox(0.26, 5.5, 0.12, 0x211a52), x, 2.75, -1.13, S);
+  place(new THREE.Mesh(new THREE.BoxGeometry(14, 0.03, 0.03), goldGlow), 0, 3.75, -1.14, S);
+  for (const x of [-4.9, 5.7]) {
+    place(new THREE.Mesh(new THREE.CylinderGeometry(0.3, 0.34, 4.6, 16), new THREE.MeshStandardMaterial({ color: 0x2a2266, roughness: 0.5 })), x, 2.3, 0.2, S);
+    place(obox(0.86, 0.2, 0.86, 0x2a2266), x, 0.1, 0.2, S);
+    place(new THREE.Mesh(new THREE.BoxGeometry(0.86, 0.16, 0.86), gold({ metalness: 0.6, roughness: 0.45 })), x, 4.62, 0.2, S);
+  }
+
+  // a banner for each building, in its colour, two either side
+  STATE.bots.slice(0, 4).forEach((b, i) => {
+    const c = new THREE.Color(b.color);
+    const x = [-3.05, -3.75, 3.6, 4.3][i];
+    const flag = place(new THREE.Group(), x, 2.35, -1.11, S);
+    place(new THREE.Mesh(new THREE.BoxGeometry(0.52, 1.5, 0.02), new THREE.MeshStandardMaterial({ color: c.clone().multiplyScalar(0.5), emissive: c.clone().multiplyScalar(0.18), roughness: 0.9 })), 0, 0, 0, flag);
+    place(new THREE.Mesh(new THREE.BoxGeometry(0.52, 0.05, 0.025), glow(c, 1.6)), 0, -0.6, 0.002, flag);
+    place(new THREE.Mesh(new THREE.BoxGeometry(0.16, 0.16, 0.025), glow(c, 1.2)), 0, 0.25, 0.002, flag).rotation.z = Math.PI / 4;
+    place(new THREE.Mesh(new THREE.BoxGeometry(0.66, 0.035, 0.035), gold()), 0, 0.77, 0.01, flag);
+  });
+
+  // the board: a gold frame round a screen; the list itself is a web page laid over it
+  const bg = place(new THREE.Group(), BOARD.x, BOARD.y, BOARD.z, S);
+  place(obox(BOARD.w + 0.14, BOARD.h + 0.14, 0.06, 0x2a2108, { metalness: 0.7, roughness: 0.35 }), 0, 0, -0.035, bg);
+  hall.frameMat = glow(0xf5c542, 1.3);
+  const T = 0.02;
+  for (const [w, h, x, y] of [
+    [BOARD.w + 0.1, T, 0, BOARD.h / 2 + 0.05],
+    [BOARD.w + 0.1, T, 0, -BOARD.h / 2 - 0.05],
+    [T, BOARD.h + 0.1, BOARD.w / 2 + 0.05, 0],
+    [T, BOARD.h + 0.1, -BOARD.w / 2 - 0.05, 0],
+  ])
+    place(new THREE.Mesh(new THREE.BoxGeometry(w, h, 0.02), hall.frameMat), x, y, 0, bg);
+  // under the page (and on phones, where the list is a flat panel instead): the city's name on a dark screen
+  const screenTex = canvasTexture(1024, 576, (g, W, H) => {
+    g.fillStyle = "#0c0a1c";
+    g.fillRect(0, 0, W, H);
+    g.strokeStyle = "rgba(245, 197, 66, 0.07)";
+    for (let x = 0; x < W; x += 48) g.strokeRect(x, -1, 48, H + 2);
+    g.fillStyle = "rgba(245, 197, 66, 0.28)";
+    g.font = "700 64px 'Chakra Petch', sans-serif";
+    g.textAlign = "center";
+    g.fillText("STOCK CITY HALL", W / 2, H / 2 + 22);
+  });
+  place(new THREE.Mesh(new THREE.PlaneGeometry(BOARD.w, BOARD.h), new THREE.MeshBasicMaterial({ map: screenTex })), 0, 0, 0.001, bg);
+  bg.updateMatrixWorld();
+  const el = document.createElement("section");
+  el.className = "board";
+  el.style.width = `${Math.round(BOARD.w * HALL_PX)}px`;
+  el.style.height = `${Math.round(BOARD.h * HALL_PX)}px`;
+  el.setAttribute("aria-label", "Every holding in the city");
+  el.innerHTML = `<header class="mon-bar"><i></i><b>City Hall · Every holding</b><span class="hb-when"></span></header><div class="hb-body" tabindex="-1"></div>`;
+  // a building's name opens it; anywhere else zooms the board in or out
+  el.addEventListener("click", (e) => {
+    const head = e.target.closest("[data-open]");
+    if (head) openBuilding(head.dataset.open);
+    else focusMonitor(office.focus ? null : "board");
+  });
+  const obj = new CSS3DObject(el);
+  obj.position.copy(bg.position);
+  obj.quaternion.copy(bg.quaternion);
+  obj.scale.setScalar(1 / HALL_PX);
+  cssScene.add(obj);
+  hall.board = { ...BOARD, group: bg, el, body: el.querySelector(".hb-body"), obj };
+
+  // the podium, with the city seal on the front and a microphone
+  const pod = place(new THREE.Group(), MAYOR_AT.x, MAYOR_AT.y, MAYOR_AT.z + 0.45, S);
+  place(obox(0.78, 1.0, 0.42, 0x2a1f5c, { metalness: 0.3, roughness: 0.5 }), 0, 0.5, 0, pod);
+  place(obox(0.9, 0.06, 0.56, 0x221a4a, { metalness: 0.4 }), 0, 1.04, -0.02, pod).rotation.x = -0.18;
+  for (const y of [0.1, 0.96]) place(new THREE.Mesh(new THREE.BoxGeometry(0.8, 0.025, 0.02), goldGlow), 0, y, 0.212, pod);
+  place(new THREE.Mesh(new THREE.CylinderGeometry(0.2, 0.2, 0.03, 32), gold()), 0, 0.58, 0.215, pod).rotation.x = Math.PI / 2;
+  place(new THREE.Mesh(new THREE.CylinderGeometry(0.15, 0.15, 0.035, 32), glow(0xa78bfa, 1.1)), 0, 0.58, 0.218, pod).rotation.x = Math.PI / 2;
+  for (const [x, h] of [[-0.06, 0.1], [0, 0.16], [0.06, 0.12]]) place(new THREE.Mesh(new THREE.BoxGeometry(0.035, h, 0.01), glow(0xf5c542, 2)), x, 0.51 + h / 2, 0.238, pod);
+  pod.add(rod(new THREE.Vector3(0.2, 1.08, -0.1), new THREE.Vector3(0.12, 1.42, -0.3), 0.012, 0x222233));
+  place(new THREE.Mesh(new THREE.SphereGeometry(0.035, 12, 10), new THREE.MeshStandardMaterial({ color: 0x111111, roughness: 0.6 })), 0.12, 1.44, -0.31, pod);
+
+  // the mayor: facing you, turned a little towards his board
+  hall.mayor = buildDude(MAYOR_OUTFIT, new THREE.Color(HALL_GOLD), true);
+  hall.mayor.poses = mayorPose;
+  hall.mayor.root.position.copy(MAYOR_AT);
+  hall.mayor.root.rotation.y = Math.PI + 0.15;
+  S.add(hall.mayor.root);
+
+  hall.anims = [(t) => (hall.frameMat.emissiveIntensity = 1.2 + 0.3 * Math.sin(t * 1.4))];
+}
+
+// The mayor's poses, in his own space like the trader's (he faces -z, his left hand is -x).
+// His board is on his left, so that's the hand he shows it with.
+function mayorPose(name, t) {
+  const sway = 0.08 * Math.sin(t * 1.3);
+  const present = {
+    // a look at the board every so often, then back at you
+    torsoX: 0, headX: 0.04, headY: t % 9 < 3.2 ? 0.55 : -0.05, bounce: 0.006 * Math.sin(t * 1.6), spin: 0,
+    L: [[-0.85, 0.15 + sway, 0.25], [-0.55, 0.8, 0.2]],
+    R: [[0.12, -0.8, -0.55], [0.05, -0.3, -1]],
+  };
+  switch (name) {
+    case "relaxed":
+      // hands behind his back while the market's shut
+      return {
+        torsoX: 0.02, headX: 0.05, headY: 0.3 * Math.sin(t * 0.4), bounce: 0.008 * Math.sin(t * 1.2), spin: 0,
+        L: [[-0.12, -0.95, 0.3], [0.5, -0.2, 0.85]],
+        R: [[0.12, -0.95, 0.3], [-0.5, -0.2, 0.85]],
+      };
+    case "wave":
+      return { ...present, headX: 0.08, headY: 0, R: [[0.75, 0.75, -0.1], [0.2 + 0.5 * Math.sin(t * 10), 1, 0]] };
+    case "cheer": {
+      const w = 0.15 * Math.sin(t * 12);
+      return {
+        torsoX: 0.05, headX: 0.25, headY: 0, bounce: 0.06 * Math.abs(Math.sin(t * 9)), spin: 0,
+        L: [[-0.5 - w, 1, -0.05], [-0.3 - w, 1, -0.1]],
+        R: [[0.5 + w, 1, -0.05], [0.3 + w, 1, -0.1]],
+      };
+    }
+    case "facepalm":
+      return {
+        torsoX: -0.12, headX: -0.22, headY: 0.1 * Math.sin(t * 6), bounce: 0, spin: 0,
+        L: [[-0.15, -1, 0.05], [-0.05, -1, -0.15]],
+        R: [[-0.25, 0.1, -1], [-0.7, 0.72, 0.05]],
+      };
+    case "nod":
+      return { ...present, headY: -0.05, headX: -0.1 + 0.2 * Math.max(0, Math.sin(t * 8)) };
+    default:
+      return present;
+  }
+}
+
+function enterHall() {
+  office.dude = hall.mayor;
+  hall.mayor.root.visible = true;
+  hall.greets = 0;
+  office.act = null;
+  $("bubble").hidden = true;
+  document.documentElement.style.setProperty("--acc", HALL_GOLD);
+  // he only reacts to trades made from now on
+  for (const b of STATE.bots) office.seen[b.id] = tradeKey(b.trades[0]);
+}
+
+const upDown = (x) => `${x >= 0 ? "up" : "down"} ${pct(Math.abs(x)).replace(/^\+/, "")}`;
+// what the mayor says: a welcome first, then each click the next of these
+function mayorLine(i) {
+  const held = STATE.bots.flatMap((b) => b.positions.map((p) => ({ ...p, where: b.name })));
+  const invested = held.reduce((a, p) => a + p.value, 0);
+  const cash = STATE.bots.reduce((a, b) => a + b.cash, 0);
+  const d = STATE.totals.day_change;
+  const today = `Today the city is ${d >= 0 ? "up" : "down"} ${money(Math.abs(d), 2)}.`;
+  const closed = marketOpen() === false ? ` The market's closed until ${tradingStarts()} New York time.` : "";
+  const count = held.length === 1 ? "One stock" : `${held.length} stocks`;
+  const summary = held.length ? `${count} held across the city, worth ${money(invested, 2)}. ${today}` : `Nobody's holding a stock right now. ${today}`;
+  if (i === 0) return `Welcome to City Hall! ${summary}${closed}`;
+  const lines = [];
+  if (held.length) {
+    const byGain = [...held].sort((a, b) => b.pnl_pct - a.pnl_pct);
+    const best = byGain[0];
+    const worst = byGain[byGain.length - 1];
+    lines.push(`Best right now: ${best.ticker} at ${best.where}, ${upDown(best.pnl_pct)}.`);
+    if (held.length > 1) lines.push(`Worst right now: ${worst.ticker} at ${worst.where}, ${upDown(worst.pnl_pct)}.`);
+  }
+  lines.push(`The city has ${money(cash, 2)} in cash.`, summary);
+  return lines[(i - 1) % lines.length];
+}
+
+// The board: the city's totals, then a column per building with each stock it holds.
+// The same page fills the flat panel on phones.
+function hallHTML() {
+  const t = STATE.totals;
+  const held = STATE.bots.flatMap((b) => b.positions);
+  const invested = held.reduce((a, p) => a + p.value, 0);
+  const cash = STATE.bots.reduce((a, b) => a + b.cash, 0);
+  const signed = (x) => `${x >= 0 ? "+" : "−"}${money(Math.abs(x), 2)}`;
+  const sum = `<div class="hb-sum">
+    <div class="hb-fig"><span class="g-label">City value</span><span class="hb-big num">${money(t.equity, 2)}</span></div>
+    <div class="hb-fig"><span class="g-label">Today</span><span class="hb-big num ${cls(t.day_change)}">${signed(t.day_change)}</span></div>
+    <div class="hb-fig"><span class="g-label">In ${held.length} stock${held.length === 1 ? "" : "s"}</span><span class="hb-big num">${money(invested, 2)}</span></div>
+    <div class="hb-fig"><span class="g-label">Cash</span><span class="hb-big num">${money(cash, 2)}</span></div>
+  </div>`;
+  const cols = STATE.bots
+    .map((b) => {
+      const pos = [...b.positions].sort((a, c) => c.value - a.value);
+      const rows = pos
+        .map((p) => {
+          const gain = (p.price - p.avg_cost) * p.shares;
+          // an AI pick bought with unsettled cash can't be sold until that cash settles (cash account rule)
+          const lock = p.locked_until && p.locked_until > nyToday() ? ` title="Bought with unsettled cash, so it can't be sold until ${esc(p.locked_until)}"` : "";
+          return `<div class="hb-row"${lock}>
+            <span class="hb-name"><span class="hb-tk num">${esc(p.ticker)}</span><span class="sleeve ${esc(p.sleeve)}">${SLEEVE_TAG[p.sleeve] || esc(p.sleeve)}</span></span><span class="hb-gain num ${cls(p.pnl_pct)}">${pct(p.pnl_pct) || "0.0%"}</span>
+            <span class="hb-sh num">${p.shares} sh · ${money(p.value, p.value < 1000 ? 2 : 0)}</span><span class="hb-pl num ${cls(gain)}">${signed(gain)}</span>
+          </div>`;
+        })
+        .join("");
+      // the board has room for five; the rest are one click away, in the building
+      const more = pos.length > 5 ? `<p class="hb-more">+${pos.length - 5} more</p>` : "";
+      return `<section class="hb-col" style="--c:${esc(b.color)}">
+        <button type="button" class="hb-head" data-open="${esc(b.id)}" aria-label="Visit ${esc(b.name)}">
+          <b>${esc(b.name)}</b>
+          <span class="hb-hv"><span class="num">${money(b.equity, 2)}</span><span class="num ${cls(b.day_change)}">${signed(b.day_change)}</span>${b.enabled ? "" : `<span class="hb-paused">Paused</span>`}</span>
+        </button>
+        ${pos.length ? `<div class="hb-rows">${rows}</div>${more}` : `<p class="hb-empty">Not holding anything</p>`}
+        <p class="hb-cash">Cash <b class="num">${money(b.cash, 2)}</b></p>
+      </section>`;
+    })
+    .join("");
+  return `${sum}<div class="hb-cols">${cols}</div>`;
+}
+
+function renderHall() {
+  if (!hall.built) return;
+  const html = hallHTML();
+  hall.board.body.innerHTML = html;
+  $("flat-hall-body").innerHTML = html;
+  const at = STATE.server?.last_quote_at || STATE.generated_at;
+  const when = marketOpen() === false ? "Market closed" : at ? `Prices at ${nyTime(at)}` : "";
+  document.querySelectorAll(".hb-when").forEach((x) => (x.textContent = when));
+  $("o-name").textContent = "City Hall";
+  markMore();
+}
+$("flat-hall").addEventListener("click", (e) => {
+  const head = e.target.closest("[data-open]");
+  if (head) openBuilding(head.dataset.open);
+});
+
+// Fit points into a box on screen (normalised -1..1 coordinates), looking along dir:
+// back the camera away until they fit, then slide it across so they sit in the middle of the box.
+function fitPose(pts, dir, box) {
+  const cam = officeCam.clone();
+  const tan = Math.tan(THREE.MathUtils.degToRad(cam.fov / 2));
+  const at = (t, d) => {
+    cam.position.copy(t).addScaledVector(dir, d);
+    cam.lookAt(t);
+    cam.updateMatrixWorld();
+    const s = pts.map((p) => p.clone().project(cam));
+    const xs = s.map((p) => p.x);
+    const ys = s.map((p) => p.y);
+    return { x0: Math.min(...xs), x1: Math.max(...xs), y0: Math.min(...ys), y1: Math.max(...ys) };
+  };
+  const t = pts.reduce((a, p) => a.add(p), new THREE.Vector3()).divideScalar(pts.length);
+  let lo = 0.5, hi = 60;
+  for (let i = 0; i < 24; i++) {
+    const mid = (lo + hi) / 2;
+    const f = at(t, mid);
+    if (f.x1 - f.x0 < (box.right - box.left) * 0.97 && f.y1 - f.y0 < (box.top - box.bottom) * 0.97) hi = mid;
+    else lo = mid;
+  }
+  // a few passes: points nearer or further than the target move by slightly different amounts
+  for (let k = 0; k < 3; k++) {
+    const f = at(t, hi);
+    const right = new THREE.Vector3().setFromMatrixColumn(cam.matrixWorld, 0);
+    const up = new THREE.Vector3().setFromMatrixColumn(cam.matrixWorld, 1);
+    t.addScaledVector(up, ((f.y1 + f.y0) / 2 - (box.top + box.bottom) / 2) * hi * tan);
+    t.addScaledVector(right, ((f.x1 + f.x0) / 2 - (box.left + box.right) / 2) * hi * tan * cam.aspect);
+  }
+  return { p: t.clone().addScaledVector(dir, hi), t };
+}
+
+// The whole board and the mayor beside it, between the top bar and the buttons.
+// On phones the list is the flat panel at the top, and the mayor stands in the space under it.
+const HALL_DIR = new THREE.Vector3(0.05, 0.1, 1).normalize();
+function hallPose() {
+  const H = canvas.clientHeight || 1;
+  const band = layoutInsets();
+  const M = MAYOR_AT;
+  const V = (x, y, z) => new THREE.Vector3(x, y, z);
+  // his hat, his shoulders, the front of the podium
+  const mayor = [V(M.x, 2.58, M.z), V(M.x - 0.45, 1.7, M.z), V(M.x + 0.45, 1.7, M.z), V(M.x - 0.45, 1.18, M.z + 0.66), V(M.x + 0.45, 1.18, M.z + 0.66)];
+  // and, on a big screen, the seal on the front of his podium
+  const seal = [V(M.x, 0.45, M.z + 0.66)];
+  const bottom = -1 + (2 * band.bottom) / H;
+  if (narrow()) {
+    const app = $("app").getBoundingClientRect();
+    const panel = $("flat-hall").getBoundingClientRect();
+    const hand = V(M.x + 0.75, 2.05, M.z); // the hand he shows the board with
+    // phones on their side: the list is down the right, he stands to the left of it
+    if (officeCam.aspect >= 4 / 3) {
+      const x1 = Math.max(panel.left - app.left - 8, 120);
+      return fitPose([...mayor, hand], HALL_DIR, { top: 1 - (2 * band.top) / H, bottom, left: -0.94, right: (2 * x1) / (canvas.clientWidth || 1) - 1 });
+    }
+    // upright: under the list, and left of middle on a narrow phone so his speech bubble fits beside him
+    const y0 = Math.min(panel.bottom - app.top + 6, H - band.bottom - 60);
+    const right = officeCam.aspect < 0.8 ? 0.1 : 0.94;
+    return fitPose([...mayor, hand], HALL_DIR, { top: 1 - (2 * y0) / H, bottom, left: -0.94, right });
+  }
+  const board = [];
+  for (const [sx, sy] of [[-1, -1], [1, -1], [-1, 1], [1, 1]]) board.push(V(BOARD.x + (sx * BOARD.w) / 2, BOARD.y + (sy * BOARD.h) / 2, BOARD.z));
+  // room above his hat for what he says
+  return fitPose([...board, ...mayor, ...seal, V(M.x, 3.15, M.z)], HALL_DIR, { top: 1 - (2 * band.top) / H, bottom, left: -0.96, right: 0.96 });
 }
 
 /* ---------- entering, leaving, focusing ---------- */
 function setOfficeMode(on) {
+  const inHall = on && office.mode === "hall";
   $("app").classList.toggle("in-office", on);
+  $("app").classList.toggle("in-hall", inHall);
   css3d.domElement.hidden = !on;
   $("office-nav").hidden = !on;
   controls.enabled = !on;
-  renderPass.scene = on ? officeScene : scene;
+  renderPass.scene = on ? (inHall ? hallScene : officeScene) : scene;
+  // City Hall is seen from further back with a longer lens, so the mayor doesn't loom over his board
+  officeCam.fov = inHall ? 24 : 40;
+  officeCam.updateProjectionMatrix();
+  // the monitors and the board share one layer of web pages: show the ones for this room
+  for (const m of Object.values(office.mons)) m.obj.visible = !inHall;
+  if (hall.board) hall.board.obj.visible = inHall;
   renderPass.camera = on ? officeCam : camera;
   bloom.strength = on ? 0.5 : 0.85;
   bloom.threshold = on ? 0.55 : 0.18;
@@ -1372,13 +1777,17 @@ function setOfficeMode(on) {
   syncFlat();
   layoutInsets();
   canvas.classList.remove("hovering");
-  canvas.setAttribute("aria-label", on ? "A trader at his desk. Click a monitor to zoom in." : "3D city of trading bots. Click a building to visit its trader.");
+  canvas.setAttribute(
+    "aria-label",
+    inHall ? "City Hall: the mayor beside a board listing every building's holdings." : on ? "A trader at his desk. Click a monitor to zoom in." : "3D city of trading bots. Click a building to visit its trader.",
+  );
 }
 
 // Every monitor and the trader's head, kept clear of the top bar
 // and the buttons at the bottom. Found by backing the camera away until all of it fits.
 const OVERVIEW_DIR = new THREE.Vector3(0.12, 0.5, 1).normalize();
 function overviewPose() {
+  if (office.mode === "hall") return hallPose();
   if (narrow()) return traderPose();
   const t = new THREE.Vector3(-0.06, 1.28, -0.45);
   // the monitors and the trader's head: the desk and chair may run off the bottom, so the screens get the room
@@ -1450,20 +1859,25 @@ function traderPose() {
   return { p: tt.clone().addScaledVector(OVERVIEW_DIR, hi), t: tt };
 }
 
+// a monitor, or City Hall's board
+function screenOf(id) {
+  return office.mode === "hall" ? (id === "board" ? hall.board : null) : office.mons[id];
+}
 function monitorPose(id) {
-  const m = office.mons[id];
+  const m = screenOf(id);
+  const ppm = m.px || PX_PER_M;
   const n = new THREE.Vector3(0, 0, 1).applyQuaternion(m.group.quaternion);
   const tan = Math.tan(THREE.MathUtils.degToRad(officeCam.fov / 2));
   const W = canvas.clientWidth;
   const H = canvas.clientHeight;
-  const pxW = m.w * PX_PER_M;
-  const pxH = m.h * PX_PER_M;
+  const pxW = m.w * ppm;
+  const pxH = m.h * ppm;
   // size on screen: at most 1:1, otherwise as big as fits between the top bar and the monitor buttons
   const band = layoutInsets();
   const scale = Math.max(0.05, Math.min(1, (W - 24) / pxW, (H - band.top - band.bottom) / pxH));
-  const d = H / (2 * tan * PX_PER_M * scale);
+  const d = H / (2 * tan * ppm * scale);
   // aim off-centre so the monitor sits in the middle of that free band
-  const t = m.group.position.clone().add(new THREE.Vector3(0, (band.top - band.bottom) / 2 / (PX_PER_M * scale), 0).applyQuaternion(m.group.quaternion));
+  const t = m.group.position.clone().add(new THREE.Vector3(0, (band.top - band.bottom) / 2 / (ppm * scale), 0).applyQuaternion(m.group.quaternion));
   return { p: m.group.position.clone().addScaledVector(n, d).add(t.clone().sub(m.group.position)), t };
 }
 
@@ -1474,10 +1888,15 @@ function narrow() {
 }
 const SCREEN_OFF = new THREE.Color(0x05040f);
 function syncFlat() {
-  const id = office.active && office.focus && !office.busy && narrow() ? office.focus : null;
-  const cards = office.active && !office.focus && !office.busy && narrow();
+  const desk = office.mode === "desk";
+  const id = desk && office.active && office.focus && !office.busy && narrow() ? office.focus : null;
+  const cards = desk && office.active && !office.focus && !office.busy && narrow();
+  // City Hall on a phone: the board's list as a flat panel, the mayor under it
+  const hallFlat = !desk && office.active && !office.busy && narrow();
   $("flat-glance").classList.toggle("show", cards);
   $("flat-glance").inert = !cards;
+  $("flat-hall").classList.toggle("show", hallFlat);
+  $("flat-hall").inert = !hallFlat;
   for (const m of Object.values(office.mons)) {
     const home = m.id === id ? $("flat-mon") : m.el;
     if (m.body.parentElement !== home) {
@@ -1488,7 +1907,7 @@ function syncFlat() {
   }
   $("flat-mon").hidden = !id;
   // the 3D pages behind the flat ones are empty shells or unreadably small: hide them so they don't show through or take taps
-  css3d.domElement.style.visibility = id || cards ? "hidden" : "";
+  css3d.domElement.style.visibility = id || cards || hallFlat ? "hidden" : "";
   // and with the cards up the screens look switched off, not like blank slabs
   if (office.screenGlow) for (const m of Object.values(office.mons)) m.screenMat.color.copy(cards ? SCREEN_OFF : office.screenGlow);
   if (id) $("flat-mon").querySelector(".mon-bar b").textContent = office.mons[id].title;
@@ -1522,7 +1941,7 @@ if (window.ResizeObserver) {
     snapPose();
     markMore();
   });
-  for (const el of [document.querySelector(".hud"), $("banner"), $("office-nav"), $("flat-glance")]) ro.observe(el);
+  for (const el of [document.querySelector(".hud"), $("banner"), $("office-nav"), $("flat-glance"), $("flat-hall")]) ro.observe(el);
 }
 
 function syncMonitors() {
@@ -1533,15 +1952,22 @@ function syncMonitors() {
     m.body.inert = !on;
   }
   document.querySelectorAll("#office-nav [data-mon]").forEach((btn) => btn.setAttribute("aria-pressed", String((btn.dataset.mon || null) === office.focus)));
+  const zoomed = office.mode === "hall" && office.focus === "board";
+  hall.board?.el.classList.toggle("focused", zoomed);
+  $("o-zoom").setAttribute("aria-pressed", String(zoomed));
+  $("o-zoom").textContent = zoomed ? "Zoom out" : "Zoom in";
 }
 
 async function openBuilding(id) {
-  if (office.busy || !STATE.bots.some((b) => b.id === id)) return;
+  const toHall = id === HALL;
+  if (office.busy || (!toHall && !STATE.bots.some((b) => b.id === id))) return;
   if (office.active && openId === id) return focusMonitor(null);
   office.busy = true;
   syncFlat(); // the cards fade out with the scene
   try {
-    if (!office.built) buildOffice();
+    if (toHall) {
+      if (!hall.built) buildHall();
+    } else if (!office.built) buildOffice();
     if (!office.active) {
       office.cityZoom = camera.zoom;
       controls.autoRotate = false;
@@ -1558,12 +1984,17 @@ async function openBuilding(id) {
     }
     await fade(true);
     openId = id;
-    draft = structuredClone(bot().settings);
-    dressOffice(bot());
+    office.mode = toHall ? "hall" : "desk";
+    if (toHall) enterHall();
+    else {
+      draft = structuredClone(bot().settings);
+      dressOffice(bot());
+      office.seen[id] = tradeKey(bot().trades[0]);
+    }
     office.active = true;
     office.focus = null;
     $("flat-glance").scrollTop = 0;
-    office.seen[id] = tradeKey(bot().trades[0]);
+    $("flat-hall-body").scrollTop = 0;
     setOfficeMode(true);
     renderScreens();
     syncMonitors();
@@ -1603,8 +2034,10 @@ async function closeBuilding() {
 
 async function focusMonitor(id) {
   if (!office.active || office.busy || id === office.focus) return;
+  // phones read City Hall's board from the flat panel, so it doesn't zoom there
+  if (id && (!screenOf(id) || (office.mode === "hall" && narrow()))) return;
   // if the keyboard was inside the monitor that's closing, hand focus to the matching bottom button
-  const lost = office.focus && office.mons[office.focus].body.contains(document.activeElement);
+  const lost = office.focus && screenOf(office.focus)?.body.contains(document.activeElement);
   const from = office.focus;
   office.busy = true;
   try {
@@ -1621,17 +2054,17 @@ async function focusMonitor(id) {
   }
   snapPose();
   syncFlat();
-  if (id) office.mons[id].body.focus({ preventScroll: true });
+  if (id) screenOf(id).body.focus({ preventScroll: true });
   else if (lost && (document.activeElement === document.body || !document.activeElement)) {
-    // back to the card it was opened from on phones, else the All screens button
+    // back to the card it was opened from on phones, else the All screens (or Zoom) button
     const card = $("flat-glance").classList.contains("show") && $("flat-glance").querySelector(`[data-mon="${from}"]`);
-    (card || document.querySelector('#office-nav [data-mon=""]')).focus({ preventScroll: true });
+    (card || (office.mode === "hall" ? $("o-zoom") : document.querySelector('#office-nav [data-mon=""]'))).focus({ preventScroll: true });
   }
 }
 
 
 function stepBuilding(dir) {
-  const ids = STATE.bots.map((b) => b.id);
+  const ids = [HALL, ...STATE.bots.map((b) => b.id)];
   openBuilding(ids[(ids.indexOf(openId) + dir + ids.length) % ids.length]);
 }
 
@@ -1639,6 +2072,7 @@ $("o-back").addEventListener("click", closeBuilding);
 $("o-prev").addEventListener("click", () => stepBuilding(-1));
 $("o-next").addEventListener("click", () => stepBuilding(1));
 document.querySelectorAll("#office-nav [data-mon]").forEach((btn) => btn.addEventListener("click", () => focusMonitor(btn.dataset.mon || null)));
+$("o-zoom").addEventListener("click", () => focusMonitor(office.focus ? null : "board"));
 addEventListener("keydown", (e) => {
   if (!office.active || !$("unlock-modal").hidden || !$("connect-modal").hidden) return;
   if (e.key === "Escape") {
@@ -1648,7 +2082,7 @@ addEventListener("keydown", (e) => {
     return;
   }
   const typing = /^(INPUT|SELECT|TEXTAREA)$/.test(document.activeElement?.tagName || "");
-  if (office.focus && !typing && (e.key === "ArrowRight" || e.key === "ArrowLeft")) {
+  if (office.focus && office.mode === "desk" && !typing && (e.key === "ArrowRight" || e.key === "ArrowLeft")) {
     const i = NAV_ORDER.indexOf(office.focus);
     const n = NAV_ORDER.length;
     const right = e.key === "ArrowRight";
@@ -1665,11 +2099,12 @@ function pickDude(ev) {
 }
 
 function officeFrame(t, dt, now) {
-  const b = bot();
+  const inHall = office.mode === "hall";
+  const b = inHall ? null : bot();
   if (office.act && now > office.actUntil) office.act = null;
-  const base = !b?.enabled || marketOpen() === false ? "relaxed" : "typing";
+  const base = inHall ? (marketOpen() === false ? "relaxed" : "present") : !b?.enabled || marketOpen() === false ? "relaxed" : "typing";
   animateDude(office.act || base, REDUCED ? 0 : t, dt);
-  if (!REDUCED) office.anims.forEach((fn) => fn(t, dt));
+  if (!REDUCED) (inHall ? hall.anims : office.anims).forEach((fn) => fn(t, dt));
   // a slow drift while looking at the whole desk; perfectly still when a monitor is open
   const drift = !office.focus && !tweens.length && !REDUCED;
   officeCam.lookAt(office.look.x + (drift ? Math.sin(t * 0.25) * 0.05 : 0), office.look.y + (drift ? Math.sin(t * 0.18) * 0.02 : 0), office.look.z);
@@ -1685,6 +2120,23 @@ function officeFrame(t, dt, now) {
       };
       const head = office.dude.neck.getWorldPosition(new THREE.Vector3()).add(new THREE.Vector3(0, 0.3, 0));
       const [hx, hy] = toScreen(head.clone());
+      if (inHall && !narrow()) {
+        // above the mayor's hat: his board takes the room beside him
+        const [, ty] = toScreen(head.clone().add(new THREE.Vector3(0, 0.58, 0)));
+        if (!office.bubbleSide) {
+          bubble.style.maxWidth = "260px";
+          office.bubbleSide = "up";
+        }
+        const w = bubble.offsetWidth;
+        const x = Math.max(8, Math.min(hx - w / 2, canvas.clientWidth - w - 8));
+        bubble.classList.remove("left");
+        bubble.classList.add("up");
+        bubble.style.setProperty("--tail-x", `${Math.max(16, Math.min(w - 16, hx - x)).toFixed(1)}px`);
+        bubble.style.transform = `translate(${x.toFixed(1)}px, ${(ty - 10).toFixed(1)}px) translate(0, -100%)`;
+        return;
+      }
+      bubble.classList.remove("up");
+      if (office.bubbleSide === "up") office.bubbleSide = null;
       const [ex] = toScreen(head.clone().add(new THREE.Vector3(0.3, 0, 0)));
       const half = Math.abs(ex - hx);
       // narrow enough to fit beside him, on the side with more room. The side is kept for the whole message
@@ -1707,6 +2159,7 @@ function officeFrame(t, dt, now) {
 
 /* ---------- what's on each monitor ---------- */
 function renderScreens(withSettings = true) {
+  if (office.mode === "hall") return renderHall();
   const b = bot();
   if (!b || !office.built) return;
   const m = office.mons;
@@ -1734,10 +2187,10 @@ function renderScreens(withSettings = true) {
 
 // phones: fade the bottom of the cards while there's more to scroll to
 function markMore() {
-  const el = $("flat-glance");
-  el.classList.toggle("more", el.scrollHeight - el.scrollTop - el.clientHeight > 2);
+  for (const el of [$("flat-glance"), $("flat-hall-body")]) el.classList.toggle("more", el.scrollHeight - el.scrollTop - el.clientHeight > 2);
 }
 $("flat-glance").addEventListener("scroll", markMore, { passive: true });
+$("flat-hall-body").addEventListener("scroll", markMore, { passive: true });
 
 /* ---------- glance views: big type, only what you need at a glance ---------- */
 // The running list is only current while the building is on and has checked since today's open.

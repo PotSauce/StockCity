@@ -45,9 +45,11 @@
   <div class="tape" aria-label="Latest trades"><div class="tape-track" id="tape"></div></div>
 
   <div class="flat-glance" id="flat-glance" role="group" aria-label="This building at a glance"></div>
+  <section class="flat-hall" id="flat-hall" aria-label="Every holding in the city"><header class="mon-bar"><i></i><b>Every holding</b><span class="hb-when"></span></header><div class="hb-body" id="flat-hall-body"></div></section>
   <nav class="office-nav" id="office-nav" hidden aria-label="This building's monitors">
     <button type="button" class="o-back" id="o-back">← City</button>
     <span class="o-bld"><button type="button" id="o-prev" aria-label="Previous building">‹</button><b id="o-name"></b><button type="button" id="o-next" aria-label="Next building">›</button></span>
+    <button type="button" class="o-zoom" id="o-zoom" aria-pressed="false">Zoom in</button>
     <span class="o-mons">
       <button type="button" data-mon="">All<span class="o-wide"> screens</span></button>
       <button type="button" data-mon="holdings">Holdings</button>
