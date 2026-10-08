@@ -83,6 +83,29 @@ class BotDay:
     def spendable(self):
         return self.led["cash"] - sum(u["amount"] for u in self.led["unsettled"])
 
+    def _locked(self, pos):
+        """Bought with unsettled cash: selling before that cash settles would be a good faith
+        violation in a cash account, so the position is held until then (stops included)."""
+        until = pos.get("locked_until")
+        if until and until > self.today:
+            self._note_once(f"{pos['ticker']}: bought with unsettled cash, so it can't be sold until {until}")
+            return True
+        return False
+
+    def _use_unsettled(self, amount):
+        """Spend unsettled sale money first; returns when the money used settles (or None)."""
+        settles = None
+        for u in self.led["unsettled"]:
+            if amount <= 0:
+                break
+            take = min(amount, u["amount"])
+            if take > 0:
+                u["amount"] = round(u["amount"] - take, 2)
+                amount -= take
+                settles = max(settles or u["settles"], u["settles"])
+        self.led["unsettled"] = [u for u in self.led["unsettled"] if u["amount"] > 0]
+        return settles
+
     def buys_today(self):
         return sum(1 for t in self.led["trades"] if t["date"] == self.today and t["side"] == "buy")
 
@@ -125,7 +148,11 @@ class BotDay:
         price = self.prices.get(ticker)
         if price is None or shares <= 0:
             return
-        shares = min(int(shares), int(min(cash_cap, self.spendable()) // (price * 1.002)))
+        # The AI pick is held overnight, so it may buy with unsettled sale money and is then held
+        # until that money settles. Day trades sell the same day, so they need settled cash.
+        unsettled_ok = self.settle and sleeve == "ai"
+        usable = self.led["cash"] if unsettled_ok else self.spendable()
+        shares = min(int(shares), int(min(cash_cap, usable) // (price * 1.002)))
         if shares <= 0:
             if self.settle and self.spendable() < self.led["cash"]:
                 self._note_once(f"Waiting for cash to settle before buying more (cash account rule)")
@@ -134,11 +161,14 @@ class BotDay:
             return
         fill = self.broker.buy(ticker, shares, price)
         self.led["cash"] -= fill.shares * fill.price
+        settles = self._use_unsettled(fill.shares * fill.price) if unsettled_ok else None
         key = f"{sleeve}:{ticker}"
         pos = self.led["positions"].setdefault(
             key,
             {"ticker": ticker, "sleeve": sleeve, "shares": 0, "avg_cost": 0.0, "opened": self.today, "opened_at": self.now_iso, "high": fill.price},
         )
+        if settles:
+            pos["locked_until"] = max(pos.get("locked_until", ""), settles)
         total_cost = pos["avg_cost"] * pos["shares"] + fill.price * fill.shares
         pos["shares"] += fill.shares
         pos["avg_cost"] = round(total_cost / pos["shares"], 4)
@@ -176,6 +206,9 @@ class BotDay:
                 elif gain <= -day["stop_pct"]:
                     self._sell(key, pos["shares"], f"Stop: down {-gain:.2%}", True)
                 continue
+            hit = price <= pos["avg_cost"] * (1 - stop) or (price <= pos["high"] * (1 - trail) and pos["high"] > pos["avg_cost"])
+            if hit and self._locked(pos):
+                continue
             if price <= pos["avg_cost"] * (1 - stop):
                 self._sell(key, pos["shares"], f"Stop loss: down {1 - price / pos['avg_cost']:.1%} from cost", True)
             elif price <= pos["high"] * (1 - trail) and pos["high"] > pos["avg_cost"]:
@@ -184,7 +217,7 @@ class BotDay:
     def sell_blocked(self):
         for key, pos in list(self.led["positions"].items()):
             why = self._blocked(pos["ticker"])
-            if why:
+            if why and not self._locked(pos):
                 self._sell(key, pos["shares"], f"Do-not-buy list: {why}", True)
 
     # ---- planning --------------------------------------------------------------------
@@ -209,7 +242,7 @@ class BotDay:
         held = {p["ticker"]: (k, p) for k, p in self.led["positions"].items() if p["sleeve"] == sleeve}
         for ticker, (key, pos) in held.items():
             if ticker not in targets:
-                if self._held_minutes(pos) < min_hold and not self.force:
+                if (self._held_minutes(pos) < min_hold and not self.force) or self._locked(pos):
                     continue
                 sells.append((key, pos["shares"], "Rotated out: no longer a top pick"))
         stopped_today = {t["ticker"] for t in self.led["trades"] if t["date"] == self.today and t.get("protective")}
@@ -227,7 +260,7 @@ class BotDay:
             if have and abs(want - have) * price <= REBALANCE_TOLERANCE * slot_value:
                 continue
             if want < have:
-                if self._held_minutes(held[ticker][1]) >= min_hold or self.force:
+                if (self._held_minutes(held[ticker][1]) >= min_hold or self.force) and not self._locked(held[ticker][1]):
                     sells.append((held[ticker][0], have - want, "Trimmed back to target size"))
             elif want > have:
                 buys.append((ticker, sleeve, want - have, "New pick" if not have else "Topped up to target size"))

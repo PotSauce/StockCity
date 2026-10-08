@@ -252,3 +252,33 @@ def test_cash_account_cannot_rebuy_with_unsettled_money():
     run_at(bot, led, minute_bars({"RUN": again, "FLAT": [50.0] * len(again)}), "10:40", settle=True)
     bought_again = [t for t in led["trades"] if t["side"] == "buy"][1:]
     assert sum(t["value"] for t in bought_again) <= 1000 - spent + 0.01
+
+
+def test_ai_pick_can_use_unsettled_cash_and_is_held_until_it_settles():
+    bot = copy.deepcopy(BOT)
+    bot.update(style="intraday", ai_share=0.2, starting_cash=1000)
+    bot["universe"] = ["RUN", "FLAT", "UP1"]
+    bot["ai"]["max_picks"] = 1
+    led = new_ledger(1000)
+    closes = frame(["RUN", "FLAT", "UP1"], slopes={"UP1": 0.002, "RUN": 0.0, "FLAT": 0.0})
+    led["cash"] = 150.0  # the rest is already spent; a sale this morning left $150 unsettled
+    led["unsettled"] = [{"amount": 150.0, "settles": "2026-10-08"}]
+    led["contributed"] = 1000
+    day = BotDay(bot, led, closes, "2026-10-07", PaperBroker(), EXCL, picker_returning("UP1"), now="2026-10-07T11:00:00", settle=True)
+    day._buy("UP1", "ai", 1, "New pick", led["cash"])
+    pos = led["positions"]["ai:UP1"]
+    assert pos["locked_until"] == "2026-10-08"
+    assert sum(u["amount"] for u in led["unsettled"]) == pytest.approx(150 - pos["avg_cost"], abs=0.01)
+    assert day.spendable() == pytest.approx(0, abs=0.01)  # day trades still can't touch it
+    # a day trade can't use unsettled money
+    day._buy("FLAT", "intraday", 1, "x", led["cash"])
+    assert "intraday:FLAT" not in led["positions"]
+    # a crash the same day doesn't sell it (that would be a good faith violation)
+    day.prices["UP1"] = pos["avg_cost"] * 0.5
+    day.stop_losses()
+    assert "ai:UP1" in led["positions"]
+    # the next trading day it can be sold again
+    nxt = BotDay(bot, led, closes, "2026-10-08", PaperBroker(), EXCL, picker_returning(), now="2026-10-08T10:00:00", settle=True)
+    nxt.prices["UP1"] = pos["avg_cost"] * 0.5
+    nxt.stop_losses()
+    assert "ai:UP1" not in led["positions"]
