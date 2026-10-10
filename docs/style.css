@@ -198,6 +198,8 @@ input[type="number"], input[type="text"], input[type="password"], input:not([typ
 }
 input:focus, select:focus { border-color: var(--neon); outline: none; }
 input[type="range"] { width: 100%; accent-color: var(--neon); }
+/* a slider has no border to light up, so keyboard focus gets the outline back (the split has two side by side) */
+input[type="range"]:focus-visible { outline: 2px solid var(--neon-2); outline-offset: 4px; }
 .split { display: flex; height: 10px; border-radius: 5px; overflow: hidden; background: rgba(167, 139, 250, 0.12); }
 .split .d, .sw.d { background: var(--neon-2); }
 .split .h, .sw.h { background: var(--neon); }

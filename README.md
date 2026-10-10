@@ -13,16 +13,17 @@ City Hall in the middle shows the whole city's value.
 
 ## How each bot trades
 
-Each building splits its money **80% day trading / 20% AI picks** (adjustable per building) and checks for trades **every 3 minutes** while the market is open (9:45am–3:55pm New York time; adjustable from 2 minutes to once a day). On every check it can buy and sell.
+Each building splits its money three ways, **20% day trades / 50% held stocks / 30% AI picks** (adjustable per building on its settings tab), and checks for trades **every 3 minutes** while the market is open (9:45am–3:55pm New York time; adjustable from 2 minutes to once a day). On every check it can buy and sell. About 80% of the money stays invested in stocks held for days; only the day-trade part turns over during the day.
 
-- **Day trading (80%)**: looks at today's minute-by-minute prices. It buys a stock that is up at least 0.2% over the last 15 minutes and trading above VWAP (today's volume-weighted average price), up to 2 at a time. It sells at **+0.8% take profit**, at a **0.5% stop**, when the run fades (back below VWAP or the 15-minute move turns negative), and always by **3:50pm**, so nothing is held overnight. No new buys after 3:40pm, and it waits 20 minutes before buying the same stock again.
-- **AI picks (20%)**: every 2 hours Claude looks at the building's stocks (returns, volatility, distance from highs) and picks 1, with a short reason. These are held for days, protected by a 10% stop loss and a 7% trailing stop. If Claude isn't set up or fails, that 20% simply waits in cash.
+- **Day trades (20%)**: looks at today's minute-by-minute prices. It buys a stock that is up at least 0.2% over the last 15 minutes and trading above VWAP (today's volume-weighted average price), up to 2 at a time. It sells at **+0.8% take profit**, at a **0.5% stop**, when the run fades (back below VWAP or the 15-minute move turns negative), and always by **3:50pm**, so nothing is held overnight. No new buys after 3:40pm, and it waits 20 minutes before buying the same stock again.
+- **Held stocks (50%)**: the building's 3 strongest stocks by momentum (6-month, 3-month and 1-week returns, above their 50-day average), held for days or weeks, protected by a 10% stop loss and a 7% trailing stop. A held stock is only swapped out once it falls out of the uptrend or more than 2 places below the top 3, so small rank changes don't cause trades. A stock the AI picks already hold is left to them.
+- **AI picks (30%)**: every 2 hours Claude looks at the building's stocks (returns, volatility, distance from highs) and picks 1, with a short reason, steering clear of the held stocks. These are held for days with the same stops. If Claude isn't set up or fails, that part simply waits in cash.
 
-Each building can switch to **Swing** style on its settings tab instead: it holds the top 3 momentum stocks (6-month, 3-month and 1-week returns, above their 50-day average) for days or weeks.
+Set a part to 0% and anything it still holds is sold on the next check (unless the cash-account rule below says it has to wait).
 
 **Risk slider**: each building's settings tab has a slider from less risky to more risky. It sets the numbers below for you:
 
-| Level | Buy when up | Take profit | Stop | Day trades at once | AI pick stop / trailing stop |
+| Level | Buy when up | Take profit | Stop | Day trades at once | Held stock and AI pick stop / trailing stop |
 |---|---|---|---|---|---|
 | 1 Careful | 0.3% | +0.6% | −0.35% | 3 | 6% / 4% |
 | 2 Steady | 0.25% | +0.7% | −0.45% | 2 | 8% / 5% |
@@ -36,16 +37,17 @@ The exact numbers can still be changed under **Fine-tune**, which switches the s
 **Guardrails** (all adjustable per building):
 
 - **At most 30 buys a day** per building. Selling is never capped, so stops and the close-out always go through.
-- A stopped-out stock isn't bought back the same day.
-- **Cash-account rule**: in a cash account, money from a sale can't be used again until it settles the next trading day. Each building only spends settled cash, so it never triggers a good-faith violation. This is on for paper too (`"cash_account_rules": "always"` in the settings file), so a paper trial trades the way the real account will. Set it to `"live"` to apply it only with real money, or `"off"` for a margin account.
+- A stopped-out stock isn't bought back the same day, and neither is a held stock or AI pick that was just rotated out.
+- A held stock or AI pick is only trimmed when it's worth more than 25% over its slot, and always keeps at least one share.
+- **Cash-account rule**: in a cash account, money from a sale can't be used again until it settles on the next settlement day: the next trading day the banks are open too, so a sale the Friday before Columbus Day or the day before Veterans Day settles a day later. Day trades only spend settled cash. Held stocks and AI picks stay overnight, so they may buy with sale money before it settles; such a stock is then not sold (not even on a stop) until that money has settled, so it never triggers a good-faith violation. This is on for paper too (`"cash_account_rules": "always"` in the settings file), so a paper trial trades the way the real account will. Set it to `"live"` to apply it only with real money, or `"off"` for a margin account.
 
-What that means for a $1,000–2,000 cash account: each dollar can be spent once a day, so expect about 3–4 buys per building per day (without the rule, 13–30). More positions at once (smaller trades) means more trades from the same money. Margin accounts under $25,000 are limited to 3 day trades per 5 days by the pattern day trader rule, which is why a cash account is the right fit here.
+What that means for a $1,000–2,000 cash account: each day-trade dollar can be spent once a day, so expect only a few day trades per building per day (without the rule, 13–30). More positions at once (smaller trades) means more trades from the same money. Margin accounts under $25,000 are limited to 3 day trades per 5 days by the pattern day trader rule, which is why a cash account is the right fit here.
 
 **Do-not-buy list** (`config/exclusions.json`): no healthcare and no private prisons (GEO Group, CoreCivic, and the prison food contractor Aramark), plus a name/industry keyword check. Every buy is checked against it, including AI picks and any ticker you add yourself. The city also refuses to add a blocked ticker from the settings screen. Each stock's sector is looked up once in the background and saved; a stock isn't bought until that check has run.
 
 **Stock lists**: each building can trade the stocks listed on its settings tab, where you can add or remove any. When the lists in `config/bots.json` grow (its `universe_version` goes up), a running city adds the new stocks to each building on its next restart and keeps the ones you added. Claude reviews the strongest 40 of a building's affordable stocks each time it picks.
 
-Bots only buy whole shares (Schwab's API can't trade fractions), so a stock is skipped when one share costs more than its slot. Each building starts with $500 ($2,000 for the city), which puts slots near $200 for day trades and $100 for the AI pick; pricier stocks such as MSFT or META are skipped until a building has more money.
+Bots only buy whole shares (Schwab's API can't trade fractions), so a stock is skipped when one share costs more than its slot. Each building starts with $500 ($2,000 for the city), which puts slots near $50 for each day trade, $83 for each held stock and $150 for the AI pick; a held stock that doesn't fit is passed over for the next strongest, and pricier stocks such as MSFT or META are skipped until a building has more money.
 
 ## Where it runs (always on)
 

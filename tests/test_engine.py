@@ -534,3 +534,75 @@ def test_a_day_trade_exit_doesnt_keep_a_stock_out_of_held_stocks():
     led["trades"] = [{**sale, "sleeve": "momentum", "reason": "Stop loss: down 10.0% from cost"}]
     BotDay(split_bot(), led, split_closes(), "2026-10-07", PaperBroker(), EXCL, picker_returning(), now="2026-10-07T10:10:00", minute_bars=RUNNING).run()
     assert "UP1" not in value(led, "momentum")  # a held stock that hit its stop isn't bought back the same day
+
+
+def test_held_stocks_and_the_ai_pick_dont_double_up():
+    # $500 at 20/50/30: an $83 held slot and a $150 AI slot. The strongest stocks cost more than a held slot,
+    # so the held stocks are cheaper ones further down, and the AI is told to avoid those, not the leaders.
+    tickers = ["UP1", "UP2", "UP3", "C1", "C2", "C3", "C4"]
+    slopes = {"UP1": 0.004, "UP2": 0.0035, "UP3": 0.003, "C1": 0.0025, "C2": 0.002, "C3": 0.0015, "C4": 0.001}
+    closes = frame(tickers, slopes=slopes)
+    for t in ["C1", "C2", "C3", "C4"]:
+        closes[t] *= 0.02  # a few dollars a share
+    bot = split_bot(starting_cash=500)
+    bot["universe"] = tickers
+    asked = []
+
+    def picker(sector, cands, max_picks, avoid):
+        asked.append(avoid)
+        free = [c["ticker"] for c in cands if c["ticker"] not in avoid]
+        return {"picks": [{"ticker": t, "confidence": 0.9, "reason": "x"} for t in free[:max_picks]], "market_view": "", "model": "test"}
+
+    led = new_ledger(500)
+    BotDay(bot, led, closes, "2026-10-07", PaperBroker(), EXCL, picker, now="2026-10-07T10:10:00").run()
+    held, ai = value(led, "momentum"), value(led, "ai")
+    assert set(held) == {"C1", "C2", "C3"} and asked == [["C1", "C2", "C3"]]
+    assert list(ai) == ["C4"]
+    # the other way round: a stock the AI already holds is left to it (here the AI keeps C1)
+    led = new_ledger(500)
+    led["positions"]["ai:C1"] = {"ticker": "C1", "sleeve": "ai", "shares": 50, "avg_cost": 2.9, "opened": "2026-10-01", "high": 2.9}
+    led["cash"] -= 145
+    BotDay(bot, led, closes, "2026-10-07", PaperBroker(), EXCL, picker_returning("C1"), now="2026-10-07T10:10:00").run()
+    assert set(value(led, "momentum")) == {"C2", "C3", "C4"} and set(value(led, "ai")) == {"C1"}
+
+
+def test_ai_share_of_zero_rotates_out_leftover_ai_picks():
+    bot = split_bot(day_share=0.7, ai_share=0)
+    led = new_ledger(10000)
+    led["positions"]["ai:UP4"] = {"ticker": "UP4", "sleeve": "ai", "shares": 5, "avg_cost": 140.0, "opened": "2026-10-01", "high": 140.0}
+    BotDay(bot, led, split_closes(), "2026-10-07", PaperBroker(), EXCL, picker_returning("UP4"), now="2026-10-07T10:10:00", minute_bars=RUNNING).run()
+    assert not value(led, "ai") and value(led, "momentum") and value(led, "intraday")
+    assert [t["reason"] for t in led["trades"] if t["ticker"] == "UP4"] == ["Rotated out: no longer a top pick"]
+
+
+def test_a_rotated_out_stock_isnt_bought_back_the_same_day():
+    sale = {"date": "2026-10-07", "time": "09:48", "ticker": "UP1", "side": "sell", "shares": 1, "price": 180.0, "value": 180.0, "reason": "Rotated out: no longer a top pick"}
+    for sleeve in ["momentum", "ai"]:
+        led = new_ledger(10000)
+        led["trades"] = [{**sale, "sleeve": sleeve}]
+        BotDay(split_bot(), led, split_closes(), "2026-10-07", PaperBroker(), EXCL, picker_returning(), now="2026-10-07T10:10:00", minute_bars=RUNNING).run()
+        assert "UP1" not in value(led, "momentum") and {"UP2", "UP3"} <= set(value(led, "momentum"))
+        assert any(n["text"] == "UP1: not buying back today after rotating it out" for n in led["notes"])
+    # the next day it can be bought again
+    BotDay(split_bot(), led, split_closes(), "2026-10-08", PaperBroker(), EXCL, picker_returning(), now="2026-10-08T10:10:00", minute_bars=RUNNING).run()
+    assert "UP1" in value(led, "momentum")
+
+
+def test_an_ai_pick_that_rose_past_its_slot_survives_the_next_review():
+    bot = split_bot(starting_cash=470, day_share=0)  # 30% AI pick, 70% held stocks
+    bot["universe"] = ["UP4", "DOWN"]
+    closes = frame(["UP4", "DOWN"], slopes={"UP4": 0.0015})
+    closes.iloc[-1, 0] = price = 150.0  # up from $135: the building's worth $485, so 3% over its $145.50 slot
+    led = new_ledger(470)
+    led["positions"]["ai:UP4"] = {"ticker": "UP4", "sleeve": "ai", "shares": 1, "avg_cost": 135.0, "opened": "2026-10-01", "high": price}
+    led["cash"] -= 135
+    led["ai_targets"] = ["UP4"]
+    offered = []
+
+    def picker(sector, cands, max_picks, avoid):
+        offered.extend(c["ticker"] for c in cands)
+        return {"picks": [{"ticker": "UP4", "confidence": 0.9, "reason": "x"}], "market_view": "", "model": "test"}
+
+    BotDay(bot, led, closes, "2026-10-07", PaperBroker(), EXCL, picker, now="2026-10-07T11:48:00", force=True).run()
+    assert "UP4" in offered and not led["ai"]["rejected"]
+    assert led["positions"]["ai:UP4"]["shares"] == 1 and not [t for t in led["trades"] if t["side"] == "sell"]

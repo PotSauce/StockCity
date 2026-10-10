@@ -284,12 +284,21 @@ class BotDay:
                 sells.append((key, pos["shares"], "Rotated out: no longer a top pick"))
         # a day trade's take profit, stop or close-out says nothing about holding the stock for days
         stopped_today = {t["ticker"] for t in self.led["trades"] if t["date"] == self.today and t.get("protective") and t["sleeve"] != "intraday"}
+        # nor is a stock rotated out of held stocks or AI picks today: a score near 0 flips on small
+        # price moves, and each round trip pays the spread and turns settled cash into sale money
+        rotated_today = {
+            t["ticker"] for t in self.led["trades"]
+            if t["date"] == self.today and t["side"] == "sell" and t["sleeve"] != "intraday" and t["reason"].startswith("Rotated out")
+        }
         for ticker in targets:
             price = self.prices.get(ticker)
             if not price:
                 continue
             if ticker in stopped_today and ticker not in held:
                 self._note_once(f"{ticker}: not buying back today after a stop")
+                continue
+            if ticker in rotated_today and ticker not in held:
+                self._note_once(f"{ticker}: not buying back today after rotating it out")
                 continue
             want = math.floor(slot_value / price)
             have = held.get(ticker, (None, {"shares": 0}))[1]["shares"]
@@ -381,18 +390,29 @@ class BotDay:
             self.led["intraday_signals"] = []
 
         # Held stocks: the building's strongest stocks by momentum, held for days
+        targets = []
         if hold_share > 0:
             held_m = [p["ticker"] for p in self.led["positions"].values() if p["sleeve"] == "momentum"]
+            # a stock the AI picks hold (or are set to buy) is left to them, so the two don't double up
+            ai_side = {p["ticker"] for p in self.led["positions"].values() if p["sleeve"] == "ai"}
+            if ai_share > 0:
+                ai_side |= set(self.led.get("ai_targets") or [])
             slot = eq * hold_share / m["top_n"]
             # whole shares only: a stock where one share costs more than a slot is passed over for
             # the next strongest, or that slot would sit in cash (stocks already held stay eligible)
-            affordable = [r for r in ranking if r["ticker"] in held_m or self.prices.get(r["ticker"], math.inf) <= slot]
+            affordable = [
+                r for r in ranking
+                if r["ticker"] in held_m or (r["ticker"] not in ai_side and self.prices.get(r["ticker"], math.inf) <= slot)
+            ]
             targets = momentum.picks_with_buffer(affordable, m["top_n"], held_m, m["rank_buffer"])
             s, b = self.plan_sleeve("momentum", targets, slot)
             sells += s
             buys += b
-            if not targets and momentum.picks(ranking, 1):
+            rising = momentum.picks(ranking, len(ranking))
+            if not targets and [t for t in rising if t not in ai_side]:
                 self._note_once(f"Held stocks: one share of every stock in an uptrend costs more than the ${slot:,.0f} slot, so that money stays in cash")
+            elif not targets and rising:
+                self._note_once("Held stocks: every stock in an uptrend is already an AI pick, so that money stays in cash")
             elif not targets:
                 self._note_once("Held stocks: nothing in an uptrend, that money stays in cash")
         else:
@@ -403,7 +423,7 @@ class BotDay:
 
         a = self.bot["ai"]
         if ai_share > 0 and (self.force or minutes_since(self.led["last_ai"], self.now) >= a["review_every_minutes"]):
-            ai_targets = self.ai_targets(cands, ranking, eq * ai_share / a["max_picks"])
+            ai_targets = self.ai_targets(cands, ranking, eq * ai_share / a["max_picks"], targets)
             if ai_targets is not None:
                 self.led["ai_targets"] = ai_targets
                 self.led["last_ai"] = self.now_iso
@@ -411,6 +431,10 @@ class BotDay:
             s, b = self.plan_sleeve("ai", self.led["ai_targets"], eq * ai_share / a["max_picks"])
             sells += s
             buys += b
+        elif ai_share <= 0:
+            # AI picks left over from before the share went to 0 are rotated out
+            s, _ = self.plan_sleeve("ai", [], 0)
+            sells += s
 
         # Selling is always allowed; the daily cap limits new buys.
         for key, shares, reason in sells:
@@ -434,17 +458,21 @@ class BotDay:
         if not any(n["date"] == self.today and n["text"] == text for n in self.led.get("notes", [])) and text not in self.notes:
             self.notes.append(text)
 
-    def ai_targets(self, cands, ranking, slot_value):
+    def ai_targets(self, cands, ranking, slot_value, held_targets=()):
+        """`held_targets`: the stocks the held sleeve aims to own this check (what it holds or is buying)."""
         holding_m = [p["ticker"] for p in self.led["positions"].values() if p["sleeve"] == "momentum"]
-        avoid = sorted(set(holding_m) | set(momentum.picks(ranking, self.bot["momentum"]["top_n"])))
-        # only offer stocks where at least one share fits the AI slot
-        affordable = [t for t in cands if self.prices.get(t, 1e12) <= slot_value]
+        avoid = sorted(set(holding_m) | set(held_targets))
+        # only offer stocks where at least one share fits the AI slot; a current pick stays eligible
+        # after its price rises past the slot (it keeps its share rather than being sold for size)
+        holding_ai = {p["ticker"] for p in self.led["positions"].values() if p["sleeve"] == "ai"}
+        affordable = [t for t in cands if t in holding_ai or self.prices.get(t, 1e12) <= slot_value]
         if not affordable:
             self._note_once(f"AI picks: no stock here costs under its ${slot_value:,.0f} slot")
             return []
-        # Claude sees the strongest 40 by momentum, which keeps each request small
+        # Claude sees the strongest 40 by momentum, which keeps each request small (current picks always)
         ranked = [r["ticker"] for r in ranking if r["ticker"] in affordable]
         affordable = (ranked + [t for t in affordable if t not in ranked])[:AI_CANDIDATES]
+        affordable += [t for t in cands if t in holding_ai and t not in affordable]
         cand_metrics = ai_picks.metrics(self.closes[affordable])
         try:
             result = self.picker(self.bot["sector"], cand_metrics, self.bot["ai"]["max_picks"], avoid)

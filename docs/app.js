@@ -2257,15 +2257,18 @@ function glanceFresh(b) {
 }
 
 // The held stocks a building aims to own (engine/city.py run(): momentum.picks_with_buffer over the stocks
-// where one share fits a held slot), and that slot.
+// where one share fits a held slot and the AI picks don't hold or want), and that slot.
 const RANKING_SENT = 12; // the server sends the top 12 of its ranking
 function heldTargets(b) {
   const s = b.settings;
   const m = s.momentum;
   const owned = b.positions.filter((p) => p.sleeve === "momentum").map((p) => p.ticker);
   const slot = (b.equity * heldShare(s)) / m.top_n;
-  // whole shares: a stock where one share costs more than a slot is passed over (one already held stays eligible)
-  const ok = b.ranking.filter((r) => r.qualifies && (owned.includes(r.ticker) || r.price <= slot)).map((r) => r.ticker);
+  const aiSide = new Set(b.positions.filter((p) => p.sleeve === "ai").map((p) => p.ticker));
+  if (s.ai_share > 0) for (const p of b.ai?.picks || []) aiSide.add(p.ticker);
+  // whole shares: a stock where one share costs more than a slot is passed over (one already held stays eligible),
+  // and so is one the AI picks hold or are set to buy, so the two don't double up
+  const ok = b.ranking.filter((r) => r.qualifies && (owned.includes(r.ticker) || (!aiSide.has(r.ticker) && r.price <= slot))).map((r) => r.ticker);
   // a stock already held keeps its place while it's within the buffer
   const keep = ok.slice(0, m.top_n + m.rank_buffer).filter((t) => owned.includes(t)).slice(0, m.top_n);
   let open = m.top_n - keep.length;
@@ -2274,6 +2277,17 @@ function heldTargets(b) {
     open -= Math.min(owned.filter((t) => !keep.includes(t)).length, m.top_n + m.rank_buffer - ok.length);
   const fill = ok.filter((t) => !keep.includes(t)).slice(0, Math.max(0, open));
   return { targets: [...keep, ...fill], slot };
+}
+
+// stocks not bought back today for held stocks: sold on a stop, or rotated out of held stocks or AI picks
+// (a day trade's exits don't count)
+function noBuyBackToday(b) {
+  const today = nyToday();
+  return new Set(
+    b.trades
+      .filter((t) => t.date === today && t.side === "sell" && t.sleeve !== "intraday" && (t.protective || (t.reason || "").startsWith("Rotated out")))
+      .map((t) => t.ticker),
+  );
 }
 
 // What the next check would buy, worked out the way the server picks (engine/city.py), so a glance
@@ -2308,10 +2322,10 @@ function nextBuys(b) {
       }
     }
   }
-  // then held stocks: a new top pick, unless a held stock or AI pick of it was sold on a stop today
+  // then held stocks: a new top pick, unless a held stock or AI pick of it was stopped or rotated out today
   if (heldShare(s) > 0) {
     const owned = new Set(b.positions.filter((p) => p.sleeve === "momentum").map((p) => p.ticker));
-    const stopped = new Set(b.trades.filter((t) => t.date === today && t.protective && t.sleeve !== "intraday").map((t) => t.ticker));
+    const stopped = noBuyBackToday(b);
     for (const t of heldTargets(b).targets) if (!owned.has(t) && !stopped.has(t)) tickers.push(t);
   }
   const list = [...new Set(tickers)].slice(0, room);
@@ -2503,24 +2517,28 @@ function nextUpHTML(b, held) {
   const keeps = heldShare(s) > 0;
   if (dayShare(s) > 0) {
     const need = num1(s.intraday.entry_pct * 100);
+    // whole shares, as in nextBuys: a mover where one share costs more than a day-trade slot is skipped
+    const slot = (b.equity * dayShare(s)) / s.intraday.max_positions;
     for (const r of (b.intraday_signals || []).filter((x) => !held.has(x.ticker)).slice(0, keeps ? 3 : 4)) {
       const move = `${r.move >= 0 ? "up" : "down"} ${num1(Math.abs(r.move) * 100)}%`;
+      const running = `<li><b>${esc(r.ticker)}</b> is ${move} in ${s.intraday.lookback_minutes} min and above VWAP.`;
       items.push(
-        r.qualifies
-          ? `<li><b>${esc(r.ticker)}</b> is ${move} in ${s.intraday.lookback_minutes} min and above VWAP. <span class="up">Ready to buy</span> on the next check if there's a free slot and cash.</li>`
-          : `<li><b>${esc(r.ticker)}</b> is ${move}; needs +${need}%${r.above_vwap ? "" : " and to get back above VWAP"}.</li>`,
+        !r.qualifies
+          ? `<li><b>${esc(r.ticker)}</b> is ${move}; needs +${need}%${r.above_vwap ? "" : " and to get back above VWAP"}.</li>`
+          : Math.floor(slot / r.price) === 0
+            ? `${running} One share (${money(r.price, 2)}) costs more than the ${money(slot)} day-trade slot, so it's passed over.</li>`
+            : `${running} <span class="up">Ready to buy</span> on the next check if there's a free slot and cash.</li>`,
       );
     }
   }
   if (keeps) {
-    const today = nyToday();
     const owned = new Set(b.positions.filter((p) => p.sleeve === "momentum").map((p) => p.ticker));
-    const stopped = new Set(b.trades.filter((t) => t.date === today && t.protective && t.sleeve !== "intraday").map((t) => t.ticker));
+    const stopped = noBuyBackToday(b);
     const score = new Map(b.ranking.map((r) => [r.ticker, r.score]));
     for (const t of heldTargets(b).targets.filter((x) => !owned.has(x) && !stopped.has(x)))
       items.push(`<li><b>${esc(t)}</b> is one of the top ${s.momentum.top_n} picks on momentum (${pct(score.get(t))}). <span class="up">Bought to hold</span> on the next check if there's cash.</li>`);
   }
-  const ai = (b.ai?.picks || []).map((p) => p.ticker).filter((t) => !held.has(t));
+  const ai = s.ai_share > 0 ? (b.ai?.picks || []).map((p) => p.ticker).filter((t) => !held.has(t)) : [];
   if (ai.length) items.push(`<li>AI picks not bought yet: <b>${ai.map(esc).join(", ")}</b>. They're bought when there's cash for a whole share.</li>`);
   if (!items.length)
     items.push(

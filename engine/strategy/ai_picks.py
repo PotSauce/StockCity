@@ -65,7 +65,7 @@ def claude_picks(sector: str, candidates: list[dict], max_picks: int, avoid: lis
     prompt = (
         f"Sector: {sector}\n"
         f"Choose up to {max_picks} stocks for the coming week.\n"
-        f"The momentum sleeve of this building already holds: {', '.join(avoid) or 'nothing'}. "
+        f"The momentum sleeve of this building holds or is buying: {', '.join(avoid) or 'nothing'}. "
         "You may overlap with it, but diversifying is usually better.\n\n"
         "Candidates (returns are decimals, e.g. 0.05 = +5%):\n"
         + json.dumps(candidates, indent=1)
