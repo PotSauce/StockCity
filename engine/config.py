@@ -11,6 +11,7 @@ EXCLUSIONS_PATH = ROOT / "config" / "exclusions.json"
 # (min, max) limits so a typo in the UI can't produce a reckless bot.
 LIMITS = {
     "starting_cash": (0, 10_000_000),
+    "day_share": (0.0, 1.0),
     "ai_share": (0.0, 1.0),
     "momentum.top_n": (1, 10),
     "momentum.lookback_days": (20, 252),
@@ -38,11 +39,13 @@ DEFAULT_BOT = {
     "market": "us_stocks",
     "enabled": True,
     "starting_cash": 2500,
-    "ai_share": 0.2,
+    # How each building splits its money: day trades (sold the same day), AI picks, and the rest
+    # in held stocks (its strongest stocks by momentum, held for days). See held_share().
+    "day_share": 0.2,
+    "ai_share": 0.3,
     "check_every_minutes": 3,
     "min_hold_minutes": 30,
     "max_buys_per_day": 30,
-    "style": "intraday",
     "intraday": {
         "lookback_minutes": 15,
         "entry_pct": 0.002,
@@ -143,7 +146,16 @@ def apply_risk(bot, level):
         bot[sec].update(RISK_LEVELS[level][sec])
 
 
-RETIRED_KEYS = {"momentum": ["rebalance_days"], "ai": ["rebalance_days"], "": ["max_trades_per_day"]}
+RETIRED_KEYS = {"momentum": ["rebalance_days"], "ai": ["rebalance_days"], "": ["max_trades_per_day", "style"]}
+# Settings saved before the three-way split have a "style" instead: "swing" buildings held stocks
+# and made no day trades; "intraday" ones day traded everything outside the AI picks, which left most
+# of the money as unsettled cash after the morning's first trade. Those move to this much day trading.
+MIGRATED_DAY_SHARE = 0.2
+
+
+def held_share(bot):
+    """The share of a building's money kept in held stocks: whatever day trades and AI picks don't use."""
+    return round(max(0.0, 1 - bot["day_share"] - bot["ai_share"]), 4)
 
 
 def normalize_bot(raw):
@@ -158,8 +170,6 @@ def normalize_bot(raw):
     for section, keys in RETIRED_KEYS.items():
         for k in keys:
             (bot[section] if section else bot).pop(k, None)
-    if bot["style"] not in ("intraday", "swing"):
-        raise ValueError(f"style must be 'intraday' or 'swing', not {bot['style']!r}")
     for k in ("no_entries_after", "close_out_at"):
         if not re.fullmatch(r"\d\d:\d\d", str(bot["intraday"][k])):
             raise ValueError(f"intraday.{k} must look like 15:40")
@@ -167,6 +177,11 @@ def normalize_bot(raw):
         val = _get(bot, key)
         cast = int if isinstance(lo, int) and key != "starting_cash" else float
         _set(bot, key, cast(min(max(float(val), lo), hi)))
+    if "day_share" not in raw:
+        bot["day_share"] = 0.0 if raw.get("style") == "swing" else min(MIGRATED_DAY_SHARE, 1 - bot["ai_share"])
+    # the AI share wins when the two add up to more than everything
+    bot["ai_share"] = round(bot["ai_share"], 4)
+    bot["day_share"] = round(min(bot["day_share"], 1 - bot["ai_share"]), 4)
     seen = []
     for t in bot["universe"]:
         t = str(t).strip().upper()

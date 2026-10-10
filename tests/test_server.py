@@ -33,6 +33,8 @@ def test_state_and_site(client):
     assert {b["id"] for b in st["bots"]} == {"tech", "energy", "finance", "consumer"}
     assert st["server"]["mode"] == "live"
     assert all("last_check" in b for b in st["bots"])  # shown on the trader's main monitor
+    # each building's money: 20% day trades, 30% AI picks, the rest in held stocks
+    assert all(b["settings"]["day_share"] == 0.2 and b["settings"]["ai_share"] == 0.3 and "style" not in b["settings"] for b in st["bots"])
     for page in ("/", "/app.js", "/style.css"):
         r = client.get(page)
         # browsers must check for a newer copy, or they keep the old page after a deploy
@@ -72,7 +74,9 @@ def test_run_now_trades_on_paper(client):
     st = client.get("/api/state").json()
     assert any(b["trades"] for b in st["bots"])
     # the Picks tab lists today's movers for day-trading buildings
-    assert all(b["intraday_signals"] for b in st["bots"] if b["settings"]["style"] == "intraday")
+    assert all(b["intraday_signals"] for b in st["bots"] if b["settings"]["day_share"] > 0)
+    # half of each building's money goes into held stocks
+    assert any(p["sleeve"] == "momentum" for b in st["bots"] for p in b["positions"])
     # AI is off without a key, so the AI sleeve holds nothing
     for b in st["bots"]:
         assert not [p for p in b["positions"] if p["sleeve"] == "ai"]

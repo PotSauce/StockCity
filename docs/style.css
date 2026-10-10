@@ -12,6 +12,7 @@
   --up: #4ade80;
   --down: #fb7185;
   --warn: #fbbf24;
+  --hold: #c4b5fd; /* held stocks, on dark */
   --font-display: "Chakra Petch", "Rajdhani", "Segoe UI", sans-serif;
   --font-body: "Barlow", "Segoe UI", system-ui, sans-serif;
   --font-data: "JetBrains Mono", ui-monospace, "SFMono-Regular", Menlo, monospace;
@@ -153,7 +154,9 @@ th:first-child, td:first-child { text-align: left; }
 td { padding: 7px 4px; text-align: right; border-bottom: 1px solid rgba(167, 139, 250, 0.08); font-family: var(--font-data); font-variant-numeric: tabular-nums; }
 td.tk { font-weight: 600; }
 .sleeve { font: 600 9.5px/1 var(--font-display); letter-spacing: 0.1em; padding: 3px 5px; border-radius: 4px; margin-left: 6px; vertical-align: 1px; }
-.sleeve.momentum, .sleeve.intraday { background: rgba(34, 211, 238, 0.14); color: var(--neon-2); }
+/* the three parts of a building's money: day trades (DAY), held stocks (HOLD) and AI picks (AI) */
+.sleeve.intraday { background: rgba(34, 211, 238, 0.14); color: var(--neon-2); }
+.sleeve.momentum { background: rgba(167, 139, 250, 0.2); color: var(--hold); }
 .sleeve.ai { background: rgba(244, 114, 182, 0.16); color: #f9a8d4; }
 .empty { color: var(--ink-dim); font-size: 14px; padding: 14px 0; }
 .section-title { font: 600 11px/1 var(--font-display); letter-spacing: 0.14em; text-transform: uppercase; color: var(--ink-dim); margin: 16px 0 8px; }
@@ -195,10 +198,24 @@ input[type="number"], input[type="text"], input[type="password"], input:not([typ
 }
 input:focus, select:focus { border-color: var(--neon); outline: none; }
 input[type="range"] { width: 100%; accent-color: var(--neon); }
-.split { display: flex; height: 10px; border-radius: 5px; overflow: hidden; }
-.split .m { background: var(--neon-2); }
-.split .a { background: #f472b6; }
-.split-legend { display: flex; justify-content: space-between; font: 12.5px var(--font-data); }
+.split { display: flex; height: 10px; border-radius: 5px; overflow: hidden; background: rgba(167, 139, 250, 0.12); }
+.split .d, .sw.d { background: var(--neon-2); }
+.split .h, .sw.h { background: var(--neon); }
+.split .a, .sw.a { background: #f472b6; }
+.split-legend { display: flex; justify-content: space-between; gap: 12px; font: 12.5px var(--font-data); }
+.split-legend > span { display: flex; flex-direction: column; }
+.split-legend > span:nth-child(2) { align-items: center; text-align: center; }
+.split-legend > span:last-child { align-items: flex-end; text-align: right; }
+.split-legend b { font-size: 15px; font-weight: 600; }
+.split-legend .d { color: var(--neon-2); }
+.split-legend .h { color: var(--hold); }
+.split-legend .a { color: #f9a8d4; }
+.field .split-label { display: flex; align-items: center; gap: 7px; margin-top: 8px; }
+.sw { width: 8px; height: 8px; border-radius: 2px; flex: none; }
+.split-range.d { accent-color: var(--neon-2); }
+.split-range.a { accent-color: #f472b6; }
+.fine-part { display: contents; }
+.fine-part > .section-title:first-child { margin-top: 16px; }
 .toggle { display: flex; align-items: center; gap: 10px; }
 .toggle input { width: 18px; height: 18px; accent-color: var(--up); }
 .chips { display: flex; flex-wrap: wrap; gap: 6px; max-height: 168px; overflow-y: auto; padding-right: 4px; }
@@ -377,6 +394,11 @@ details.fine[open] > summary { margin-bottom: 4px; }
 .g-row { display: grid; grid-template-columns: 170px auto; justify-content: start; align-items: center; gap: 18px; font: 600 34px/1.1 var(--font-display); }
 .g-row b { font-weight: 700; }
 .g-row .num { white-space: normal; }
+/* the split, one line per part, coloured like the bar on the form */
+.g-split { display: flex; flex-direction: column; }
+.g-split .d { color: var(--neon-2); }
+.g-split .h { color: var(--hold); }
+.g-split .a { color: #f9a8d4; }
 
 /* the wide status monitor */
 .st { display: grid; grid-template-columns: minmax(0, 1.3fr) repeat(4, auto) minmax(140px, 1.2fr); gap: 26px; align-items: center; height: 100%; }
@@ -597,6 +619,7 @@ ul.next b { font-family: var(--font-data); }
   .fg .g-meter { width: 100%; margin: 0; }
   .fg .g-row { justify-content: space-between; }
   .fg .g-row:nth-child(n + 3) { display: flex; }
+  .fg .g-split { align-items: flex-end; }
   .fg .g-hold { grid-template-columns: 40px minmax(0, 1fr) max-content; gap: 6px; }
   .fg .g-hold .g-tk { font-size: 13px; }
   .fg .g-hold .sleeve { display: none; }

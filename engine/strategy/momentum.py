@@ -1,4 +1,4 @@
-"""The 80% sleeve: buy the sector's strongest trending stocks, re-check on a schedule."""
+"""Held stocks: buy the sector's strongest trending stocks and hold them for days."""
 import pandas as pd
 
 

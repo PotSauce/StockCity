@@ -755,8 +755,32 @@ function bot() {
   return STATE.bots.find((b) => b.id === openId);
 }
 
-const SLEEVE_TAG = { ai: "AI", momentum: "MOM", intraday: "DAY" };
-const mainName = (s) => (s.style === "intraday" ? "Day trading" : "Momentum");
+// Each building splits its money three ways (engine/config.py): day trades, AI picks, and the rest in
+// held stocks (its strongest stocks by momentum, kept for days; sleeve "momentum").
+const SLEEVE_TAG = { ai: "AI", momentum: "HOLD", intraday: "DAY" };
+const sleeveTag = (sleeve) => `<span class="sleeve ${esc(sleeve)}">${SLEEVE_TAG[sleeve] || esc(String(sleeve || "").toUpperCase())}</span>`;
+// Settings saved before the split had a "style" instead: day trading used everything outside the AI picks.
+const dayShare = (s) => s.day_share ?? (s.style === "intraday" ? 1 - s.ai_share : 0);
+const heldShare = (s) => Math.max(0, Math.round((1 - dayShare(s) - s.ai_share) * 10000) / 10000);
+// the three parts as whole percents that add up to 100
+function splitPcts(s) {
+  const day = Math.round(dayShare(s) * 100);
+  const ai = Math.round(s.ai_share * 100);
+  return { day, ai, held: Math.max(0, 100 - day - ai) };
+}
+// a settings copy for the form: the split in the new shape, so a save never writes the old "style"
+function draftOf(s) {
+  const d = structuredClone(s);
+  d.day_share = dayShare(s);
+  delete d.style;
+  return d;
+}
+// the latest date shares of this stock bought with unsettled cash can be sold (cash account rule), if that's
+// after today. The broker sees one holding per stock, so a lock on one sleeve's shares holds the others too.
+function lockedUntil(b, ticker) {
+  const until = b.positions.reduce((a, p) => (p.ticker === ticker && (p.locked_until || "") > a ? p.locked_until : a), "");
+  return until > nyToday() ? until : null;
+}
 
 const officeScene = new THREE.Scene();
 officeScene.background = new THREE.Color(0x0b0820);
@@ -1347,6 +1371,7 @@ function dudeLine(b) {
   const held = b.positions.map((p) => p.ticker);
   const hold = held.length ? `Holding ${held.join(", ")}.` : "Not holding anything.";
   if (marketOpen() === false) return `Market's closed. ${hold} I start again at ${tradingStarts()} New York time.`;
+  if (!dayShare(b.settings)) return `${hold} I keep the strongest stocks for days.`;
   const sig = (b.intraday_signals || []).find((r) => !held.includes(r.ticker));
   return `${hold} ${sig ? `Watching ${sig.ticker}.` : "Looking for a stock that's running."}`;
 }
@@ -1652,10 +1677,11 @@ function hallHTML() {
       const rows = pos
         .map((p) => {
           const gain = p.value - p.avg_cost * p.shares;
-          // an AI pick bought with unsettled cash can't be sold until that cash settles (cash account rule)
-          const lock = p.locked_until && p.locked_until > nyToday() ? ` title="Bought with unsettled cash, so it can't be sold until ${esc(p.locked_until)}"` : "";
+          // a held stock or AI pick bought with unsettled cash can't be sold until that cash settles (cash account rule)
+          const until = lockedUntil(b, p.ticker);
+          const lock = until ? ` title="Bought with unsettled cash, so it can't be sold until ${esc(until)}"` : "";
           return `<div class="hb-row"${lock}>
-            <span class="hb-name"><span class="hb-tk num">${esc(p.ticker)}</span><span class="sleeve ${esc(p.sleeve)}">${SLEEVE_TAG[p.sleeve] || esc(p.sleeve)}</span></span><span class="hb-gain num ${cls(p.pnl_pct)}">${pct(p.pnl_pct) || "0.0%"}</span>
+            <span class="hb-name"><span class="hb-tk num">${esc(p.ticker)}</span>${sleeveTag(p.sleeve)}</span><span class="hb-gain num ${cls(p.pnl_pct)}">${pct(p.pnl_pct) || "0.0%"}</span>
             <span class="hb-sh num">${p.shares} sh · ${money(p.value, p.value < 1000 ? 2 : 0)}</span><span class="hb-pl num ${cls(gain)}">${signed(gain)}</span>
           </div>`;
         })
@@ -2005,7 +2031,7 @@ async function openBuilding(id) {
     office.mode = toHall ? "hall" : "desk";
     if (toHall) enterHall();
     else {
-      draft = structuredClone(bot().settings);
+      draft = draftOf(bot().settings);
       dressOffice(bot());
       office.seen[id] = tradeKey(bot().trades[0]);
     }
@@ -2230,39 +2256,66 @@ function glanceFresh(b) {
   return b.enabled && marketOpen() !== false && !!b.last_check && new Date(b.last_check).toLocaleDateString("en-CA", { timeZone: "America/New_York" }) === nyToday();
 }
 
+// The held stocks a building aims to own (engine/city.py run(): momentum.picks_with_buffer over the stocks
+// where one share fits a held slot), and that slot.
+const RANKING_SENT = 12; // the server sends the top 12 of its ranking
+function heldTargets(b) {
+  const s = b.settings;
+  const m = s.momentum;
+  const owned = b.positions.filter((p) => p.sleeve === "momentum").map((p) => p.ticker);
+  const slot = (b.equity * heldShare(s)) / m.top_n;
+  // whole shares: a stock where one share costs more than a slot is passed over (one already held stays eligible)
+  const ok = b.ranking.filter((r) => r.qualifies && (owned.includes(r.ticker) || r.price <= slot)).map((r) => r.ticker);
+  // a stock already held keeps its place while it's within the buffer
+  const keep = ok.slice(0, m.top_n + m.rank_buffer).filter((t) => owned.includes(t)).slice(0, m.top_n);
+  let open = m.top_n - keep.length;
+  // a held stock below the 12 sent can still be within the buffer and keep its place: don't count on that slot
+  if (b.ranking.length >= RANKING_SENT && ok.length < m.top_n + m.rank_buffer)
+    open -= Math.min(owned.filter((t) => !keep.includes(t)).length, m.top_n + m.rank_buffer - ok.length);
+  const fill = ok.filter((t) => !keep.includes(t)).slice(0, Math.max(0, open));
+  return { targets: [...keep, ...fill], slot };
+}
+
 // What the next check would buy, worked out the way the server picks (engine/city.py), so a glance
 // never promises a buy that won't come. Cash isn't checked; the detail pages say "if there's cash".
+// (Held stocks may buy with unsettled sale money, so settling cash doesn't hold them up either.)
 function nextBuys(b) {
   const s = b.settings;
   const today = nyToday();
   if (!glanceFresh(b)) return { tickers: [], why: "" };
-  if (b.trades.filter((t) => t.side === "buy" && t.date === today).length >= s.max_buys_per_day) return { tickers: [], why: "cap" };
-  if (s.style === "intraday") {
+  const room = s.max_buys_per_day - b.trades.filter((t) => t.side === "buy" && t.date === today).length;
+  if (room <= 0) return { tickers: [], why: "cap" };
+  const tickers = [];
+  let why = "";
+  // day trades first: stocks running up right now, into the free slots
+  if (dayShare(s) > 0) {
     const d = s.intraday;
-    if (nyClock() >= d.no_entries_after) return { tickers: [], why: "late" };
     const held = new Set(b.positions.filter((p) => p.sleeve === "intraday").map((p) => p.ticker));
     let slots = d.max_positions - held.size;
-    if (slots <= 0) return { tickers: [], why: "full" };
-    const slot = (b.equity * (1 - s.ai_share)) / d.max_positions;
-    const now = clockMinutes(nyClock());
-    const tickers = [];
-    for (const r of b.intraday_signals || []) {
-      if (slots <= 0) break;
-      if (!r.qualifies || held.has(r.ticker) || Math.floor(slot / r.price) === 0) continue;
-      const exit = b.trades.find((t) => t.ticker === r.ticker && t.side === "sell" && t.sleeve === "intraday" && t.date === today);
-      if (exit && now - clockMinutes(exit.time) < d.cooldown_minutes) continue;
-      tickers.push(r.ticker);
-      slots--;
+    if (nyClock() >= d.no_entries_after) why = "late";
+    else if (slots <= 0) why = "full";
+    else {
+      const slot = (b.equity * dayShare(s)) / d.max_positions;
+      const now = clockMinutes(nyClock());
+      for (const r of b.intraday_signals || []) {
+        if (slots <= 0) break;
+        // a stock with shares that can't be sold today (bought with unsettled cash) is skipped for the next mover
+        if (!r.qualifies || held.has(r.ticker) || lockedUntil(b, r.ticker) || Math.floor(slot / r.price) === 0) continue;
+        const exit = b.trades.find((t) => t.ticker === r.ticker && t.side === "sell" && t.sleeve === "intraday" && t.date === today);
+        if (exit && now - clockMinutes(exit.time) < d.cooldown_minutes) continue;
+        tickers.push(r.ticker);
+        slots--;
+      }
     }
-    return { tickers, why: "" };
   }
-  // momentum: the top picks, where a stock already held keeps its place while it's within the buffer
-  const m = s.momentum;
-  const held = b.positions.filter((p) => p.sleeve === "momentum").map((p) => p.ticker);
-  const ok = b.ranking.filter((r) => r.qualifies).map((r) => r.ticker);
-  const keep = ok.slice(0, m.top_n + m.rank_buffer).filter((t) => held.includes(t)).slice(0, m.top_n);
-  const fill = ok.filter((t) => !keep.includes(t)).slice(0, m.top_n - keep.length);
-  return { tickers: [...keep, ...fill].filter((t) => !held.includes(t)), why: "" };
+  // then held stocks: a new top pick, unless a held stock or AI pick of it was sold on a stop today
+  if (heldShare(s) > 0) {
+    const owned = new Set(b.positions.filter((p) => p.sleeve === "momentum").map((p) => p.ticker));
+    const stopped = new Set(b.trades.filter((t) => t.date === today && t.protective && t.sleeve !== "intraday").map((t) => t.ticker));
+    for (const t of heldTargets(b).targets) if (!owned.has(t) && !stopped.has(t)) tickers.push(t);
+  }
+  const list = [...new Set(tickers)].slice(0, room);
+  return { tickers: list, why: list.length ? "" : why };
 }
 
 function glanceState(b) {
@@ -2304,7 +2357,7 @@ function glanceHoldings(b) {
     const r = holdingRange(p, s);
     const at = (x) => Math.min(100, Math.max(0, ((x - r.lo) / (r.hi - r.lo || 1)) * 100)).toFixed(1);
     return `<div class="g-hold">
-      <div class="g-hold-top"><b class="g-tk">${esc(p.ticker)}</b><span class="sleeve ${p.sleeve}">${SLEEVE_TAG[p.sleeve] || "MOM"}</span>
+      <div class="g-hold-top"><b class="g-tk">${esc(p.ticker)}</b>${sleeveTag(p.sleeve)}
         <span class="g-hold-sh num">${p.shares} × ${money(p.price, 2)}</span><span class="g-hold-gain num ${cls(p.pnl_pct)}">${pct(p.pnl_pct, 1) || "0.0%"}</span></div>
       <div class="g-range" role="img" aria-label="${esc(p.ticker)} ${r.loLabel} ${money(r.lo, 2)}, now ${money(p.price, 2)}, ${r.hiLabel} ${money(r.hi, 2)}">
         <span class="down num">${r.loLabel} ${money(r.lo, 2)}</span>
@@ -2319,7 +2372,7 @@ function glanceHoldings(b) {
       ? "—"
       : buys.tickers.length
         ? `${buys.tickers.slice(0, 3).map(esc).join(" · ")} <span class="up">ready</span>`
-        : { cap: "Hit today's buy limit", late: `No new buys after ${clock12(s.intraday.no_entries_after)}`, full: "Slots full" }[buys.why] || `Watching ${s.universe.length} stocks`;
+        : { cap: "Hit today's buy limit", late: `No new day trades after ${clock12(s.intraday.no_entries_after)}`, full: "Day-trade slots full" }[buys.why] || `Watching ${s.universe.length} stocks`;
   return `<div class="g g-holdings">
     <p class="g-note ${st}">${note}</p>
     ${rows.length ? rows.join("") + more : `<p class="g-empty">Not holding anything</p>`}
@@ -2346,12 +2399,16 @@ function glanceTrades(b) {
 
 function glancePicks(b) {
   const s = b.settings;
-  const day = s.style === "intraday";
+  // what's running now while the building day trades, else the strongest stocks it holds for days
+  const day = dayShare(s) > 0;
   // only what the next check would really buy gets a chip; an older list (paused, closed, before the first check) gets none
   const live = glanceFresh(b);
   const buys = new Set(nextBuys(b).tickers);
   const held = new Set(b.positions.map((p) => p.ticker));
-  const list = day ? (b.intraday_signals || []).slice(0, 3) : b.ranking.slice(0, 3);
+  // the stocks it holds or is about to buy, in rank order (the plain leaderboard while there are none)
+  const targets = day ? [] : heldTargets(b).targets;
+  const picks = b.ranking.filter((r) => targets.includes(r.ticker));
+  const list = day ? (b.intraday_signals || []).slice(0, 3) : (picks.length ? picks : b.ranking).slice(0, 3);
   const rows = list.map((r) => {
     const v = day ? r.move : r.score;
     const chip = buys.has(r.ticker) ? `<span class="g-chip on">${day ? "Ready" : "Buy"}</span>` : held.has(r.ticker) ? `<span class="g-chip closed">Held</span>` : "";
@@ -2361,7 +2418,7 @@ function glancePicks(b) {
   const ai = (b.ai?.picks || []).map((p) => p.ticker);
   const aiNone = s.ai_share === 0 ? "off" : b.ai?.status === "error" ? "unavailable" : "none yet";
   return `<div class="g g-picks">
-    <p class="g-label">${!day ? "Momentum leaders" : live ? "Running now" : "At the last check"}</p>
+    <p class="g-label">${!day ? (picks.length ? "Top picks" : "Momentum leaders") : live ? "Running now" : "At the last check"}</p>
     ${rows.length ? rows.join("") : `<p class="g-empty">${empty}</p>`}
     <p class="g-ai"><span class="g-label">AI picks</span> ${ai.length && s.ai_share > 0 ? ai.map(esc).join(" · ") : `<span class="g-dim">${aiNone}</span>`}</p>
   </div>`;
@@ -2373,12 +2430,14 @@ function glanceSettings(b) {
   const max = maxRisk();
   const col = s.risk ? RISK_COLORS[Math.min(RISK_COLORS.length, s.risk) - 1] : "var(--ink)";
   const segs = Array.from({ length: max }, (_, i) => `<i style="--c:${RISK_COLORS[Math.min(RISK_COLORS.length - 1, i)]}" class="${i < s.risk ? "on" : ""}"></i>`).join("");
-  const aiPct = Math.round(s.ai_share * 100);
+  const split = splitPcts(s);
+  // one line per part in use, in the colours of the split bar on the form
+  const parts = [["d", split.day, "day"], ["h", split.held, "held"], ["a", split.ai, "AI"]].filter(([, v]) => v > 0).map(([k, v, name]) => `<span class="${k}">${v}% ${name}</span>`);
   return `<div class="g g-settings">
     <div><p class="g-label">Risk</p><p class="g-risk" style="color:${col}">${esc(riskName(s.risk))}</p><div class="g-meter" aria-hidden="true">${segs}</div></div>
     <div class="g-row"><span class="g-label">Trading</span><span class="g-chip ${s.enabled ? "on" : "paused"}"><i></i>${s.enabled ? "On" : "Off"}</span></div>
     <div class="g-row"><span class="g-label">Money</span><b class="num">${money(s.starting_cash)}</b></div>
-    <div class="g-row"><span class="g-label">Split</span><span class="num">${100 - aiPct}% ${s.style === "intraday" ? "day" : "momentum"} · ${aiPct}% AI</span></div>
+    <div class="g-row"><span class="g-label">Split</span><span class="num g-split">${parts.join(" ")}</span></div>
   </div>`;
 }
 
@@ -2393,7 +2452,8 @@ function statusHTML(b) {
   </div>`;
 }
 
-function planLine(p, s) {
+function planLine(p, b) {
+  const s = b.settings;
   const day = s.intraday;
   const m = s.momentum;
   if (p.sleeve === "intraday") {
@@ -2401,8 +2461,9 @@ function planLine(p, s) {
   }
   const hi = Math.max(p.high || 0, p.avg_cost);
   const trail = hi > p.avg_cost ? ` or if it slips to <b class="down">${money(hi * (1 - m.trailing_stop_pct), 2)}</b> (${num1(m.trailing_stop_pct * 100)}% off its high)` : "";
-  const who = p.sleeve === "ai" ? "AI pick, held for days." : "Momentum pick, held while it stays near the top.";
-  if (p.locked_until && p.locked_until > nyToday()) return `${who} Bought with unsettled cash, so it can't be sold until ${esc(p.locked_until)} (cash account rule).`;
+  const who = p.sleeve === "ai" ? "AI pick, held for days." : "Held stock, kept for days while it stays near the top.";
+  const until = lockedUntil(b, p.ticker);
+  if (until) return `${who} Bought with unsettled cash, so it can't be sold until ${esc(until)} (cash account rule).`;
   return `${who} Sells below <b class="down">${money(p.avg_cost * (1 - m.stop_loss_pct), 2)}</b> (−${num1(m.stop_loss_pct * 100)}%)${trail}.`;
 }
 
@@ -2419,15 +2480,19 @@ function planHTML(b) {
     ? b.positions
         .map(
           (p) => `<div class="hold">
-      <div class="hold-top"><span class="tk">${esc(p.ticker)}<span class="sleeve ${p.sleeve}">${SLEEVE_TAG[p.sleeve] || "MOM"}</span></span>
+      <div class="hold-top"><span class="tk">${esc(p.ticker)}${sleeveTag(p.sleeve)}</span>
         <span class="num">${p.shares} ${p.shares === 1 ? "share" : "shares"}</span>
         <span class="num">bought ${money(p.avg_cost, 2)} · now ${money(p.price, 2)}</span>
         <span class="num gain ${cls(p.pnl_pct)}">${pct(p.pnl_pct, 2)}</span></div>
-      <div class="hold-plan">${planLine(p, s)}</div></div>`,
+      <div class="hold-plan">${planLine(p, b)}</div></div>`,
         )
         .join("")
     : `<p class="empty">Not holding anything right now.</p>`;
-  const cash = `<p class="cash-line num">Cash ${money(b.cash, 2)}${b.settling ? ` · ${money(b.settling, 2)} of it is from today's sales and can buy again next trading day` : ""}</p>`;
+  // sale money settles the next business day (cash account rule). Held stocks and AI picks stay overnight, so
+  // they may buy with it before then; day trades wait for it.
+  const overnight = [heldShare(s) > 0 && "held stocks", s.ai_share > 0 && "AI picks"].filter(Boolean).join(" and ");
+  const usable = overnight ? ` ${overnight[0].toUpperCase()}${overnight.slice(1)} can buy with it now${dayShare(s) > 0 ? "; day trades wait for it" : ""}.` : "";
+  const cash = `<p class="cash-line num">Cash ${money(b.cash, 2)}${b.settling ? ` · ${money(b.settling, 2)} of it is from recent sales and settles the next business day.${usable}` : ""}</p>`;
   const notes = b.notes.length ? `<div class="section-title">Notes</div><ul class="notes">${b.notes.slice(0, 3).map((n) => `<li>${esc(n.text)}</li>`).join("")}</ul>` : "";
   return `${status}<div class="section-title">Holding</div>${rows}${cash}<div class="section-title">Next up</div>${nextUpHTML(b, held)}${notes}`;
 }
@@ -2435,9 +2500,10 @@ function planHTML(b) {
 function nextUpHTML(b, held) {
   const s = b.settings;
   const items = [];
-  if (s.style === "intraday") {
+  const keeps = heldShare(s) > 0;
+  if (dayShare(s) > 0) {
     const need = num1(s.intraday.entry_pct * 100);
-    for (const r of (b.intraday_signals || []).filter((x) => !held.has(x.ticker)).slice(0, 4)) {
+    for (const r of (b.intraday_signals || []).filter((x) => !held.has(x.ticker)).slice(0, keeps ? 3 : 4)) {
       const move = `${r.move >= 0 ? "up" : "down"} ${num1(Math.abs(r.move) * 100)}%`;
       items.push(
         r.qualifies
@@ -2445,13 +2511,25 @@ function nextUpHTML(b, held) {
           : `<li><b>${esc(r.ticker)}</b> is ${move}; needs +${need}%${r.above_vwap ? "" : " and to get back above VWAP"}.</li>`,
       );
     }
-  } else {
-    for (const r of b.ranking.filter((x) => x.qualifies && !held.has(x.ticker)).slice(0, 3)) items.push(`<li><b>${esc(r.ticker)}</b> ranks high on momentum (${pct(r.score)}).</li>`);
+  }
+  if (keeps) {
+    const today = nyToday();
+    const owned = new Set(b.positions.filter((p) => p.sleeve === "momentum").map((p) => p.ticker));
+    const stopped = new Set(b.trades.filter((t) => t.date === today && t.protective && t.sleeve !== "intraday").map((t) => t.ticker));
+    const score = new Map(b.ranking.map((r) => [r.ticker, r.score]));
+    for (const t of heldTargets(b).targets.filter((x) => !owned.has(x) && !stopped.has(x)))
+      items.push(`<li><b>${esc(t)}</b> is one of the top ${s.momentum.top_n} picks on momentum (${pct(score.get(t))}). <span class="up">Bought to hold</span> on the next check if there's cash.</li>`);
   }
   const ai = (b.ai?.picks || []).map((p) => p.ticker).filter((t) => !held.has(t));
   if (ai.length) items.push(`<li>AI picks not bought yet: <b>${ai.map(esc).join(", ")}</b>. They're bought when there's cash for a whole share.</li>`);
   if (!items.length)
-    items.push(marketOpen() === false ? "<li>The watch list fills in once the market opens.</li>" : `<li>Nothing is moving enough yet. He's watching all ${s.universe.length} stocks.</li>`);
+    items.push(
+      marketOpen() === false
+        ? "<li>The watch list fills in once the market opens.</li>"
+        : dayShare(s) > 0
+          ? `<li>Nothing is moving enough yet. He's watching all ${s.universe.length} stocks.</li>`
+          : `<li>Nothing new to buy. He checks all ${s.universe.length} stocks again every ${s.check_every_minutes} min.</li>`,
+    );
   return `<ul class="next">${items.join("")}</ul>`;
 }
 
@@ -2487,7 +2565,7 @@ function tradesHTML(b) {
     .slice(0, 60)
     .map(
       (t) => `<div class="trade"><span class="side ${t.side}">${t.side.toUpperCase()}</span>
-      <span class="what">${t.shares} ${esc(t.ticker)} @ ${money(t.price, 2)}<span class="sleeve ${t.sleeve}">${SLEEVE_TAG[t.sleeve] || "MOM"}</span>${t.side === "sell" && t.cost ? plTag((t.price - t.cost) * t.shares) : ""}</span>
+      <span class="what">${t.shares} ${esc(t.ticker)} @ ${money(t.price, 2)}${sleeveTag(t.sleeve)}${t.side === "sell" && t.cost ? plTag((t.price - t.cost) * t.shares) : ""}</span>
       <span class="when">${esc(t.date)}${t.time ? " " + esc(t.time) : ""}</span><span class="why">${esc(t.reason)}</span></div>`,
     )
     .join("");
@@ -2520,11 +2598,24 @@ function picksHTML(b) {
     ? `<p class="blocked">Never bought here: ${b.blocked_in_universe.map((x) => `${esc(x.ticker)} (${esc(x.reason)})`).join(", ")}</p>`
     : "";
 
-  const main =
-    b.settings.style === "intraday"
-      ? `<div class="section-title">Moving right now · ✓ = up ${num1(b.settings.intraday.entry_pct * 100)}%+ in ${b.settings.intraday.lookback_minutes} min and above VWAP · re-checked every ${b.settings.check_every_minutes} min</div>${moversHTML(b)}`
-      : `<div class="section-title">Momentum leaderboard · top ${b.settings.momentum.top_n} with ✓ get bought · re-checked every ${b.settings.check_every_minutes} min</div>${rank}`;
-  return `${main}${blocked}<div class="section-title">AI picks · ${Math.round(b.settings.ai_share * 100)}% of this building</div>${aiPart}`;
+  // a section for each part of the split that's in use: day trades, then held stocks, then the AI picks
+  const s = b.settings;
+  const split = splitPcts(s);
+  const every = `re-checked every ${s.check_every_minutes} min`;
+  const dayPart =
+    dayShare(s) > 0
+      ? `<div class="section-title">Day trades · ${split.day}% · moving right now · ✓ = up ${num1(s.intraday.entry_pct * 100)}%+ in ${s.intraday.lookback_minutes} min and above VWAP · ${every}</div>${moversHTML(b)}`
+      : "";
+  let heldPart = "";
+  if (heldShare(s) > 0) {
+    const { slot } = heldTargets(b);
+    const owned = b.positions.filter((p) => p.sleeve === "momentum").map((p) => p.ticker);
+    const pricey = b.ranking.slice(0, s.momentum.top_n + s.momentum.rank_buffer).some((r) => r.qualifies && r.price > slot && !owned.includes(r.ticker));
+    heldPart = `<div class="section-title">Held stocks · ${split.held}% · strongest by momentum · the top ${s.momentum.top_n} with ✓ are held for days · ${every}</div>${rank}
+      ${owned.length ? `<p class="blocked">Held now: ${owned.map(esc).join(", ")}.</p>` : ""}
+      ${pricey ? `<p class="blocked">Each held stock gets about ${money(slot)}. A stock where one share costs more is passed over for the next one.</p>` : ""}`;
+  }
+  return `${dayPart}${heldPart}${blocked}<div class="section-title">AI picks · ${split.ai}% of this building</div>${aiPart}`;
 }
 
 function moversHTML(b) {
@@ -2546,14 +2637,13 @@ const CHECKS = [[2, "2 minutes"], [3, "3 minutes"], [5, "5 minutes"], [15, "15 m
 const AI_EVERY = [[60, "hour"], [120, "2 hours"], [240, "4 hours"], [390, "day"], [1950, "week"]];
 const LOOKBACKS = [[63, "3 months"], [126, "6 months"], [189, "9 months"], [252, "12 months"]];
 
-const STYLES = [["intraday", "Day trading (in and out within the day)"], ["swing", "Swing (hold days to weeks)"]];
-
 function settingsHTML(b) {
   const d = draft;
-  const aiPct = Math.round(d.ai_share * 100);
+  const split = splitPcts(d);
   const day = d.intraday;
-  const isDay = d.style === "intraday";
   const opt = (list, cur) => list.map(([v, l]) => `<option value="${v}" ${v === cur ? "selected" : ""}>${l}</option>`).join("");
+  // Fine-tune shows the parts of the split in use; the sliders show and hide them as they move
+  const part = (id, on, title, html) => `<div class="fine-part" id="${id}" ${on ? "" : "hidden"}><div class="section-title">${title}</div>${html}</div>`;
   const dayFields = `
     <div class="two">
       <div class="field"><label for="s-entry">Buy when up at least (%)</label><input id="s-entry" type="number" min="0.05" max="5" step="any" value="${num1(day.entry_pct * 100)}"></div>
@@ -2568,21 +2658,38 @@ function settingsHTML(b) {
       <div class="field"><label for="s-cool">Wait before re-buying (minutes)</label><input id="s-cool" type="number" min="0" max="390" step="1" value="${day.cooldown_minutes}"></div>
     </div>
     <span class="help">Buys a stock that is up this much over the last few minutes and above VWAP. Sells at the take profit, at the stop, when the run fades, and always by ${esc(day.close_out_at)} so nothing is held overnight. No new buys after ${esc(day.no_entries_after)}.</span>`;
-  const swingFields = `
+  const heldFields = `
     <div class="two">
-      <div class="field"><label for="s-topn">Momentum stocks held</label><input id="s-topn" type="number" min="1" max="10" value="${d.momentum.top_n}"></div>
+      <div class="field"><label for="s-topn">Held stocks at once</label><input id="s-topn" type="number" min="1" max="10" value="${d.momentum.top_n}"></div>
       <div class="field"><label for="s-look">Momentum looks back</label><select id="s-look">${opt(LOOKBACKS, d.momentum.lookback_days)}</select></div>
-    </div>`;
+    </div>
+    <span class="help">Holds the strongest stocks by momentum and swaps one out when it drops well down the list.</span>`;
+  const aiFields = `
+    <div class="two">
+      <div class="field"><label for="s-aipicks">AI stocks held</label><input id="s-aipicks" type="number" min="1" max="5" value="${d.ai.max_picks}"></div>
+      <div class="field"><label for="s-aievery">AI re-picks every</label><select id="s-aievery">${opt(AI_EVERY, d.ai.review_every_minutes)}</select></div>
+    </div>
+    <span class="help">Each AI review is one Claude request, roughly 3–5¢.</span>`;
+  const stopFields = `
+    <div class="two">
+      <div class="field"><label for="s-stop">Stop loss (%)</label><input id="s-stop" type="number" min="1" max="90" step="any" value="${num1(d.momentum.stop_loss_pct * 100)}"></div>
+      <div class="field"><label for="s-trail">Trailing stop (%)</label><input id="s-trail" type="number" min="1" max="90" step="any" value="${num1(d.momentum.trailing_stop_pct * 100)}"></div>
+    </div>
+    <div class="field"><label for="s-hold">Hold at least (minutes)</label><input id="s-hold" type="number" min="0" max="10080" step="1" value="${d.min_hold_minutes}">
+      <span class="help">Stop loss sells when a stock falls this far below what the bot paid; trailing stop sells a winner that falls this far from its high.</span></div>`;
   return `<form class="settings" id="settings-form" novalidate>
     <div class="toggle"><input type="checkbox" id="s-enabled" ${d.enabled ? "checked" : ""}><label for="s-enabled">Trading on (untick to pause this building)</label></div>
     <div class="field"><label for="s-cash">Money in this building ($)</label>
       <input id="s-cash" type="number" min="0" step="1" value="${d.starting_cash}">
       <span class="help">Raising it adds cash on the next check; lowering it takes cash out (only uninvested cash).</span></div>
-    <div class="field"><label for="s-style">Trading style</label><select id="s-style">${opt(STYLES, d.style)}</select></div>
-    <div class="field"><span class="flabel">Strategy split</span>
-      <div class="split"><span class="m" style="width:${100 - aiPct}%"></span><span class="a" style="width:${aiPct}%"></span></div>
-      <div class="split-legend">${legendHTML(d, aiPct)}</div>
-      <input id="s-ai" type="range" min="0" max="100" step="5" value="${aiPct}" aria-label="AI share"></div>
+    <div class="field split-field"><span class="flabel">Strategy split</span>
+      <div class="split" aria-hidden="true">${splitBarHTML(split)}</div>
+      <div class="split-legend" id="s-legend">${legendHTML(split)}</div>
+      <label class="split-label" for="s-day"><i class="sw d"></i>Day trading</label>
+      <input id="s-day" class="split-range d" type="range" min="0" max="100" step="5" value="${split.day}" aria-valuetext="${split.day}%">
+      <label class="split-label" for="s-ai"><i class="sw a"></i>AI picks</label>
+      <input id="s-ai" class="split-range a" type="range" min="0" max="100" step="5" value="${split.ai}" aria-valuetext="${split.ai}%">
+      <span class="help">Held stocks get the rest and are kept for days, so that money stays invested. Day-trading money waits a day to settle after each trade.</span></div>
     <div class="field"><span class="flabel">Risk</span>
       <div class="risk-head"><b id="risk-name">${riskName(d.risk)}</b><span id="risk-level">${d.risk ? `${d.risk} of ${maxRisk()}` : ""}</span></div>
       <input id="s-risk" class="risk-range" type="range" min="1" max="${maxRisk()}" step="1" value="${d.risk || 3}" aria-label="Risk, from less risky to more risky">
@@ -2594,27 +2701,24 @@ function settingsHTML(b) {
       <span class="err" id="s-err"></span></div>
     <details class="fine" id="s-fine" ${fineOpen ? "open" : ""}><summary>Fine-tune (optional)</summary>
     <span class="help">The risk slider sets these for you. Changing one here switches the slider to Custom.</span>
-    ${isDay ? dayFields : swingFields}
     <div class="two">
       <div class="field"><label for="s-check">Check for trades every</label><select id="s-check">${opt(CHECKS, d.check_every_minutes)}</select></div>
       <div class="field"><label for="s-cap">Max buys per day</label><input id="s-cap" type="number" min="1" max="500" value="${d.max_buys_per_day}"></div>
     </div>
     <span class="help">Selling is never capped, so a stop or close-out always goes through.</span>
-    <div class="section-title">${isDay ? "AI picks (held for days)" : "Risk and AI picks"}</div>
-    <div class="two">
-      <div class="field"><label for="s-aipicks">AI stocks held</label><input id="s-aipicks" type="number" min="1" max="5" value="${d.ai.max_picks}"></div>
-      <div class="field"><label for="s-aievery">AI re-picks every</label><select id="s-aievery">${opt(AI_EVERY, d.ai.review_every_minutes)}</select></div>
-    </div>
-    <div class="two">
-      <div class="field"><label for="s-stop">Stop loss (%)</label><input id="s-stop" type="number" min="1" max="90" step="any" value="${num1(d.momentum.stop_loss_pct * 100)}"></div>
-      <div class="field"><label for="s-trail">Trailing stop (%)</label><input id="s-trail" type="number" min="1" max="90" step="any" value="${num1(d.momentum.trailing_stop_pct * 100)}"></div>
-    </div>
-    <div class="field"><label for="s-hold">Hold at least (minutes)</label><input id="s-hold" type="number" min="0" max="10080" step="1" value="${d.min_hold_minutes}">
-      <span class="help">${isDay ? "These three apply to the AI picks." : "These apply to every holding."} Stop loss sells when a stock falls this far below what the bot paid; trailing stop sells a winner that falls this far from its high. Each AI review is one Claude request, roughly 3–5¢.</span></div>
+    ${part("s-fine-day", split.day > 0, "Day trades", dayFields)}
+    ${part("s-fine-held", split.held > 0, "Held stocks", heldFields)}
+    ${part("s-fine-ai", split.ai > 0, "AI picks (held for days)", aiFields)}
+    ${part("s-fine-stops", split.held + split.ai > 0, "Stops for held stocks and AI picks", stopFields)}
     </details>
     <div class="actions"><button type="submit" class="primary" id="s-save">${MODE === "server" ? (api.unlocked() ? "Save changes" : "Unlock to save") : gh.connected() ? "Save to GitHub" : "Save changes"}</button><button type="button" id="s-reset">Undo changes</button></div>
     <div id="s-out"></div>
   </form>`;
+}
+
+// the split bar: day trades, held stocks, AI picks
+function splitBarHTML(split) {
+  return `<span class="d" style="width:${split.day}%"></span><span class="h" style="width:${split.held}%"></span><span class="a" style="width:${split.ai}%"></span>`;
 }
 
 let fineOpen = false;
@@ -2642,14 +2746,22 @@ function riskSummary(d) {
   if (!d.risk) return "You've set your own numbers under Fine-tune. Move the slider to go back to a preset.";
   const pc = (x) => `${num1(x * 100)}%`;
   const day = d.intraday, m = d.momentum;
-  const ai = `AI picks: ${pc(m.stop_loss_pct)} stop loss, ${pc(m.trailing_stop_pct)} trailing stop.`;
-  if (d.style !== "intraday") return `Holds the top ${m.top_n} momentum ${m.top_n === 1 ? "stock" : "stocks"}, sold at a ${pc(m.stop_loss_pct)} loss or after falling ${pc(m.trailing_stop_pct)} from a high.`;
-  const n = day.max_positions === 1 ? "one stock at a time" : `${day.max_positions} stocks at a time`;
-  return `Buys a stock up ${pc(day.entry_pct)} in ${day.lookback_minutes} min, takes profit at +${pc(day.take_profit_pct)}, sells at −${pc(day.stop_pct)}, ${n}. ${ai}`;
+  // a sentence for each part of the split in use
+  const split = splitPcts(d);
+  const out = [];
+  if (split.day > 0) {
+    const n = day.max_positions === 1 ? "one stock at a time" : `${day.max_positions} stocks at a time`;
+    out.push(`Day trades: buys a stock up ${pc(day.entry_pct)} in ${day.lookback_minutes} min, takes profit at +${pc(day.take_profit_pct)}, sells at −${pc(day.stop_pct)}, ${n}.`);
+  }
+  const stops = `${pc(m.stop_loss_pct)} loss or ${pc(m.trailing_stop_pct)} below a high`;
+  if (split.held > 0) out.push(`Holds its top ${m.top_n} ${m.top_n === 1 ? "stock" : "stocks"}${split.ai > 0 ? " and the AI picks" : ""} for days (sold at a ${stops}).`);
+  else if (split.ai > 0) out.push(`AI picks: ${pc(m.stop_loss_pct)} stop loss, ${pc(m.trailing_stop_pct)} trailing stop.`);
+  return out.join(" ");
 }
 
-function legendHTML(d, aiPct) {
-  return `<span style="color:var(--neon-2)">${mainName(d)} ${100 - aiPct}%</span><span style="color:#f9a8d4">AI picks ${aiPct}%</span>`;
+// the split's three parts in the colours of the bar
+function legendHTML(split) {
+  return `<span class="d"><b>${split.day}%</b> Day trading</span> <span class="h"><b>${split.held}%</b> Held stocks</span> <span class="a"><b>${split.ai}%</b> AI picks</span>`;
 }
 
 function blockedReason(t) {
@@ -2666,8 +2778,9 @@ function wireSettings(root, b) {
   const sync = () => {
     draft.enabled = root.querySelector("#s-enabled").checked;
     draft.starting_cash = Math.max(0, num("#s-cash"));
-    draft.style = root.querySelector("#s-style").value;
-    draft.ai_share = num("#s-ai") / 100;
+    // the split: day trades and AI picks on the sliders, held stocks get the rest (the AI share wins, as on the server)
+    draft.ai_share = clamp(num("#s-ai"), 0, 100) / 100;
+    draft.day_share = Math.min(clamp(num("#s-day"), 0, 100), 100 - clamp(num("#s-ai"), 0, 100)) / 100;
     draft.ai.max_picks = clamp(Math.round(num("#s-aipicks")), 1, 5);
     draft.check_every_minutes = num("#s-check");
     draft.ai.review_every_minutes = num("#s-aievery");
@@ -2691,10 +2804,6 @@ function wireSettings(root, b) {
     }
   };
   office.syncSettings = sync;
-  root.querySelector("#s-style").addEventListener("change", () => {
-    sync();
-    renderScreens();
-  });
   const showRisk = () => {
     root.querySelector("#risk-name").textContent = riskName(draft.risk);
     root.querySelector("#risk-level").textContent = draft.risk ? `${draft.risk} of ${maxRisk()}` : "";
@@ -2713,12 +2822,31 @@ function wireSettings(root, b) {
     draft.risk = detectRisk(draft);
     showRisk();
   });
-  root.querySelector("#s-ai").addEventListener("input", (e) => {
-    const v = Number(e.target.value);
-    root.querySelector(".split .m").style.width = `${100 - v}%`;
-    root.querySelector(".split .a").style.width = `${v}%`;
-    root.querySelector(".split-legend").innerHTML = legendHTML(draft, v);
-  });
+  // the split sliders: moving one so the two add up to more than 100% pulls the other down (held stocks at 0%)
+  const daySl = root.querySelector("#s-day");
+  const aiSl = root.querySelector("#s-ai");
+  const showSplit = () => {
+    const split = splitPcts(draft);
+    const bar = root.querySelector(".split");
+    for (const k of ["d", "h", "a"]) bar.querySelector(`.${k}`).style.width = `${split[{ d: "day", h: "held", a: "ai" }[k]]}%`;
+    root.querySelector("#s-legend").innerHTML = legendHTML(split);
+    daySl.setAttribute("aria-valuetext", `${split.day}%, held stocks ${split.held}%`);
+    aiSl.setAttribute("aria-valuetext", `${split.ai}%, held stocks ${split.held}%`);
+    // Fine-tune shows the parts in use
+    root.querySelector("#s-fine-day").hidden = !split.day;
+    root.querySelector("#s-fine-held").hidden = !split.held;
+    root.querySelector("#s-fine-ai").hidden = !split.ai;
+    root.querySelector("#s-fine-stops").hidden = !(split.held + split.ai);
+  };
+  const moveSplit = (moved, other) => {
+    if (Number(daySl.value) + Number(aiSl.value) > 100) other.value = String(100 - Number(moved.value));
+    sync();
+    showSplit();
+    showRisk();
+  };
+  daySl.addEventListener("input", () => moveSplit(daySl, aiSl));
+  aiSl.addEventListener("input", () => moveSplit(aiSl, daySl));
+  showSplit();
   root.querySelectorAll("[data-rm]").forEach((btn) =>
     btn.addEventListener("click", () => {
       sync();
@@ -2748,13 +2876,14 @@ function wireSettings(root, b) {
     }
   });
   root.querySelector("#s-reset").addEventListener("click", () => {
-    draft = structuredClone(b.settings);
+    draft = draftOf(b.settings);
     renderScreens();
   });
   root.querySelector("#settings-form").addEventListener("submit", async (e) => {
     e.preventDefault();
     if (!e.currentTarget.checkValidity()) {
       fine.open = true;
+      root.querySelectorAll(".fine-part").forEach((el) => (el.hidden = false)); // a bad value may be in a part that's hidden
       e.currentTarget.reportValidity();
       return;
     }
@@ -2814,7 +2943,7 @@ function wireSettings(root, b) {
 function savedSettings(b, saved) {
   for (const x of new Set([b, STATE.bots.find((y) => y.id === saved.id)])) if (x) Object.assign(x, { settings: structuredClone(saved), enabled: saved.enabled });
   if (openId === saved.id) {
-    draft = structuredClone(saved);
+    draft = draftOf(saved);
     renderScreens();
   }
   renderHUD();
