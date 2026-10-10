@@ -1,19 +1,26 @@
 """One trading check for one building: capital changes, stops, then any due rebalances.
 
+Each building splits its money three ways: day trades (bought and sold the same day), held stocks
+(its strongest stocks by momentum, held for days; sleeve "momentum") and AI picks (sleeve "ai").
+
 The server runs a check every few minutes while the market is open. Guardrails keep that from
-turning into churn: a minimum hold time, a daily trade cap, a size tolerance, and a rank buffer
+turning into churn: a minimum hold time, a daily trade cap, size tolerances, and a rank buffer
 so a holding isn't swapped out the moment it slips one place in the leaderboard.
 """
 import math
-from datetime import datetime, time
+from datetime import date, datetime, time
 
 import pandas as pd
 
-from .markets.us_stocks import next_trading_day
+from .config import held_share
+from .markets.us_stocks import is_settlement_day, next_settlement_day
 from .strategy import ai_picks, intraday, momentum
 
 MAX_TRADES_KEPT = 500
-REBALANCE_TOLERANCE = 0.10  # leave a holding alone if it's within 10% of its target size
+REBALANCE_TOLERANCE = 0.10  # don't top up a holding that's within 10% of its slot
+# Whole shares make target sizes jumpy, so a holding is only trimmed once it's worth more than 25%
+# over its slot, and never sold to zero just for size.
+TRIM_TOLERANCE = 0.25
 AI_CANDIDATES = 40  # stocks Claude reviews per building
 SIM_TIME = time(15, 35)  # simulated runs pretend each day's check happens at this time
 
@@ -40,6 +47,12 @@ def minutes_since(last, now):
     return (pd.Timestamp(now) - pd.Timestamp(last)).total_seconds() / 60
 
 
+def settlement_date(day):
+    """`day` (YYYY-MM-DD) if trades settle that day, else the next day they do."""
+    d = date.fromisoformat(day)
+    return day if is_settlement_day(d) else str(next_settlement_day(d))
+
+
 def equity(led, prices):
     held = sum(p["shares"] * prices.get(p["ticker"], p["avg_cost"]) for p in led["positions"].values())
     return led["cash"] + held
@@ -60,15 +73,22 @@ class BotDay:
         self.force = force
         last = closes.ffill().iloc[-1]
         self.prices = {t: float(v) for t, v in last.items() if pd.notna(v) and v > 0}
-        # today's 1-minute bars (close, volume), used by the intraday style; newest prices win
+        # today's 1-minute bars (close, volume), used by day trades; newest prices win
         self.bars_close, self.bars_vol = minute_bars if minute_bars is not None else (None, None)
         if self.bars_close is not None and not self.bars_close.empty:
             for t, v in self.bars_close.ffill().iloc[-1].items():
                 if pd.notna(v) and v > 0:
                     self.prices[t] = float(v)
-        # cash-account rule: money from a sale can't buy again until it settles (next trading day)
+        # cash-account rule: money from a sale can't buy again until it settles (next settlement day)
         self.settle = settle
         self.led.setdefault("unsettled", [])
+        # dates saved before bank holidays were counted (a Friday sale "settling" on Columbus Day)
+        # move to the day the money really settles
+        for u in self.led["unsettled"]:
+            u["settles"] = settlement_date(u["settles"])
+        for pos in self.led["positions"].values():
+            if pos.get("locked_until"):
+                pos["locked_until"] = settlement_date(pos["locked_until"])
         self.led["unsettled"] = [u for u in self.led["unsettled"] if u["settles"] > self.today]
         self.notes = []
 
@@ -83,17 +103,23 @@ class BotDay:
     def spendable(self):
         return self.led["cash"] - sum(u["amount"] for u in self.led["unsettled"])
 
+    def _locked_until(self, ticker):
+        """When the building's shares of `ticker` bought with unsettled cash can be sold, or None."""
+        until = max((p.get("locked_until") or "" for p in self.led["positions"].values() if p["ticker"] == ticker), default="")
+        return until if until > self.today else None
+
     def _locked(self, pos):
         """Bought with unsettled cash: selling before that cash settles would be a good faith
-        violation in a cash account, so the position is held until then (stops included)."""
-        until = pos.get("locked_until")
-        if until and until > self.today:
+        violation in a cash account, so the position is held until then (stops included). The
+        broker sees one holding per stock, so the same stock in another sleeve waits too."""
+        until = self._locked_until(pos["ticker"])
+        if until:
             self._note_once(f"{pos['ticker']}: bought with unsettled cash, so it can't be sold until {until}")
             return True
         return False
 
     def _use_unsettled(self, amount):
-        """Spend unsettled sale money first; returns when the money used settles (or None)."""
+        """Take `amount` out of unsettled sale money; returns when the money used settles (or None)."""
         settles = None
         for u in self.led["unsettled"]:
             if amount <= 0:
@@ -137,7 +163,7 @@ class BotDay:
         cost = pos["avg_cost"]
         self.led["cash"] += fill.shares * fill.price
         if self.settle:
-            settles = str(next_trading_day(pd.Timestamp(self.today).date()))
+            settles = str(next_settlement_day(pd.Timestamp(self.today).date()))
             self.led["unsettled"].append({"amount": round(fill.shares * fill.price, 2), "settles": settles})
         pos["shares"] -= fill.shares
         if pos["shares"] <= 0:
@@ -148,10 +174,15 @@ class BotDay:
         price = self.prices.get(ticker)
         if price is None or shares <= 0:
             return
-        # The AI pick is held overnight, so it may buy with unsettled sale money and is then held
-        # until that money settles. Day trades sell the same day, so they need settled cash.
-        unsettled_ok = self.settle and sleeve == "ai"
-        usable = self.led["cash"] if unsettled_ok else self.spendable()
+        # Held stocks and the AI pick stay overnight, so they may buy with unsettled sale money and
+        # are then held until that money settles. Day trades sell the same day, so they need settled
+        # cash, and so does a held buy of a stock a day trade holds right now (it's sold today, and
+        # the broker can't tell which of the shares were sold).
+        if sleeve == "intraday" and self._locked_until(ticker):
+            return
+        unsettled_ok = self.settle and sleeve in ("ai", "momentum") and f"intraday:{ticker}" not in self.led["positions"]
+        settled = max(0.0, self.spendable())
+        usable = self.led["cash"] if unsettled_ok else settled
         shares = min(int(shares), int(min(cash_cap, usable) // (price * 1.002)))
         if shares <= 0:
             if self.settle and self.spendable() < self.led["cash"]:
@@ -160,8 +191,14 @@ class BotDay:
                 self._note_once(f"Not enough cash to buy {ticker}")
             return
         fill = self.broker.buy(ticker, shares, price)
-        self.led["cash"] -= fill.shares * fill.price
-        settles = self._use_unsettled(fill.shares * fill.price) if unsettled_ok else None
+        cost = fill.shares * fill.price
+        self.led["cash"] -= cost
+        # Like the broker, a buy is paid from settled cash first; only the rest is unsettled sale
+        # money, and only then is the position locked. (Paying with sale money first would leave
+        # settled cash on the books that the broker has already used, and a day trade bought with
+        # it and sold the same day would be a good faith violation.)
+        from_unsettled = round(cost - settled, 2)
+        settles = self._use_unsettled(from_unsettled) if unsettled_ok and from_unsettled > 0 else None
         key = f"{sleeve}:{ticker}"
         pos = self.led["positions"].setdefault(
             key,
@@ -245,7 +282,14 @@ class BotDay:
                 if (self._held_minutes(pos) < min_hold and not self.force) or self._locked(pos):
                     continue
                 sells.append((key, pos["shares"], "Rotated out: no longer a top pick"))
-        stopped_today = {t["ticker"] for t in self.led["trades"] if t["date"] == self.today and t.get("protective")}
+        # a day trade's take profit, stop or close-out says nothing about holding the stock for days
+        stopped_today = {t["ticker"] for t in self.led["trades"] if t["date"] == self.today and t.get("protective") and t["sleeve"] != "intraday"}
+        # nor is a stock rotated out of held stocks or AI picks today: a score near 0 flips on small
+        # price moves, and each round trip pays the spread and turns settled cash into sale money
+        rotated_today = {
+            t["ticker"] for t in self.led["trades"]
+            if t["date"] == self.today and t["side"] == "sell" and t["sleeve"] != "intraday" and t["reason"].startswith("Rotated out")
+        }
         for ticker in targets:
             price = self.prices.get(ticker)
             if not price:
@@ -253,16 +297,22 @@ class BotDay:
             if ticker in stopped_today and ticker not in held:
                 self._note_once(f"{ticker}: not buying back today after a stop")
                 continue
-            want = math.floor(slot_value / price)
-            if want == 0:
-                self._note_once(f"Skipped {ticker} ({sleeve}): one share costs more than its ${slot_value:,.0f} slot")
-            have = held.get(ticker, (None, {"shares": 0}))[1]["shares"]
-            if have and abs(want - have) * price <= REBALANCE_TOLERANCE * slot_value:
+            if ticker in rotated_today and ticker not in held:
+                self._note_once(f"{ticker}: not buying back today after rotating it out")
                 continue
+            want = math.floor(slot_value / price)
+            have = held.get(ticker, (None, {"shares": 0}))[1]["shares"]
+            if want == 0 and not have:
+                self._note_once(f"Skipped {ticker} ({sleeve}): one share costs more than its ${slot_value:,.0f} slot")
             if want < have:
-                if (self._held_minutes(held[ticker][1]) >= min_hold or self.force) and not self._locked(held[ticker][1]):
-                    sells.append((held[ticker][0], have - want, "Trimmed back to target size"))
+                # still a pick: keep at least one share, and leave it alone unless it's well over its slot
+                keep = max(want, 1)
+                if keep < have and have * price > (1 + TRIM_TOLERANCE) * slot_value:
+                    if (self._held_minutes(held[ticker][1]) >= min_hold or self.force) and not self._locked(held[ticker][1]):
+                        sells.append((held[ticker][0], have - keep, "Trimmed back to target size"))
             elif want > have:
+                if have and (want - have) * price <= REBALANCE_TOLERANCE * slot_value:
+                    continue
                 buys.append((ticker, sleeve, want - have, "New pick" if not have else "Topped up to target size"))
         return sells, buys
 
@@ -299,6 +349,8 @@ class BotDay:
             t = r["ticker"]
             if not r["qualifies"] or t in held or self._minutes_since_exit(t) < cfg["cooldown_minutes"]:
                 continue
+            if self._locked_until(t):
+                continue  # shares of it bought with unsettled cash can't be sold today; try the next mover
             shares = math.floor(slot_value / r["price"])
             if shares == 0:
                 continue  # too pricey for this slot; try the next mover
@@ -326,29 +378,52 @@ class BotDay:
 
         cap = self.bot["max_buys_per_day"]
         eq = equity(self.led, self.prices)
-        ai_share = self.bot["ai_share"]
+        day_share, ai_share, hold_share = self.bot["day_share"], self.bot["ai_share"], held_share(self.bot)
         sells, buys = [], []
 
-        if self.bot["style"] == "intraday":
-            s, b = self.plan_intraday(cands, eq * (1 - ai_share))
+        # Day trades (their stops and the close-out run in stop_losses even when this share is 0)
+        if day_share > 0:
+            s, b = self.plan_intraday(cands, eq * day_share)
             sells += s
             buys += b
-            # holdings left over from the swing style are rotated out
+        else:
+            self.led["intraday_signals"] = []
+
+        # Held stocks: the building's strongest stocks by momentum, held for days
+        targets = []
+        if hold_share > 0:
+            held_m = [p["ticker"] for p in self.led["positions"].values() if p["sleeve"] == "momentum"]
+            # a stock the AI picks hold (or are set to buy) is left to them, so the two don't double up
+            ai_side = {p["ticker"] for p in self.led["positions"].values() if p["sleeve"] == "ai"}
+            if ai_share > 0:
+                ai_side |= set(self.led.get("ai_targets") or [])
+            slot = eq * hold_share / m["top_n"]
+            # whole shares only: a stock where one share costs more than a slot is passed over for
+            # the next strongest, or that slot would sit in cash (stocks already held stay eligible)
+            affordable = [
+                r for r in ranking
+                if r["ticker"] in held_m or (r["ticker"] not in ai_side and self.prices.get(r["ticker"], math.inf) <= slot)
+            ]
+            targets = momentum.picks_with_buffer(affordable, m["top_n"], held_m, m["rank_buffer"])
+            s, b = self.plan_sleeve("momentum", targets, slot)
+            sells += s
+            buys += b
+            rising = momentum.picks(ranking, len(ranking))
+            if not targets and [t for t in rising if t not in ai_side]:
+                self._note_once(f"Held stocks: one share of every stock in an uptrend costs more than the ${slot:,.0f} slot, so that money stays in cash")
+            elif not targets and rising:
+                self._note_once("Held stocks: every stock in an uptrend is already an AI pick, so that money stays in cash")
+            elif not targets:
+                self._note_once("Held stocks: nothing in an uptrend, that money stays in cash")
+        else:
+            # held stocks left over from before the share went to 0 are rotated out
             s, _ = self.plan_sleeve("momentum", [], 0)
             sells += s
-        else:
-            held_m = [p["ticker"] for p in self.led["positions"].values() if p["sleeve"] == "momentum"]
-            targets = momentum.picks_with_buffer(ranking, m["top_n"], held_m, m["rank_buffer"])
-            s, b = self.plan_sleeve("momentum", targets, eq * (1 - ai_share) / m["top_n"])
-            sells += s
-            buys += b
-            if not targets:
-                self._note_once("Momentum: nothing in an uptrend, sleeve stays in cash")
         self.led["last_momentum"] = self.now_iso
 
         a = self.bot["ai"]
         if ai_share > 0 and (self.force or minutes_since(self.led["last_ai"], self.now) >= a["review_every_minutes"]):
-            ai_targets = self.ai_targets(cands, ranking, eq * ai_share / a["max_picks"])
+            ai_targets = self.ai_targets(cands, ranking, eq * ai_share / a["max_picks"], targets)
             if ai_targets is not None:
                 self.led["ai_targets"] = ai_targets
                 self.led["last_ai"] = self.now_iso
@@ -356,6 +431,10 @@ class BotDay:
             s, b = self.plan_sleeve("ai", self.led["ai_targets"], eq * ai_share / a["max_picks"])
             sells += s
             buys += b
+        elif ai_share <= 0:
+            # AI picks left over from before the share went to 0 are rotated out
+            s, _ = self.plan_sleeve("ai", [], 0)
+            sells += s
 
         # Selling is always allowed; the daily cap limits new buys.
         for key, shares, reason in sells:
@@ -379,17 +458,21 @@ class BotDay:
         if not any(n["date"] == self.today and n["text"] == text for n in self.led.get("notes", [])) and text not in self.notes:
             self.notes.append(text)
 
-    def ai_targets(self, cands, ranking, slot_value):
+    def ai_targets(self, cands, ranking, slot_value, held_targets=()):
+        """`held_targets`: the stocks the held sleeve aims to own this check (what it holds or is buying)."""
         holding_m = [p["ticker"] for p in self.led["positions"].values() if p["sleeve"] == "momentum"]
-        avoid = sorted(set(holding_m) | set(momentum.picks(ranking, self.bot["momentum"]["top_n"])))
-        # only offer stocks where at least one share fits the AI slot
-        affordable = [t for t in cands if self.prices.get(t, 1e12) <= slot_value]
+        avoid = sorted(set(holding_m) | set(held_targets))
+        # only offer stocks where at least one share fits the AI slot; a current pick stays eligible
+        # after its price rises past the slot (it keeps its share rather than being sold for size)
+        holding_ai = {p["ticker"] for p in self.led["positions"].values() if p["sleeve"] == "ai"}
+        affordable = [t for t in cands if t in holding_ai or self.prices.get(t, 1e12) <= slot_value]
         if not affordable:
             self._note_once(f"AI picks: no stock here costs under its ${slot_value:,.0f} slot")
             return []
-        # Claude sees the strongest 40 by momentum, which keeps each request small
+        # Claude sees the strongest 40 by momentum, which keeps each request small (current picks always)
         ranked = [r["ticker"] for r in ranking if r["ticker"] in affordable]
         affordable = (ranked + [t for t in affordable if t not in ranked])[:AI_CANDIDATES]
+        affordable += [t for t in cands if t in holding_ai and t not in affordable]
         cand_metrics = ai_picks.metrics(self.closes[affordable])
         try:
             result = self.picker(self.bot["sector"], cand_metrics, self.bot["ai"]["max_picks"], avoid)

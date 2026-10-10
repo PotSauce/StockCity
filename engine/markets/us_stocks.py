@@ -1,5 +1,5 @@
 """US stocks: NYSE/Nasdaq regular hours, prices from Yahoo Finance (free, no key)."""
-from datetime import date, datetime, time
+from datetime import date, datetime, time, timedelta
 from zoneinfo import ZoneInfo
 
 from ..data import SyntheticPrices, YahooPrices
@@ -16,17 +16,31 @@ HOLIDAYS = {
     date(2027, 6, 18), date(2027, 7, 5), date(2027, 9, 6), date(2027, 11, 25), date(2027, 12, 24),
 }
 
+# Federal Reserve holidays (Columbus Day, Veterans Day) when the NYSE is open but trades don't
+# settle, because the banks behind settlement are closed. Extend each year.
+NO_SETTLEMENT = {date(2026, 10, 12), date(2026, 11, 11), date(2027, 10, 11), date(2027, 11, 11)}
+
 
 def is_trading_day(day):
     return day.weekday() < 5 and day not in HOLIDAYS
 
 
 def next_trading_day(day):
-    """When a sale made on `day` settles (T+1)."""
-    from datetime import timedelta
-
+    """The next day the market is open."""
     d = day + timedelta(days=1)
     while not is_trading_day(d):
+        d += timedelta(days=1)
+    return d
+
+
+def is_settlement_day(day):
+    return is_trading_day(day) and day not in NO_SETTLEMENT
+
+
+def next_settlement_day(day):
+    """When a sale made on `day` settles (T+1, counting only days when trades settle)."""
+    d = day + timedelta(days=1)
+    while not is_settlement_day(d):
         d += timedelta(days=1)
     return d
 
