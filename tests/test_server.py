@@ -134,3 +134,44 @@ def test_city_hall_chart_keeps_todays_values(client, monkeypatch):
     city.guard()
     assert city.ledger["meta"]["intraday"] == {"date": "2026-10-08", "points": [city.ledger["meta"]["intraday"]["points"][0]]}
     assert city.ledger["meta"]["intraday"]["points"][0]["t"] == "09:35"
+
+
+def test_server_wakes_for_the_open():
+    from engine.data import SyntheticPrices
+
+    m = UsStocks(prices=SyntheticPrices())
+    assert m.poll_seconds(datetime(2026, 10, 7, 15, 0, tzinfo=timezone.utc)) == 60  # open
+    assert m.poll_seconds(datetime(2026, 10, 7, 13, 20, tzinfo=timezone.utc)) == 601  # 9:20am: wake at 9:30
+    assert m.poll_seconds(datetime(2026, 10, 7, 12, 0, tzinfo=timezone.utc)) == 900  # 8am
+    assert m.poll_seconds(datetime(2026, 10, 10, 15, 0, tzinfo=timezone.utc)) == 900  # Saturday
+
+
+def test_money_added_is_not_a_gain(client):
+    """Adding money to a building: old days keep the amount they had, today's figure and chart don't count it."""
+    city = client.city
+    tech = city.ledger["bots"]["tech"]
+    tech["history"] = [{"date": "2026-10-06", "equity": 503.0}]  # saved before days noted the money put in
+    bot = client.get("/api/state").json()["bots"][0]["settings"]
+    r = client.put("/api/bots/tech", json={**bot, "starting_cash": 1000}, headers={"X-City-Password": "secret"})
+    assert r.status_code == 200
+    city.trade_cycle(force=True)
+    assert tech["contributed"] == 1000
+    assert tech["history"][0] == {"date": "2026-10-06", "equity": 503.0, "contributed": 500.0}
+    st = client.get("/api/state").json()
+    b = next(b for b in st["bots"] if b["id"] == "tech")
+    assert abs(b["day_change"]) < 50  # not +$500
+    city.ledger["meta"].pop("intraday", None)
+    city.guard()
+    assert city.ledger["meta"]["intraday"]["points"][-1]["c"]["tech"] == 1000
+
+
+def test_old_days_get_the_money_put_in_on_startup(tmp_path):
+    import json
+
+    from engine.city import new_ledger
+    from engine.service import City
+
+    old = {**new_ledger(500), "history": [{"date": "2026-10-06", "equity": 499.0}]}
+    (tmp_path / "ledger.json").write_text(json.dumps({"bots": {"tech": old}, "meta": {}}))
+    city = City(tmp_path, price_source="simulated")
+    assert city.ledger["bots"]["tech"]["history"][0]["contributed"] == 500.0

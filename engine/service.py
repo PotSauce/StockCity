@@ -85,7 +85,11 @@ class City:
         data = json.loads(self.ledger_path.read_text()) if self.ledger_path.exists() else {"bots": {}, "meta": {}}
         data.setdefault("meta", {})
         for bot in self.cfg["bots"]:
-            data["bots"].setdefault(bot["id"], new_ledger(bot["starting_cash"]))
+            led = data["bots"].setdefault(bot["id"], new_ledger(bot["starting_cash"]))
+            # City Hall's chart measures each day against the money put in by then; days saved before
+            # the history noted it get today's amount, before any later change can make it wrong
+            for h in led["history"]:
+                h.setdefault("contributed", round(led["contributed"], 2))
         return data
 
     def save(self):
@@ -277,12 +281,14 @@ class City:
         for mid in open_mids:
             last = self.frame(mid).ffill().iloc[-1]
             prices.update({t: float(v) for t, v in last.items() if pd.notna(v)})
-        eq = {
-            b["id"]: round(equity(self.ledger["bots"][b["id"]], prices), 2)
-            for b in self.cfg["bots"]
-            if b["market"] in open_mids
-        }
-        pts.append({"t": at, "eq": eq})
+        bots = [b["id"] for b in self.cfg["bots"] if b["market"] in open_mids]
+        leds = self.ledger["bots"]
+        # with the money put in, so adding or taking out money mid-day isn't drawn as a gain or loss
+        pts.append({
+            "t": at,
+            "eq": {i: round(equity(leds[i], prices), 2) for i in bots},
+            "c": {i: round(leds[i]["contributed"], 2) for i in bots},
+        })
         del pts[:-INTRADAY_MAX_POINTS]
 
     def due_for_trade(self):

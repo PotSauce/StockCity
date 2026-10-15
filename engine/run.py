@@ -67,7 +67,8 @@ def build_state(cfg, ledger, closes, excl_raw, source, broker_name, run_note):
             )
         positions.sort(key=lambda x: -x["value"])
         hist = led["history"]
-        prev = hist[-2]["equity"] if len(hist) > 1 else led["contributed"]
+        # yesterday's value, plus any money added since, so a top-up doesn't count as today's gain
+        prev = hist[-2]["equity"] + led["contributed"] - hist[-2].get("contributed", led["contributed"]) if len(hist) > 1 else led["contributed"]
         bots_out.append(
             {
                 "id": bot["id"],

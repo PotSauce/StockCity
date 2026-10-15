@@ -667,8 +667,8 @@ ul.next b { font-family: var(--font-data); }
 .hb-big { font: 600 54px/1 var(--font-data); font-variant-numeric: tabular-nums; letter-spacing: -0.02em; white-space: nowrap; }
 /* on the board: the chart beside the totals (two by two), the building columns under both */
 .board .hb-body { display: grid; grid-template-columns: minmax(0, 1fr) auto; grid-template-rows: auto minmax(0, 1fr); gap: 22px 40px; }
-/* (the columns keep room for five holdings and a "+2 more" under them) */
-.board .hb-chart { grid-area: 1 / 1; height: 326px; }
+/* (the columns keep room for five holdings and a "+2 more" under them, even under a value line that wraps) */
+.board .hb-chart { grid-area: 1 / 1; height: 300px; }
 .board .hb-sum { grid-area: 1 / 2; grid-template-columns: repeat(2, auto); align-content: center; gap: 30px 40px; }
 .board .hb-big { font-size: 46px; }
 .board .hb-cols { grid-area: 2 / 1 / 3 / 3; }
@@ -763,9 +763,12 @@ ul.next b { font-family: var(--font-data); }
 .flat-hall .hb-body { overflow-y: auto; overscroll-behavior: contain; scrollbar-width: none; gap: 10px; padding: 10px; }
 .flat-hall .hb-body.more { -webkit-mask-image: linear-gradient(#000 calc(100% - 26px), transparent); mask-image: linear-gradient(#000 calc(100% - 26px), transparent); }
 .flat-hall .hb-sum { grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 8px 12px; }
-.flat-hall .pc { flex: none; height: 168px; font-size: 10.5px; }
+.flat-hall .pc { flex: none; height: 156px; font-size: 10.5px; }
 .flat-hall .pc-sub { order: 3; flex-basis: 100%; }
 .flat-hall .pc-range { margin-left: auto; }
+/* small buttons, so a finger gets a taller target than the eye sees (not wider: they almost touch) */
+.flat-hall .pc-range button { position: relative; }
+.flat-hall .pc-range button::after { content: ""; position: absolute; inset: -6px 0; }
 .flat-hall .hb-fig { gap: 3px; }
 .flat-hall .hb-fig .g-label { font-size: 9px; letter-spacing: 0.12em; }
 .flat-hall .hb-big { font-size: 19px; }
@@ -796,6 +799,12 @@ ul.next b { font-family: var(--font-data); }
 /* phones on their side: the list down the right, the mayor beside it */
 @media (min-aspect-ratio: 4/3) {
   .flat-hall { left: auto; width: 60%; bottom: var(--bottom-inset, 70px); max-height: none; }
+  /* phones on their side: the totals in a column beside the chart, so a building's name still shows */
+  .flat-hall .hb-body { display: grid; grid-template-columns: auto minmax(0, 1fr); grid-auto-rows: max-content; align-content: start; }
+  .flat-hall .hb-sum { grid-template-columns: 1fr; align-content: center; gap: 6px; }
+  .flat-hall .hb-big { font-size: 16px; }
+  .flat-hall .pc { height: 140px; }
+  .flat-hall .hb-cols { grid-column: 1 / -1; }
 }
 
 /* the mayor's speech bubble sits above his hat, its tail pointing down at him */

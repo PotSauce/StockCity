@@ -221,6 +221,9 @@ class BotDay:
             return
         if delta < 0:
             delta = -min(-delta, self.led["cash"])
+        # days kept before the history noted the money put in keep the amount from before this change
+        for h in self.led["history"]:
+            h.setdefault("contributed", round(self.led["contributed"], 2))
         self.led["cash"] += delta
         self.led["contributed"] += delta
         self.notes.append(f"Capital {'added' if delta > 0 else 'withdrawn'}: ${abs(delta):,.2f}")

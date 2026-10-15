@@ -1563,12 +1563,15 @@ function buildHall() {
   el.innerHTML = `<header class="mon-bar"><i></i><b>City Hall · Performance and every holding</b><span class="hb-when"></span></header><div class="hb-body" tabindex="-1">${HALL_BODY}</div>`;
   wirePerf(el.querySelector(".pc"));
   // a building's name opens it, the chart's buttons switch its range; anywhere else zooms the board in or out
+  // (the chart itself only zooms in, so pointing at it up close doesn't throw you back out)
   el.addEventListener("click", (e) => {
     const range = e.target.closest("[data-range]");
     const head = e.target.closest("[data-open]");
     if (range) setPerfRange(range.dataset.range);
     else if (head) openBuilding(head.dataset.open);
-    else focusMonitor(office.focus ? null : "board");
+    else if (e.target.closest(".pc-plot")) {
+      if (!office.focus) focusMonitor("board");
+    } else focusMonitor(office.focus ? null : "board");
   });
   const obj = new CSS3DObject(el);
   obj.position.copy(bg.position);
@@ -1793,6 +1796,12 @@ function perfFigure() {
   </figure>`;
 }
 
+// the market day the "Today" range shows: today once the market has opened, else the last day the server kept
+function perfDay() {
+  const log = STATE.intraday;
+  const today = nyToday();
+  return marketOpen() === true || log?.date === today ? today : log?.date;
+}
 const isoDay = (iso, opts) => new Date(`${iso}T12:00:00Z`).toLocaleDateString("en-US", { timeZone: "UTC", ...opts });
 const hourLabel = (h) => `${((h + 11) % 12) + 1}${h < 12 ? "am" : "pm"}`;
 const nowMinutes = () => clockMinutes(nyClock()) - MARKET_OPEN_MIN;
@@ -1831,20 +1840,17 @@ function perfData(range) {
       when: (x) => isoDay(days[x], { weekday: "short", month: "short", day: "numeric" }),
       ticks: days.map((d, x) => ({ x, label: isoDay(d, { month: "short", day: "numeric" }) })),
       sub: days.length ? `Since ${isoDay(days[0], { month: "short", day: "numeric" })} · vs money put in` : "",
-      dayLabel: null,
       empty: days.length ? "" : "The chart starts after the city's first day.",
     };
   }
-  // the latest market day: today once the market's open, else the last day the server kept
   const log = STATE.intraday;
   const open = marketOpen() === true;
-  const day = open || log?.date === today ? today : log?.date;
+  const day = perfDay();
   const out = {
     range, series, x0: 0, x1: MARKET_DAY_MIN,
     when: (x) => clock12(`${Math.floor((x + MARKET_OPEN_MIN) / 60)}:${(x + MARKET_OPEN_MIN) % 60}`),
     ticks: [10, 11, 12, 13, 14, 15, 16].map((h) => ({ x: h * 60 - MARKET_OPEN_MIN, label: hourLabel(h) })),
     sub: "",
-    dayLabel: !day || day === today ? "Today" : isoDay(day, { weekday: "short" }),
     empty: "",
   };
   if (!day) {
@@ -1852,27 +1858,37 @@ function perfData(range) {
     return out;
   }
   out.sub = `${day === today ? "Today" : isoDay(day, { weekday: "long", month: "short", day: "numeric" })} · vs the close before`;
-  // each building's value at the close before that day (or the money put in, on its first day)
-  const base = bots.map((b) => b.history.filter((h) => h.date < day).at(-1)?.equity ?? b.contributed);
   const pts = log?.date === day ? log.points : [];
-  const add = (x, eqOf) => {
+  // Each building against its value at the close before that day (the money put in, on its first day),
+  // plus any money added since, so a top-up isn't drawn as a gain.
+  const prev = bots.map((b) => {
+    const h = b.history.filter((h) => h.date < day).at(-1);
+    const c = h?.contributed ?? pts[0]?.c?.[b.id] ?? b.contributed;
+    return { eq: h ? h.equity : c, c };
+  });
+  const add = (x, valueOf) => {
     let eq = 0, b0 = 0;
     bots.forEach((b, k) => {
-      const e = eqOf(b, k);
+      const [e, c] = valueOf(b, k) || [];
       if (e == null) return;
-      series[k + 1].pts.push({ x, eq: e, base: base[k] });
+      const base = prev[k].eq + (c ?? prev[k].c) - prev[k].c;
+      series[k + 1].pts.push({ x, eq: e, base });
       eq += e;
-      b0 += base[k];
+      b0 += base;
     });
     if (b0) series[0].pts.push({ x, eq, base: b0 });
   };
-  for (const p of pts) add(clockMinutes(p.t) - MARKET_OPEN_MIN, (b) => p.eq[b.id]);
+  for (const p of pts) add(clockMinutes(p.t) - MARKET_OPEN_MIN, (b) => [p.eq[b.id], p.c?.[b.id]]);
   // and where things stand now (or at that day's close), so the last point matches the board's figures
   const lastX = pts.length ? clockMinutes(pts.at(-1).t) - MARKET_OPEN_MIN : null;
   const endX = open && day === today ? Math.min(Math.max(nowMinutes(), 0), MARKET_DAY_MIN) : lastX == null ? null : Math.min(MARKET_DAY_MIN, lastX + 5);
   if (endX != null) {
     if (lastX != null && endX - lastX < 1) series.forEach((s) => s.pts.at(-1)?.x === lastX && s.pts.pop());
-    add(endX, (b) => (day === today ? b.equity : b.history.find((h) => h.date === day)?.equity ?? pts.at(-1)?.eq[b.id]));
+    add(endX, (b) => {
+      if (day === today) return [b.equity, b.contributed];
+      const h = b.history.find((h) => h.date === day);
+      return h ? [h.equity, h.contributed] : [pts.at(-1)?.eq[b.id], pts.at(-1)?.c?.[b.id]];
+    });
   }
   if (!series[0].pts.length) out.empty = "The day's line fills in while the market is open.";
   return out;
@@ -1905,7 +1921,8 @@ function drawPerf(fig) {
   const H = plot.clientHeight;
   const d = perfData(perf.range);
   fig.querySelectorAll("[data-range]").forEach((b) => b.setAttribute("aria-pressed", String(b.dataset.range === perf.range)));
-  fig.querySelector('[data-range="day"]').textContent = d.dayLabel || "Today";
+  const day = perfDay();
+  fig.querySelector('[data-range="day"]').textContent = !day || day === nyToday() ? "Today" : isoDay(day, { weekday: "short" });
   if (!W || !H) return; // hidden (the phone panel on a big screen): drawn when it shows
   const key = JSON.stringify([perf.range, W, H, d.sub, d.series.map((s) => s.pts.map((p) => [p.x, Math.round(p.eq * 100), Math.round(p.base * 100)]))]);
   if (fig.dataset.key === key) return showPerfAt(fig);
@@ -1915,9 +1932,15 @@ function drawPerf(fig) {
   const gains = d.series.flatMap((s) => s.pts.map(gainOf));
   let lo = Math.min(0, ...gains);
   let hi = Math.max(0, ...gains);
+  // padded only on a side the lines reach past 0%, so an all-up day has no empty band below 0%
   const pad = Math.max((hi - lo) * 0.04, 0.001);
-  lo -= pad;
-  hi += pad;
+  if (hi === lo) {
+    lo -= pad;
+    hi += pad;
+  } else {
+    if (lo < 0) lo -= pad;
+    if (hi > 0) hi += pad;
+  }
   const step = niceStep(hi - lo);
   lo = Math.floor(lo / step) * step;
   hi = Math.ceil(hi / step) * step;
@@ -1936,7 +1959,16 @@ function drawPerf(fig) {
   // x labels: as many as fit without crowding
   const room = (box.r - box.l) / (fs * 4.2);
   const every = Math.max(1, Math.ceil(d.ticks.length / Math.max(2, room)));
-  const xTicks = d.ticks.filter((t, i) => i % every === 0 || (d.range === "all" && i === d.ticks.length - 1 && i % every > every / 2));
+  const xTicks = d.ticks.filter((t, i) => i % every === 0);
+  if (d.range === "all" && d.ticks.length > 1) {
+    // the latest date always shows, flush right, in place of a regular label it would run into
+    const last = d.ticks.at(-1);
+    const w = (t) => t.label.length * fs * 0.5;
+    const right = (t, k) => X(t.x) + (k === 0 ? w(t) : w(t) / 2); // the first label starts at its date
+    if (xTicks.at(-1) === last) xTicks.pop();
+    while (xTicks.length > 1 && right(xTicks.at(-1), xTicks.length - 1) > X(last.x) - w(last) - fs * 0.5) xTicks.pop();
+    if (!xTicks.length || right(xTicks.at(-1), xTicks.length - 1) <= X(last.x) - w(last) - fs * 0.5) xTicks.push(last);
+  }
   const grid = yTicks
     .map((v) => `<line class="pc-grid${Math.abs(v) < step / 2 ? " zero" : ""}" x1="${box.l}" x2="${r1(box.r)}" y1="${r1(Y(v))}" y2="${r1(Y(v))}"/><text class="pc-y" x="${r1(box.l - fs * 0.45)}" y="${r1(Y(v))}" dy="0.35em">${tickText(v)}</text>`)
     .join("");
@@ -1971,7 +2003,7 @@ function drawPerf(fig) {
     })
     .join("");
   plot.innerHTML = `<svg width="${W}" height="${H}" viewBox="0 0 ${W} ${H}" aria-hidden="true" style="--fs:${fs}px">
-      ${grid}${xs}${lines}${cityMarks}
+      ${d.empty ? "" : grid}${xs}${lines}${cityMarks}
       <g class="pc-cross" hidden><line y1="${r1(box.t)}" y2="${r1(box.b)}"/>${d.series.map((s) => `<circle r="${r1(fs * (s.main ? 0.34 : 0.24))}" ${s.main ? 'class="city"' : `fill="${esc(s.color)}"`}/>`).join("")}</g>
       <g class="pc-hit">${hits}</g>
     </svg>${d.empty ? `<p class="pc-empty">${esc(d.empty)}</p>` : ""}`;
@@ -2038,7 +2070,15 @@ function wirePerf(fig) {
     showPerfAt(fig);
   };
   plot.addEventListener("pointermove", point);
-  plot.addEventListener("pointerdown", point);
+  plot.addEventListener("pointerdown", (e) => {
+    // a finger is held by the strip it first touched, which would keep the readout there as it slides
+    if (e.target.hasPointerCapture?.(e.pointerId)) e.target.releasePointerCapture(e.pointerId);
+    point(e);
+  });
+  plot.addEventListener("pointercancel", () => {
+    perf.at = null;
+    showPerfAt(fig);
+  });
   // a mouse leaving clears it; a finger lifting leaves the readout up until you tap somewhere else
   plot.addEventListener("pointerleave", (e) => {
     if (e.pointerType !== "mouse" || perf.at == null) return;
