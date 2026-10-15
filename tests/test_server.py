@@ -101,3 +101,77 @@ def test_each_building_checks_on_its_own_interval(client):
     city.ledger["bots"][tech["id"]]["last_check"] = (now - timedelta(minutes=2)).isoformat()
     assert not city.bot_due(tech, now)  # default 3 minutes
     assert city.bot_due(tech, now + timedelta(minutes=1))
+
+
+def test_city_hall_chart_keeps_todays_values(client, monkeypatch):
+    """City Hall's chart: each building's value every 5 minutes the market is open, for the latest day only."""
+    from datetime import timedelta
+
+    import engine.service
+
+    city = client.city
+    city.ledger["meta"].pop("intraday", None)  # the server's own check at startup may have started one
+    t0 = datetime(2026, 10, 7, 15, 0, tzinfo=timezone.utc)  # 11am New York
+    for minutes in (0, 2, 5, 11):
+        monkeypatch.setattr(engine.service, "now_utc", lambda m=minutes: t0 + timedelta(minutes=m))
+        city.guard()
+    log = city.ledger["meta"]["intraday"]
+    assert log["date"] == "2026-10-07"
+    assert [p["t"] for p in log["points"]] == ["11:00", "11:05", "11:11"]  # 11:02 was too soon after 11:00
+    assert set(log["points"][0]["eq"]) == {"tech", "energy", "finance", "consumer"}
+    assert all(v > 0 for p in log["points"] for v in p["eq"].values())
+    st = client.get("/api/state").json()
+    assert st["intraday"]["points"][-1]["t"] == "11:11"
+    # the daily history notes the money put in, so a later top-up doesn't look like a gain on the chart
+    assert all(h["contributed"] == 500.0 for b in st["bots"] for h in b["history"] if "contributed" in h)
+    assert any("contributed" in b["history"][-1] for b in st["bots"])
+
+    # closed: nothing new; the next market day starts a fresh line
+    monkeypatch.setattr(engine.service, "now_utc", lambda: datetime(2026, 10, 7, 21, 0, tzinfo=timezone.utc))
+    city.guard()
+    assert len(city.ledger["meta"]["intraday"]["points"]) == 3
+    monkeypatch.setattr(engine.service, "now_utc", lambda: datetime(2026, 10, 8, 13, 35, tzinfo=timezone.utc))
+    city.guard()
+    assert city.ledger["meta"]["intraday"] == {"date": "2026-10-08", "points": [city.ledger["meta"]["intraday"]["points"][0]]}
+    assert city.ledger["meta"]["intraday"]["points"][0]["t"] == "09:35"
+
+
+def test_server_wakes_for_the_open():
+    from engine.data import SyntheticPrices
+
+    m = UsStocks(prices=SyntheticPrices())
+    assert m.poll_seconds(datetime(2026, 10, 7, 15, 0, tzinfo=timezone.utc)) == 60  # open
+    assert m.poll_seconds(datetime(2026, 10, 7, 13, 20, tzinfo=timezone.utc)) == 601  # 9:20am: wake at 9:30
+    assert m.poll_seconds(datetime(2026, 10, 7, 12, 0, tzinfo=timezone.utc)) == 900  # 8am
+    assert m.poll_seconds(datetime(2026, 10, 10, 15, 0, tzinfo=timezone.utc)) == 900  # Saturday
+
+
+def test_money_added_is_not_a_gain(client):
+    """Adding money to a building: old days keep the amount they had, today's figure and chart don't count it."""
+    city = client.city
+    tech = city.ledger["bots"]["tech"]
+    tech["history"] = [{"date": "2026-10-06", "equity": 503.0}]  # saved before days noted the money put in
+    bot = client.get("/api/state").json()["bots"][0]["settings"]
+    r = client.put("/api/bots/tech", json={**bot, "starting_cash": 1000}, headers={"X-City-Password": "secret"})
+    assert r.status_code == 200
+    city.trade_cycle(force=True)
+    assert tech["contributed"] == 1000
+    assert tech["history"][0] == {"date": "2026-10-06", "equity": 503.0, "contributed": 500.0}
+    st = client.get("/api/state").json()
+    b = next(b for b in st["bots"] if b["id"] == "tech")
+    assert abs(b["day_change"]) < 50  # not +$500
+    city.ledger["meta"].pop("intraday", None)
+    city.guard()
+    assert city.ledger["meta"]["intraday"]["points"][-1]["c"]["tech"] == 1000
+
+
+def test_old_days_get_the_money_put_in_on_startup(tmp_path):
+    import json
+
+    from engine.city import new_ledger
+    from engine.service import City
+
+    old = {**new_ledger(500), "history": [{"date": "2026-10-06", "equity": 499.0}]}
+    (tmp_path / "ledger.json").write_text(json.dumps({"bots": {"tech": old}, "meta": {}}))
+    city = City(tmp_path, price_source="simulated")
+    assert city.ledger["bots"]["tech"]["history"][0]["contributed"] == 500.0

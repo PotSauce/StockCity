@@ -140,6 +140,12 @@ button.primary:hover { background: #c4b5fd; }
 .label .lsub { font: 600 11.5px/1 var(--font-data); color: var(--ink); background: rgba(11, 8, 32, 0.75); padding: 3px 6px; border-radius: 5px; border: 1px solid var(--line); }
 .label .ltick { width: 1px; height: 18px; background: linear-gradient(currentColor, transparent); }
 .label.hq .lname { color: var(--ink); text-shadow: 0 0 12px var(--neon); }
+/* City Hall's sign carries a little chart of the city since the start */
+.label.hq .lsub { display: flex; flex-direction: column; align-items: center; gap: 3px; padding-bottom: 4px; }
+.lspark { display: block; overflow: visible; }
+.lspark line { stroke: rgba(236, 233, 255, 0.3); stroke-width: 1; }
+.lspark polyline { fill: none; stroke: currentColor; stroke-width: 1.6; stroke-linejoin: round; stroke-linecap: round; }
+.lspark circle { fill: currentColor; stroke: #0b0820; stroke-width: 1.2; }
 
 /* ---------- shared figures (used on the trader's monitors) ---------- */
 .eyebrow { font: 600 11px/1 var(--font-display); letter-spacing: 0.16em; text-transform: uppercase; color: var(--acc, var(--neon)); }
@@ -633,7 +639,7 @@ ul.next b { font-family: var(--font-data); }
 /* the cards scroll when there are more than fit: fade the bottom edge so it's clear there's more */
 .flat-glance.more { -webkit-mask-image: linear-gradient(#000 calc(100% - 26px), transparent); mask-image: linear-gradient(#000 calc(100% - 26px), transparent); }
 
-/* ---------- City Hall: the mayor's board (a 1600 × 900 page, read at about half size), and its phone panel ---------- */
+/* ---------- City Hall: the mayor's board (a 1600 × 1080 page, read at about half size), and its phone panel ---------- */
 /* the bottom bar keeps its size in the hall, so ‹ and › stay under the pointer going in and out:
    the monitor buttons' slot holds Zoom (big screens) or a hint (phones) */
 .o-zoom, .o-hint { display: none; }
@@ -659,11 +665,57 @@ ul.next b { font-family: var(--font-data); }
 .hb-fig { display: flex; flex-direction: column; gap: 8px; min-width: 0; }
 .hb-fig .g-label { font-size: 22px; }
 .hb-big { font: 600 54px/1 var(--font-data); font-variant-numeric: tabular-nums; letter-spacing: -0.02em; white-space: nowrap; }
+/* on the board: the chart beside the totals (two by two), the building columns under both */
+.board .hb-body { display: grid; grid-template-columns: minmax(0, 1fr) auto; grid-template-rows: auto minmax(0, 1fr); gap: 22px 40px; }
+/* (the columns keep room for five holdings and a "+2 more" under them, even under a value line that wraps) */
+.board .hb-chart { grid-area: 1 / 1; height: 300px; }
+.board .hb-sum { grid-area: 1 / 2; grid-template-columns: repeat(2, auto); align-content: center; gap: 30px 40px; }
+.board .hb-big { font-size: 46px; }
+.board .hb-cols { grid-area: 2 / 1 / 3 / 3; }
+
+/* the performance chart: sizes are in em, so the board (26px) and the phone panel (10.5px) share them */
+.pc { margin: 0; display: flex; flex-direction: column; min-width: 0; min-height: 0; font-size: 26px; }
+.pc-head { display: flex; align-items: center; flex-wrap: wrap; gap: 0.3em 0.7em; min-width: 0; }
+.pc .g-label { font-size: 1em; color: var(--ink); }
+.pc-sub { flex: 1; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; font: 500 0.86em/1.2 var(--font-data); color: var(--ink-dim); }
+.pc-range { display: flex; gap: 0.15em; padding: 0.15em; border-radius: 999px; border: 0.1em solid var(--line); }
+.pc-range button { border: 0; border-radius: 999px; background: none; padding: 0.42em 0.85em; font: 600 0.78em/1 var(--font-display); letter-spacing: 0.1em; text-transform: uppercase; color: var(--ink-dim); white-space: nowrap; }
+.pc-range button:hover { color: var(--ink); }
+.pc-range button[aria-pressed="true"] { background: color-mix(in srgb, var(--acc) 26%, transparent); color: var(--ink); }
+.pc-range button:focus-visible { outline: 0.12em solid var(--acc); outline-offset: 0.05em; }
+.pc-main { flex: 1; min-height: 0; display: grid; grid-template-columns: minmax(0, 1fr) 9.4em; gap: 0.9em; margin-top: 0.45em; }
+.pc-plot { position: relative; min-width: 0; min-height: 0; border-radius: 0.25em; touch-action: pan-y; outline: none; }
+.pc-plot:focus-visible { outline: 0.12em solid var(--acc); outline-offset: 0.15em; }
+.pc-plot svg { display: block; overflow: visible; font: 500 0.8em/1 var(--font-data); font-variant-numeric: tabular-nums; }
+.pc-grid { stroke: rgba(167, 139, 250, 0.16); stroke-width: calc(var(--fs) * 0.07); }
+.pc-grid.zero { stroke: rgba(236, 233, 255, 0.42); }
+.pc-x, .pc-y { fill: var(--ink-dim); }
+.pc-y { text-anchor: end; }
+.pc-line { fill: none; stroke-width: calc(var(--fs) * 0.12); stroke-linejoin: round; stroke-linecap: round; opacity: 0.85; }
+.pc-line.city { stroke: var(--ink); stroke-width: calc(var(--fs) * 0.22); opacity: 1; }
+.pc-wash.up { fill: var(--up); opacity: 0.14; }
+.pc-wash.down { fill: var(--down); opacity: 0.16; }
+/* a ring in the board's own dark round each dot, so it stays clear where lines cross */
+.pc-end, .pc-cross circle { stroke: #090718; stroke-width: calc(var(--fs) * 0.1); }
+.pc-end.city, .pc-cross .city { fill: var(--ink); }
+.pc-cross { pointer-events: none; }
+.pc-cross line { stroke: rgba(236, 233, 255, 0.5); stroke-width: calc(var(--fs) * 0.07); }
+.pc-hit rect { fill: transparent; pointer-events: all; cursor: crosshair; }
+.pc-empty { position: absolute; inset: 0 0 1.6em 3em; display: grid; place-items: center; margin: 0; text-align: center; font: 600 0.86em/1.3 var(--font-display); color: var(--ink-dim); pointer-events: none; }
+.pc-legend { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; justify-content: center; gap: 0.32em; min-width: 0; font: 600 0.88em/1.1 var(--font-display); }
+.pc-legend li { display: grid; grid-template-columns: 1.1em minmax(0, 1fr) auto; align-items: center; gap: 0.1em 0.45em; }
+.pc-legend i { height: 0.17em; border-radius: 0.1em; }
+.pc-legend .city i { height: 0.3em; background: var(--ink); }
+.pc-name { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; color: var(--ink); }
+.pc-legend b { font: 600 1em/1 var(--font-data); font-variant-numeric: tabular-nums; text-align: right; }
+.pc-legend .city { margin-bottom: 0.2em; }
+.pc-legend .city .pc-name, .pc-legend .city b { font-size: 1.12em; }
+.pc-eq { grid-column: 2 / -1; font: 500 0.92em/1 var(--font-data); color: var(--ink-dim); }
 .hb-cols { flex: 1; min-height: 0; display: grid; grid-auto-flow: column; grid-auto-columns: minmax(0, 1fr); gap: 22px; }
 /* a column per building, topped with its colour */
 .hb-col { --c: var(--acc); display: flex; flex-direction: column; min-width: 0; min-height: 0; overflow: hidden; border-radius: 8px; border-top: 6px solid var(--c); background: color-mix(in srgb, var(--c) 7%, transparent); }
 .hb-head {
-  display: flex; flex-direction: column; align-items: flex-start; gap: 8px; width: 100%; padding: 14px 18px 12px;
+  display: flex; flex-direction: column; align-items: flex-start; gap: 8px; width: 100%; padding: 12px 18px 10px;
   background: none; border: 0; border-bottom: 2px solid color-mix(in srgb, var(--c) 30%, transparent); border-radius: 0; text-align: left; color: inherit; cursor: pointer;
 }
 .hb-head:hover { background: color-mix(in srgb, var(--c) 14%, transparent); }
@@ -675,7 +727,7 @@ ul.next b { font-family: var(--font-data); }
 .hb-rows { display: flex; flex-direction: column; min-height: 0; overflow: hidden; padding: 2px 18px; }
 /* one stock: ticker, sleeve and gain on top; shares, value and the dollar gain under them.
    The gains keep their width; a long ticker or value gives way. */
-.hb-row { display: grid; grid-template-columns: minmax(0, 1fr) auto; align-items: center; gap: 6px 12px; padding: 10px 0; border-bottom: 2px solid rgba(167, 139, 250, 0.1); }
+.hb-row { display: grid; grid-template-columns: minmax(0, 1fr) auto; align-items: center; gap: 6px 12px; padding: 8px 0; border-bottom: 2px solid rgba(167, 139, 250, 0.1); }
 .hb-row .num { font-variant-numeric: tabular-nums; white-space: nowrap; }
 .hb-name { display: flex; align-items: center; gap: 12px; min-width: 0; overflow: hidden; }
 .hb-tk { font: 700 40px/1 var(--font-data); }
@@ -711,6 +763,12 @@ ul.next b { font-family: var(--font-data); }
 .flat-hall .hb-body { overflow-y: auto; overscroll-behavior: contain; scrollbar-width: none; gap: 10px; padding: 10px; }
 .flat-hall .hb-body.more { -webkit-mask-image: linear-gradient(#000 calc(100% - 26px), transparent); mask-image: linear-gradient(#000 calc(100% - 26px), transparent); }
 .flat-hall .hb-sum { grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 8px 12px; }
+.flat-hall .pc { flex: none; height: 156px; font-size: 10.5px; }
+.flat-hall .pc-sub { order: 3; flex-basis: 100%; }
+.flat-hall .pc-range { margin-left: auto; }
+/* small buttons, so a finger gets a taller target than the eye sees (not wider: they almost touch) */
+.flat-hall .pc-range button { position: relative; }
+.flat-hall .pc-range button::after { content: ""; position: absolute; inset: -6px 0; }
 .flat-hall .hb-fig { gap: 3px; }
 .flat-hall .hb-fig .g-label { font-size: 9px; letter-spacing: 0.12em; }
 .flat-hall .hb-big { font-size: 19px; }
@@ -741,6 +799,12 @@ ul.next b { font-family: var(--font-data); }
 /* phones on their side: the list down the right, the mayor beside it */
 @media (min-aspect-ratio: 4/3) {
   .flat-hall { left: auto; width: 60%; bottom: var(--bottom-inset, 70px); max-height: none; }
+  /* phones on their side: the totals in a column beside the chart, so a building's name still shows */
+  .flat-hall .hb-body { display: grid; grid-template-columns: auto minmax(0, 1fr); grid-auto-rows: max-content; align-content: start; }
+  .flat-hall .hb-sum { grid-template-columns: 1fr; align-content: center; gap: 6px; }
+  .flat-hall .hb-big { font-size: 16px; }
+  .flat-hall .pc { height: 140px; }
+  .flat-hall .hb-cols { grid-column: 1 / -1; }
 }
 
 /* the mayor's speech bubble sits above his hat, its tail pointing down at him */

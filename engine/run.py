@@ -67,7 +67,8 @@ def build_state(cfg, ledger, closes, excl_raw, source, broker_name, run_note):
             )
         positions.sort(key=lambda x: -x["value"])
         hist = led["history"]
-        prev = hist[-2]["equity"] if len(hist) > 1 else led["contributed"]
+        # yesterday's value, plus any money added since, so a top-up doesn't count as today's gain
+        prev = hist[-2]["equity"] + led["contributed"] - hist[-2].get("contributed", led["contributed"]) if len(hist) > 1 else led["contributed"]
         bots_out.append(
             {
                 "id": bot["id"],
@@ -113,6 +114,8 @@ def build_state(cfg, ledger, closes, excl_raw, source, broker_name, run_note):
             "day_change": round(sum(b["day_change"] for b in bots_out), 2),
         },
         "bots": bots_out,
+        # the latest market day's building values every few minutes, for City Hall's "today" chart
+        "intraday": ledger.get("meta", {}).get("intraday"),
         "config": {"broker": cfg["broker"], "live_trading_confirmed": cfg["live_trading_confirmed"], "bots": cfg["bots"]},
         "exclusions": excl_raw,
         "risk_levels": RISK_LEVELS,

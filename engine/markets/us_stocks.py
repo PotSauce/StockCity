@@ -60,6 +60,16 @@ class UsStocks(Market):
         ny = now.astimezone(NY)
         return self.is_trading_day(ny.date()) and OPEN <= ny.time() < CLOSE
 
+    def poll_seconds(self, now):
+        """Every minute while open; while shut, every 15 minutes but never sleeping past the open,
+        so the first prices (and City Hall's first point of the day) come right at 9:30."""
+        if self.is_open(now):
+            return 60
+        ny = now.astimezone(NY)
+        day = ny.date() if self.is_trading_day(ny.date()) and ny.time() < OPEN else next_trading_day(ny.date())
+        opens = datetime.combine(day, OPEN, tzinfo=NY)
+        return int(min(900, max(5, (opens - ny).total_seconds() + 1)))
+
     def history(self, symbols, days):
         return self.prices.closes(symbols, days)
 

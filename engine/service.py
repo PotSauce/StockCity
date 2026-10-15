@@ -14,7 +14,7 @@ from zoneinfo import ZoneInfo
 import pandas as pd
 
 from .brokers import PaperBroker, make_broker
-from .city import BotDay, minutes_since, new_ledger
+from .city import BotDay, equity, minutes_since, new_ledger
 from .config import CONFIG_PATH, load_exclusions, normalize_bot, parse_config
 from .data import SyntheticPrices, YahooPrices
 from .exclusions import Exclusions
@@ -28,6 +28,9 @@ HISTORY_DAYS = 300
 # closing auction. Each building checks on its own interval (check_every_minutes).
 TRADE_START, TRADE_END = time(9, 45), time(15, 55)
 STOP_CHECK_SECONDS = 300
+# City Hall's "today" chart: each building's value, kept every few minutes while the market is open
+INTRADAY_EVERY_MINUTES = 5
+INTRADAY_MAX_POINTS = 200
 
 
 def now_utc():
@@ -82,7 +85,11 @@ class City:
         data = json.loads(self.ledger_path.read_text()) if self.ledger_path.exists() else {"bots": {}, "meta": {}}
         data.setdefault("meta", {})
         for bot in self.cfg["bots"]:
-            data["bots"].setdefault(bot["id"], new_ledger(bot["starting_cash"]))
+            led = data["bots"].setdefault(bot["id"], new_ledger(bot["starting_cash"]))
+            # City Hall's chart measures each day against the money put in by then; days saved before
+            # the history noted it get today's amount, before any later change can make it wrong
+            for h in led["history"]:
+                h.setdefault("contributed", round(led["contributed"], 2))
         return data
 
     def save(self):
@@ -253,7 +260,36 @@ class City:
                     elif m.is_trading_day(today):
                         BotDay(bot, led, frame, today, PaperBroker(), self.excl, no_ai_picker, **kw).finish()
             self.last_stop_check = now
+            self.record_intraday(now)
             self.save()
+
+    def record_intraday(self, now):
+        """Today's line on City Hall's chart: every building's value, every few minutes the market is open.
+        Only the latest market day is kept; the daily history covers the days before it."""
+        open_mids = [mid for mid in self.market_ids() if self.market(mid).is_open(now)]
+        if not open_mids:
+            return
+        now_ny = now.astimezone(NY)
+        day, at = now_ny.date().isoformat(), now_ny.strftime("%H:%M")
+        log = self.ledger["meta"].get("intraday")
+        if not log or log.get("date") != day:
+            log = self.ledger["meta"]["intraday"] = {"date": day, "points": []}
+        pts = log["points"]
+        if pts and minutes_since(f"{day} {pts[-1]['t']}", now_ny.replace(tzinfo=None)) < INTRADAY_EVERY_MINUTES:
+            return
+        prices = {}
+        for mid in open_mids:
+            last = self.frame(mid).ffill().iloc[-1]
+            prices.update({t: float(v) for t, v in last.items() if pd.notna(v)})
+        bots = [b["id"] for b in self.cfg["bots"] if b["market"] in open_mids]
+        leds = self.ledger["bots"]
+        # with the money put in, so adding or taking out money mid-day isn't drawn as a gain or loss
+        pts.append({
+            "t": at,
+            "eq": {i: round(equity(leds[i], prices), 2) for i in bots},
+            "c": {i: round(leds[i]["contributed"], 2) for i in bots},
+        })
+        del pts[:-INTRADAY_MAX_POINTS]
 
     def due_for_trade(self):
         now = now_utc()

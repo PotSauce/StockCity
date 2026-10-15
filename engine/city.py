@@ -221,6 +221,9 @@ class BotDay:
             return
         if delta < 0:
             delta = -min(-delta, self.led["cash"])
+        # days kept before the history noted the money put in keep the amount from before this change
+        for h in self.led["history"]:
+            h.setdefault("contributed", round(self.led["contributed"], 2))
         self.led["cash"] += delta
         self.led["contributed"] += delta
         self.notes.append(f"Capital {'added' if delta > 0 else 'withdrawn'}: ${abs(delta):,.2f}")
@@ -503,7 +506,8 @@ class BotDay:
     def finish(self):
         eq = round(equity(self.led, self.prices), 2)
         hist = [h for h in self.led["history"] if h["date"] != self.today]
-        hist.append({"date": self.today, "equity": eq})
+        # the money put in so far, so a chart of this building's gain stays right if that changes later
+        hist.append({"date": self.today, "equity": eq, "contributed": round(self.led["contributed"], 2)})
         self.led["history"] = hist[-400:]
         self.led["notes"] = (self.led.get("notes", []) + [{"date": self.today, "text": n} for n in self.notes])[-40:]
         return self.led
