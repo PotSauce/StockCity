@@ -101,3 +101,36 @@ def test_each_building_checks_on_its_own_interval(client):
     city.ledger["bots"][tech["id"]]["last_check"] = (now - timedelta(minutes=2)).isoformat()
     assert not city.bot_due(tech, now)  # default 3 minutes
     assert city.bot_due(tech, now + timedelta(minutes=1))
+
+
+def test_city_hall_chart_keeps_todays_values(client, monkeypatch):
+    """City Hall's chart: each building's value every 5 minutes the market is open, for the latest day only."""
+    from datetime import timedelta
+
+    import engine.service
+
+    city = client.city
+    city.ledger["meta"].pop("intraday", None)  # the server's own check at startup may have started one
+    t0 = datetime(2026, 10, 7, 15, 0, tzinfo=timezone.utc)  # 11am New York
+    for minutes in (0, 2, 5, 11):
+        monkeypatch.setattr(engine.service, "now_utc", lambda m=minutes: t0 + timedelta(minutes=m))
+        city.guard()
+    log = city.ledger["meta"]["intraday"]
+    assert log["date"] == "2026-10-07"
+    assert [p["t"] for p in log["points"]] == ["11:00", "11:05", "11:11"]  # 11:02 was too soon after 11:00
+    assert set(log["points"][0]["eq"]) == {"tech", "energy", "finance", "consumer"}
+    assert all(v > 0 for p in log["points"] for v in p["eq"].values())
+    st = client.get("/api/state").json()
+    assert st["intraday"]["points"][-1]["t"] == "11:11"
+    # the daily history notes the money put in, so a later top-up doesn't look like a gain on the chart
+    assert all(h["contributed"] == 500.0 for b in st["bots"] for h in b["history"] if "contributed" in h)
+    assert any("contributed" in b["history"][-1] for b in st["bots"])
+
+    # closed: nothing new; the next market day starts a fresh line
+    monkeypatch.setattr(engine.service, "now_utc", lambda: datetime(2026, 10, 7, 21, 0, tzinfo=timezone.utc))
+    city.guard()
+    assert len(city.ledger["meta"]["intraday"]["points"]) == 3
+    monkeypatch.setattr(engine.service, "now_utc", lambda: datetime(2026, 10, 8, 13, 35, tzinfo=timezone.utc))
+    city.guard()
+    assert city.ledger["meta"]["intraday"] == {"date": "2026-10-08", "points": [city.ledger["meta"]["intraday"]["points"][0]]}
+    assert city.ledger["meta"]["intraday"]["points"][0]["t"] == "09:35"

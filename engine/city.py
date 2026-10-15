@@ -503,7 +503,8 @@ class BotDay:
     def finish(self):
         eq = round(equity(self.led, self.prices), 2)
         hist = [h for h in self.led["history"] if h["date"] != self.today]
-        hist.append({"date": self.today, "equity": eq})
+        # the money put in so far, so a chart of this building's gain stays right if that changes later
+        hist.append({"date": self.today, "equity": eq, "contributed": round(self.led["contributed"], 2)})
         self.led["history"] = hist[-400:]
         self.led["notes"] = (self.led.get("notes", []) + [{"date": self.today, "text": n} for n in self.notes])[-40:]
         return self.led

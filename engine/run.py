@@ -113,6 +113,8 @@ def build_state(cfg, ledger, closes, excl_raw, source, broker_name, run_note):
             "day_change": round(sum(b["day_change"] for b in bots_out), 2),
         },
         "bots": bots_out,
+        # the latest market day's building values every few minutes, for City Hall's "today" chart
+        "intraday": ledger.get("meta", {}).get("intraday"),
         "config": {"broker": cfg["broker"], "live_trading_confirmed": cfg["live_trading_confirmed"], "bots": cfg["bots"]},
         "exclusions": excl_raw,
         "risk_levels": RISK_LEVELS,

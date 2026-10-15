@@ -438,6 +438,25 @@ function buildHQ() {
   return g;
 }
 
+// City Hall's sign in the city: the city's value since the start, a point a day, against the money put in
+function towerSpark() {
+  const pts = perfData("all").series[0].pts;
+  if (pts.length < 2) return "";
+  const W = 92, H = 22, pad = 2.5;
+  const g = pts.map(gainOf);
+  let lo = Math.min(0, ...g), hi = Math.max(0, ...g);
+  // at least a 1% range, so a few cents' wobble doesn't look like a crash
+  const grow = Math.max(0, 0.01 - (hi - lo)) / 2;
+  lo -= grow;
+  hi += grow;
+  const X = (i) => pad + (i / (pts.length - 1)) * (W - pad * 2);
+  const Y = (v) => H - pad - ((v - lo) / (hi - lo || 1)) * (H - pad * 2);
+  const line = g.map((v, i) => `${X(i).toFixed(1)},${Y(v).toFixed(1)}`).join(" ");
+  const last = g.at(-1);
+  return `<svg class="lspark ${cls(last)}" width="${W}" height="${H}" viewBox="0 0 ${W} ${H}" role="img" aria-label="City since the start: ${pct(last)}">
+    <line x1="${pad}" x2="${W - pad}" y1="${Y(0).toFixed(1)}" y2="${Y(0).toFixed(1)}"/><polyline points="${line}"/><circle cx="${X(g.length - 1).toFixed(1)}" cy="${Y(last).toFixed(1)}" r="2.2"/></svg>`;
+}
+
 /* ---------- city layout ---------- */
 function layoutCity(bots) {
   // ground and grid
@@ -707,7 +726,7 @@ function renderHUD() {
   } else banner.hidden = true;
 
   const hq = buildings[HALL].label.userData.el.querySelector(".lsub");
-  hq.innerHTML = `${money(t.equity)} <span class="${cls(t.pnl)}">${pct(t.pnl_pct)}</span>`;
+  hq.innerHTML = `<span>${money(t.equity)} <span class="${cls(t.pnl)}">${pct(t.pnl_pct)}</span></span>${towerSpark()}`;
 
   const list = $("building-list");
   list.innerHTML = "";
@@ -1455,11 +1474,11 @@ function checkNewTrades() {
 const hallScene = new THREE.Scene();
 hallScene.background = new THREE.Color(0x0b0820);
 hallScene.fog = new THREE.Fog(0x0b0820, 9, 22);
-// the board is a web page of 1600 × 900 px on a 4 × 2.25 m screen, a little taller than the mayor
+// the board is a web page of 1600 × 1080 px on a 4 × 2.7 m screen, a little taller than the mayor
 const HALL_PX = 400;
-const BOARD = { w: 4, h: 2.25, x: 1.1, y: 2.15, z: -0.94, px: HALL_PX };
+const BOARD = { w: 4, h: 2.7, x: 1.1, y: 2.35, z: -0.94, px: HALL_PX };
 const MAYOR_AT = new THREE.Vector3(-1.9, 0.12, -0.25);
-const hall = { built: false, board: null, mayor: null, anims: [], greets: 0, frameMat: null, lastHTML: "" };
+const hall = { built: false, board: null, mayor: null, anims: [], greets: 0, frameMat: null, lastSum: "", lastCols: "" };
 const MAYOR_OUTFIT = { skin: 0xd6a17a, hair: 0xb8bcc6, top: 0x2a2c40, arm: 0x2a2c40, fore: 0x2a2c40, pants: 0x1d1f2e, shoes: 0x0b0b0b, gear: ["collar", "sash", "medal", "mustache", "tophat"] };
 
 function buildHall() {
@@ -1524,7 +1543,7 @@ function buildHall() {
   ])
     place(new THREE.Mesh(new THREE.BoxGeometry(w, h, 0.02), hall.frameMat), x, y, 0, bg);
   // under the page (and on phones, where the list is a flat panel instead): the city's name on a dark screen
-  const screenTex = canvasTexture(1024, 576, (g, W, H) => {
+  const screenTex = canvasTexture(1024, Math.round((1024 * BOARD.h) / BOARD.w), (g, W, H) => {
     g.fillStyle = "#0c0a1c";
     g.fillRect(0, 0, W, H);
     g.strokeStyle = "rgba(245, 197, 66, 0.07)";
@@ -1540,12 +1559,15 @@ function buildHall() {
   el.className = "board";
   el.style.width = `${Math.round(BOARD.w * HALL_PX)}px`;
   el.style.height = `${Math.round(BOARD.h * HALL_PX)}px`;
-  el.setAttribute("aria-label", "Every holding in the city");
-  el.innerHTML = `<header class="mon-bar"><i></i><b>City Hall · Every holding</b><span class="hb-when"></span></header><div class="hb-body" tabindex="-1"></div>`;
-  // a building's name opens it; anywhere else zooms the board in or out
+  el.setAttribute("aria-label", "How the city is doing, and every holding");
+  el.innerHTML = `<header class="mon-bar"><i></i><b>City Hall · Performance and every holding</b><span class="hb-when"></span></header><div class="hb-body" tabindex="-1">${HALL_BODY}</div>`;
+  wirePerf(el.querySelector(".pc"));
+  // a building's name opens it, the chart's buttons switch its range; anywhere else zooms the board in or out
   el.addEventListener("click", (e) => {
+    const range = e.target.closest("[data-range]");
     const head = e.target.closest("[data-open]");
-    if (head) openBuilding(head.dataset.open);
+    if (range) setPerfRange(range.dataset.range);
+    else if (head) openBuilding(head.dataset.open);
     else focusMonitor(office.focus ? null : "board");
   });
   const obj = new CSS3DObject(el);
@@ -1555,6 +1577,7 @@ function buildHall() {
   obj.visible = false; // setOfficeMode shows it once you're in the hall
   cssScene.add(obj);
   hall.board = { ...BOARD, group: bg, el, body: el.querySelector(".hb-body"), obj };
+  perfResize?.observe(el.querySelector(".pc-plot"));
 
   // the podium, with the city seal on the front and a microphone
   const pod = place(new THREE.Group(), MAYOR_AT.x, MAYOR_AT.y, MAYOR_AT.z + 0.45, S);
@@ -1649,29 +1672,37 @@ function mayorLine(i) {
     lines.push(`Best right now: ${best.ticker} at ${best.where}, ${upDown(best.pnl_pct)}.`);
     if (held.length > 1) lines.push(`Worst right now: ${worst.ticker} at ${worst.where}, ${upDown(worst.pnl_pct)}.`);
   }
+  const t = STATE.totals;
+  const top = [...STATE.bots].sort((a, b) => b.pnl_pct - a.pnl_pct)[0];
+  lines.push(
+    `Since we opened, the city is ${t.pnl >= 0 ? "up" : "down"} ${money(Math.abs(t.pnl), 2)}.${top ? ` ${top.name} has done best, ${upDown(top.pnl_pct)}.` : ""} It's all on my chart.`,
+  );
   lines.push(`The city has ${money(cash, 2)} in cash.`, summary);
   return lines[(i - 1) % lines.length];
 }
 
-// The board: the city's totals, then a column per building with each stock it holds.
-// The same page fills the flat panel on phones.
-function hallHTML() {
+// The board: the city's totals beside a chart of how it's done, then a column per building with each
+// stock it holds. The same page fills the flat panel on phones. The chart stays put between refreshes
+// (drawPerf redraws it), so a hover or the keyboard on it isn't lost every 15 seconds.
+const HALL_BODY = `<div class="hb-sum"></div>${perfFigure()}<div class="hb-cols"></div>`;
+function hallSumHTML() {
   const t = STATE.totals;
   const held = STATE.bots.flatMap((b) => b.positions);
   const invested = held.reduce((a, p) => a + p.value, 0);
   const cash = STATE.bots.reduce((a, b) => a + b.cash, 0);
-  // dollars with a sign, except an amount that rounds to $0.00
-  const signed = (x) => {
-    const r = Math.round(x * 100) / 100;
-    return `${r === 0 ? "" : r > 0 ? "+" : "−"}${money(Math.abs(r), 2)}`;
-  };
-  const sum = `<div class="hb-sum">
+  return `
     <div class="hb-fig"><span class="g-label">City value</span><span class="hb-big num">${money(t.equity, 2)}</span></div>
     <div class="hb-fig"><span class="g-label">Today</span><span class="hb-big num ${cls(t.day_change)}">${signed(t.day_change)}</span></div>
     <div class="hb-fig"><span class="g-label">In ${held.length} stock${held.length === 1 ? "" : "s"}</span><span class="hb-big num">${money(invested, 2)}</span></div>
-    <div class="hb-fig"><span class="g-label">Cash</span><span class="hb-big num">${money(cash, 2)}</span></div>
-  </div>`;
-  const cols = STATE.bots
+    <div class="hb-fig"><span class="g-label">Cash</span><span class="hb-big num">${money(cash, 2)}</span></div>`;
+}
+// dollars with a sign, except an amount that rounds to $0.00
+function signed(x) {
+  const r = Math.round(x * 100) / 100;
+  return `${r === 0 ? "" : r > 0 ? "+" : "−"}${money(Math.abs(r), 2)}`;
+}
+function hallColsHTML() {
+  return STATE.bots
     .map((b) => {
       const pos = [...b.positions].sort((a, c) => c.value - a.value);
       const rows = pos
@@ -1698,21 +1729,25 @@ function hallHTML() {
       </section>`;
     })
     .join("");
-  return `${sum}<div class="hb-cols">${cols}</div>`;
 }
 
 function renderHall() {
   if (!hall.built) return;
-  const html = hallHTML();
-  if (html !== hall.lastHTML) {
-    hall.lastHTML = html;
-    for (const box of [hall.board.body, $("flat-hall-body")]) {
+  const sum = hallSumHTML();
+  const cols = hallColsHTML();
+  for (const box of [hall.board.body, $("flat-hall-body")]) {
+    if (sum !== hall.lastSum) box.querySelector(".hb-sum").innerHTML = sum;
+    if (cols !== hall.lastCols) {
+      const el = box.querySelector(".hb-cols");
       // a refresh mustn't throw the keyboard off the building it was on
-      const open = box.contains(document.activeElement) && document.activeElement.dataset.open;
-      box.innerHTML = html;
-      if (open) box.querySelector(`[data-open="${CSS.escape(open)}"]`)?.focus({ preventScroll: true });
+      const open = el.contains(document.activeElement) && document.activeElement.dataset.open;
+      el.innerHTML = cols;
+      if (open) el.querySelector(`[data-open="${CSS.escape(open)}"]`)?.focus({ preventScroll: true });
     }
+    drawPerf(box.querySelector(".pc"));
   }
+  hall.lastSum = sum;
+  hall.lastCols = cols;
   const at = STATE.server?.last_quote_at || STATE.generated_at;
   const when = marketOpen() === false ? "Market closed" : at ? `Prices at ${nyTime(at)}` : "";
   // (the board's page isn't in the document until it's first drawn, so not a document query)
@@ -1721,9 +1756,320 @@ function renderHall() {
   markMore();
 }
 $("flat-hall").addEventListener("click", (e) => {
+  const range = e.target.closest("[data-range]");
   const head = e.target.closest("[data-open]");
-  if (head) openBuilding(head.dataset.open);
+  if (range) setPerfRange(range.dataset.range);
+  else if (head) openBuilding(head.dataset.open);
 });
+
+/* ---------- City Hall's performance chart ----------
+   How the city and each building have done, in percent: since the start (a point a day, from each
+   building's history, against the money put in) or through the latest market day (a point every
+   5 minutes from the server's intraday log, against the day before's close). The city is the thick
+   white line, washed green above its starting line and red below; each building is a thin line in
+   its own colour. The legend beside it reads out every line at the point under the pointer. */
+const MARKET_OPEN_MIN = 570; // 9:30am New York, in minutes after midnight
+const MARKET_DAY_MIN = 390; // to 4pm
+const perf = { range: "all", at: null };
+try {
+  if (localStorage.getItem("perfRange") === "day") perf.range = "day";
+} catch {}
+const perfResize = window.ResizeObserver ? new ResizeObserver((entries) => entries.forEach((e) => drawPerf(e.target.closest(".pc")))) : null;
+
+// the chart's frame; drawPerf fills in the plot, legend and table
+function perfFigure() {
+  return `<figure class="hb-chart pc">
+    <figcaption class="pc-head">
+      <span class="g-label">Performance</span><span class="pc-sub"></span>
+      <span class="pc-range" role="group" aria-label="Chart range">
+        <button type="button" data-range="day" aria-pressed="false">Today</button><button type="button" data-range="all" aria-pressed="true">Since start</button>
+      </span>
+    </figcaption>
+    <div class="pc-main">
+      <div class="pc-plot" tabindex="0" role="slider" aria-label="Performance chart: arrow keys step through it"></div>
+      <ul class="pc-legend"></ul>
+    </div>
+    <table class="sr-only pc-table"></table>
+  </figure>`;
+}
+
+const isoDay = (iso, opts) => new Date(`${iso}T12:00:00Z`).toLocaleDateString("en-US", { timeZone: "UTC", ...opts });
+const hourLabel = (h) => `${((h + 11) % 12) + 1}${h < 12 ? "am" : "pm"}`;
+const nowMinutes = () => clockMinutes(nyClock()) - MARKET_OPEN_MIN;
+
+// The lines to draw: the city first, then each building. Each point is { x, eq, base }, its gain eq / base - 1.
+// x is the day's number since the start, or minutes since 9:30am on the latest market day.
+function perfData(range) {
+  const bots = STATE.bots;
+  const today = nyToday();
+  const series = [
+    { id: "city", name: "City", main: true, pts: [] },
+    ...bots.map((b) => ({ id: b.id, name: b.name.split(" ")[0], color: b.color, pts: [] })),
+  ];
+  if (range === "all") {
+    const days = [...new Set(bots.flatMap((b) => b.history.map((h) => h.date)))].sort();
+    // each building's value and money put in by day (today's live); a day it missed keeps its last value
+    const byDay = bots.map((b) => {
+      const m = new Map(b.history.map((h) => [h.date, [h.equity, h.contributed ?? b.contributed]]));
+      if (m.has(today)) m.set(today, [b.equity, b.contributed]);
+      return m;
+    });
+    const last = bots.map(() => null);
+    days.forEach((d, x) => {
+      let eq = 0, base = 0;
+      bots.forEach((b, k) => {
+        last[k] = byDay[k].get(d) || last[k];
+        if (!last[k]) return;
+        series[k + 1].pts.push({ x, eq: last[k][0], base: last[k][1] });
+        eq += last[k][0];
+        base += last[k][1];
+      });
+      if (base) series[0].pts.push({ x, eq, base });
+    });
+    return {
+      range, series, x0: 0, x1: Math.max(1, days.length - 1),
+      when: (x) => isoDay(days[x], { weekday: "short", month: "short", day: "numeric" }),
+      ticks: days.map((d, x) => ({ x, label: isoDay(d, { month: "short", day: "numeric" }) })),
+      sub: days.length ? `Since ${isoDay(days[0], { month: "short", day: "numeric" })} · vs money put in` : "",
+      dayLabel: null,
+      empty: days.length ? "" : "The chart starts after the city's first day.",
+    };
+  }
+  // the latest market day: today once the market's open, else the last day the server kept
+  const log = STATE.intraday;
+  const open = marketOpen() === true;
+  const day = open || log?.date === today ? today : log?.date;
+  const out = {
+    range, series, x0: 0, x1: MARKET_DAY_MIN,
+    when: (x) => clock12(`${Math.floor((x + MARKET_OPEN_MIN) / 60)}:${(x + MARKET_OPEN_MIN) % 60}`),
+    ticks: [10, 11, 12, 13, 14, 15, 16].map((h) => ({ x: h * 60 - MARKET_OPEN_MIN, label: hourLabel(h) })),
+    sub: "",
+    dayLabel: !day || day === today ? "Today" : isoDay(day, { weekday: "short" }),
+    empty: "",
+  };
+  if (!day) {
+    out.empty = "The day's line fills in while the market is open.";
+    return out;
+  }
+  out.sub = `${day === today ? "Today" : isoDay(day, { weekday: "long", month: "short", day: "numeric" })} · vs the close before`;
+  // each building's value at the close before that day (or the money put in, on its first day)
+  const base = bots.map((b) => b.history.filter((h) => h.date < day).at(-1)?.equity ?? b.contributed);
+  const pts = log?.date === day ? log.points : [];
+  const add = (x, eqOf) => {
+    let eq = 0, b0 = 0;
+    bots.forEach((b, k) => {
+      const e = eqOf(b, k);
+      if (e == null) return;
+      series[k + 1].pts.push({ x, eq: e, base: base[k] });
+      eq += e;
+      b0 += base[k];
+    });
+    if (b0) series[0].pts.push({ x, eq, base: b0 });
+  };
+  for (const p of pts) add(clockMinutes(p.t) - MARKET_OPEN_MIN, (b) => p.eq[b.id]);
+  // and where things stand now (or at that day's close), so the last point matches the board's figures
+  const lastX = pts.length ? clockMinutes(pts.at(-1).t) - MARKET_OPEN_MIN : null;
+  const endX = open && day === today ? Math.min(Math.max(nowMinutes(), 0), MARKET_DAY_MIN) : lastX == null ? null : Math.min(MARKET_DAY_MIN, lastX + 5);
+  if (endX != null) {
+    if (lastX != null && endX - lastX < 1) series.forEach((s) => s.pts.at(-1)?.x === lastX && s.pts.pop());
+    add(endX, (b) => (day === today ? b.equity : b.history.find((h) => h.date === day)?.equity ?? pts.at(-1)?.eq[b.id]));
+  }
+  if (!series[0].pts.length) out.empty = "The day's line fills in while the market is open.";
+  return out;
+}
+
+const gainOf = (p) => (p.base ? p.eq / p.base - 1 : 0);
+const pct2 = (x) => pct(x, Math.abs(x) < 0.1 ? 2 : 1);
+
+function setPerfRange(range) {
+  if (range === perf.range) return;
+  perf.range = range;
+  perf.at = null;
+  try {
+    localStorage.setItem("perfRange", range);
+  } catch {}
+  document.querySelectorAll(".pc").forEach((fig) => drawPerf(fig));
+}
+
+// a round step for the gain axis that gives about four lines
+function niceStep(span) {
+  const raw = span / 4;
+  const mag = 10 ** Math.floor(Math.log10(raw));
+  return [1, 2, 2.5, 5, 10].map((m) => m * mag).find((s) => s >= raw);
+}
+
+function drawPerf(fig) {
+  if (!fig || !STATE) return;
+  const plot = fig.querySelector(".pc-plot");
+  const W = plot.clientWidth;
+  const H = plot.clientHeight;
+  const d = perfData(perf.range);
+  fig.querySelectorAll("[data-range]").forEach((b) => b.setAttribute("aria-pressed", String(b.dataset.range === perf.range)));
+  fig.querySelector('[data-range="day"]').textContent = d.dayLabel || "Today";
+  if (!W || !H) return; // hidden (the phone panel on a big screen): drawn when it shows
+  const key = JSON.stringify([perf.range, W, H, d.sub, d.series.map((s) => s.pts.map((p) => [p.x, Math.round(p.eq * 100), Math.round(p.base * 100)]))]);
+  if (fig.dataset.key === key) return showPerfAt(fig);
+  fig.dataset.key = key;
+
+  const fs = parseFloat(getComputedStyle(fig).fontSize) || 12;
+  const gains = d.series.flatMap((s) => s.pts.map(gainOf));
+  let lo = Math.min(0, ...gains);
+  let hi = Math.max(0, ...gains);
+  const pad = Math.max((hi - lo) * 0.04, 0.001);
+  lo -= pad;
+  hi += pad;
+  const step = niceStep(hi - lo);
+  lo = Math.floor(lo / step) * step;
+  hi = Math.ceil(hi / step) * step;
+  const yTicks = [];
+  for (let v = lo; v <= hi + step / 2; v += step) yTicks.push(Math.round(v / step) * step);
+  // as many decimals as the step needs: 2.5% steps read +2.5%, +5%
+  const dp = [0, 1, 2, 3].find((n) => Math.abs(Math.round(step * 100 * 10 ** n) - step * 100 * 10 ** n) < 1e-6) ?? 3;
+  const tickText = (v) => (Math.abs(v) < step / 2 ? "0%" : `${v > 0 ? "+" : "−"}${Math.abs(v * 100).toFixed(dp)}%`);
+  // the gain labels down the left take the width of the longest
+  const left = Math.ceil(Math.max(...yTicks.map((v) => tickText(v).length)) * fs * 0.62 + fs * 0.5);
+  const box = { l: left, r: W - fs * 0.5, t: fs * 0.6, b: H - fs * 1.7 };
+  const X = (x) => box.l + ((x - d.x0) / (d.x1 - d.x0 || 1)) * (box.r - box.l);
+  const Y = (g) => box.b - ((g - lo) / (hi - lo || 1)) * (box.b - box.t);
+  const r1 = (v) => v.toFixed(1);
+
+  // x labels: as many as fit without crowding
+  const room = (box.r - box.l) / (fs * 4.2);
+  const every = Math.max(1, Math.ceil(d.ticks.length / Math.max(2, room)));
+  const xTicks = d.ticks.filter((t, i) => i % every === 0 || (d.range === "all" && i === d.ticks.length - 1 && i % every > every / 2));
+  const grid = yTicks
+    .map((v) => `<line class="pc-grid${Math.abs(v) < step / 2 ? " zero" : ""}" x1="${box.l}" x2="${r1(box.r)}" y1="${r1(Y(v))}" y2="${r1(Y(v))}"/><text class="pc-y" x="${r1(box.l - fs * 0.45)}" y="${r1(Y(v))}" dy="0.35em">${tickText(v)}</text>`)
+    .join("");
+  const xs = xTicks.map((t, i) => {
+    const anchor = d.range === "all" && i === 0 && t.x === d.x0 ? "start" : X(t.x) > box.r - fs * 1.5 ? "end" : "middle";
+    return `<text class="pc-x" x="${r1(X(t.x))}" y="${r1(box.b + fs * 1.25)}" text-anchor="${anchor}">${esc(t.label)}</text>`;
+  }).join("");
+
+  const path = (pts) => pts.map((p, i) => `${i ? "L" : "M"}${r1(X(p.x))} ${r1(Y(gainOf(p)))}`).join("");
+  const [city, ...bldgs] = d.series;
+  const lines = bldgs
+    .filter((s) => s.pts.length)
+    .map((s) => (s.pts.length > 1 ? `<path class="pc-line" d="${path(s.pts)}" stroke="${esc(s.color)}"/>` : "") + `<circle class="pc-end" cx="${r1(X(s.pts.at(-1).x))}" cy="${r1(Y(gainOf(s.pts.at(-1))))}" r="${r1(fs * 0.22)}" fill="${esc(s.color)}"/>`)
+    .join("");
+  let cityMarks = "";
+  if (city.pts.length) {
+    const zero = r1(Y(0));
+    const area = city.pts.length > 1 ? `${path(city.pts)}L${r1(X(city.pts.at(-1).x))} ${zero}L${r1(X(city.pts[0].x))} ${zero}Z` : "";
+    const id = fig.closest(".board") ? "pcb" : "pcf";
+    cityMarks = `<defs><clipPath id="${id}-up"><rect x="0" y="0" width="${W}" height="${zero}"/></clipPath><clipPath id="${id}-dn"><rect x="0" y="${zero}" width="${W}" height="${H}"/></clipPath></defs>
+      ${area ? `<path class="pc-wash up" d="${area}" clip-path="url(#${id}-up)"/><path class="pc-wash down" d="${area}" clip-path="url(#${id}-dn)"/>` : ""}
+      ${city.pts.length > 1 ? `<path class="pc-line city" d="${path(city.pts)}"/>` : ""}
+      <circle class="pc-end city" cx="${r1(X(city.pts.at(-1).x))}" cy="${r1(Y(gainOf(city.pts.at(-1))))}" r="${r1(fs * 0.32)}"/>`;
+  }
+  // a strip for each point the pointer can land on, wider than the lines themselves
+  const at = [...new Set(city.pts.map((p) => p.x))];
+  const hits = at
+    .map((x, i) => {
+      const a = i ? (X(at[i - 1]) + X(x)) / 2 : box.l;
+      const b = i < at.length - 1 ? (X(x) + X(at[i + 1])) / 2 : box.r;
+      return `<rect data-i="${i}" x="${r1(a)}" y="0" width="${r1(Math.max(b - a, 1))}" height="${H}"/>`;
+    })
+    .join("");
+  plot.innerHTML = `<svg width="${W}" height="${H}" viewBox="0 0 ${W} ${H}" aria-hidden="true" style="--fs:${fs}px">
+      ${grid}${xs}${lines}${cityMarks}
+      <g class="pc-cross" hidden><line y1="${r1(box.t)}" y2="${r1(box.b)}"/>${d.series.map((s) => `<circle r="${r1(fs * (s.main ? 0.34 : 0.24))}" ${s.main ? 'class="city"' : `fill="${esc(s.color)}"`}/>`).join("")}</g>
+      <g class="pc-hit">${hits}</g>
+    </svg>${d.empty ? `<p class="pc-empty">${esc(d.empty)}</p>` : ""}`;
+  fig.perf = { d, X, Y, at };
+  if (perf.at != null && perf.at >= at.length) perf.at = null;
+
+  // the same numbers as a table, for screen readers (the day's every half hour)
+  const rows = city.pts.filter((p, i) => d.range === "all" || i === city.pts.length - 1 || Math.round(p.x) % 30 < 5);
+  fig.querySelector(".pc-table").innerHTML = `<caption>${esc(`Performance, ${d.sub || d.empty}`)}</caption>
+    <tr><th scope="col">When</th>${d.series.map((s) => `<th scope="col">${esc(s.name)}</th>`).join("")}</tr>
+    ${rows.map((p) => `<tr><th scope="row">${esc(d.when(p.x))}</th>${d.series.map((s) => `<td>${esc(pct2(gainOf(s.pts.find((q) => q.x === p.x) || { base: 0 })))}</td>`).join("")}</tr>`).join("")}`;
+  showPerfAt(fig);
+}
+
+// The legend reads out every line at the point under the pointer (or the latest), and that point gets a crosshair.
+function showPerfAt(fig) {
+  const P = fig?.perf;
+  if (!P) return;
+  const { d, X, Y, at } = P;
+  const i = perf.at;
+  const x = i == null ? null : at[i];
+  const cross = fig.querySelector(".pc-cross");
+  cross.toggleAttribute("hidden", x == null);
+  const pick = (s) => (x == null ? s.pts.at(-1) : s.pts.find((p) => p.x === x));
+  if (x != null) {
+    const line = cross.querySelector("line");
+    line.setAttribute("x1", X(x).toFixed(1));
+    line.setAttribute("x2", X(x).toFixed(1));
+    cross.querySelectorAll("circle").forEach((c, k) => {
+      const p = pick(d.series[k]);
+      c.style.display = p ? "" : "none";
+      if (p) {
+        c.setAttribute("cx", X(p.x).toFixed(1));
+        c.setAttribute("cy", Y(gainOf(p)).toFixed(1));
+      }
+    });
+  }
+  const when = x == null ? d.sub : d.when(x);
+  fig.querySelector(".pc-sub").textContent = when;
+  fig.querySelector(".pc-legend").innerHTML = d.series
+    .map((s) => {
+      const p = pick(s);
+      if (!p) return "";
+      const g = gainOf(p);
+      return `<li${s.main ? ' class="city"' : ""}><i style="${s.main ? "" : `background:${esc(s.color)}`}"></i><span class="pc-name">${esc(s.name)}</span><b class="num ${cls(g)}">${pct2(g)}</b>${s.main ? `<span class="pc-eq num">${money(p.eq, 2)}</span>` : ""}</li>`;
+    })
+    .join("");
+  const plot = fig.querySelector(".pc-plot");
+  const city = d.series[0];
+  const readout = (p) => d.series.map((s) => { const q = s.pts.find((r) => r.x === p.x); return q ? `${s.name} ${pct2(gainOf(q))}` : ""; }).filter(Boolean).join(", ");
+  const p = pick(city);
+  plot.setAttribute("aria-valuemin", "0");
+  plot.setAttribute("aria-valuemax", String(Math.max(0, at.length - 1)));
+  plot.setAttribute("aria-valuenow", String(i ?? Math.max(0, at.length - 1)));
+  plot.setAttribute("aria-valuetext", p ? `${d.when(p.x)}: ${readout(p)}` : d.empty);
+}
+
+function wirePerf(fig) {
+  const plot = fig.querySelector(".pc-plot");
+  const point = (e) => {
+    const r = e.target.closest?.("[data-i]");
+    if (!r || perf.at === Number(r.dataset.i)) return;
+    perf.at = Number(r.dataset.i);
+    showPerfAt(fig);
+  };
+  plot.addEventListener("pointermove", point);
+  plot.addEventListener("pointerdown", point);
+  // a mouse leaving clears it; a finger lifting leaves the readout up until you tap somewhere else
+  plot.addEventListener("pointerleave", (e) => {
+    if (e.pointerType !== "mouse" || perf.at == null) return;
+    perf.at = null;
+    showPerfAt(fig);
+  });
+  plot.addEventListener("keydown", (e) => {
+    const n = fig.perf?.at.length || 0;
+    if (!n) return;
+    const i = perf.at ?? n - 1;
+    const to = { ArrowLeft: i - 1, ArrowRight: i + 1, ArrowDown: i - 1, ArrowUp: i + 1, Home: 0, End: n - 1 }[e.key];
+    if (to == null) return;
+    e.preventDefault();
+    e.stopPropagation();
+    perf.at = Math.min(Math.max(to, 0), n - 1);
+    showPerfAt(fig);
+  });
+  plot.addEventListener("blur", () => {
+    perf.at = null;
+    showPerfAt(fig);
+  });
+}
+document.addEventListener("pointerdown", (e) => {
+  if (perf.at == null || e.target.closest?.(".pc-plot")) return;
+  perf.at = null;
+  document.querySelectorAll(".pc").forEach(showPerfAt);
+});
+// the phone panel gets the same page as the board
+$("flat-hall-body").innerHTML = HALL_BODY;
+wirePerf($("flat-hall-body").querySelector(".pc"));
+perfResize?.observe($("flat-hall-body").querySelector(".pc-plot"));
 
 // Fit points into a box on screen (normalised -1..1 coordinates), looking along dir:
 // back the camera away until they fit, then slide it across so they sit in the middle of the box.
